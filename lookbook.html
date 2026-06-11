@@ -33,24 +33,39 @@
 
     /* GRID */
     .lb-grid {
-      columns: 3;
-      column-gap: 3px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
       padding: 3px;
     }
-    .lb-tile {
-      break-inside: avoid;
-      margin-bottom: 3px;
-      overflow: hidden;
-      cursor: pointer;
-      position: relative;
+
+    /* CARD — scrollable gallery */
+    .lb-card { position:relative; overflow:hidden; cursor:pointer; }
+    .lb-card-slides {
+      display:flex;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
     }
-    .lb-tile img {
-      display: block;
-      width: 100%;
-      height: auto;
-      transition: transform .7s cubic-bezier(.25,.46,.45,.94), opacity .3s;
+    .lb-card-slides::-webkit-scrollbar { display:none; }
+    .lb-card-slide {
+      flex:0 0 100%;
+      scroll-snap-align:start;
+      aspect-ratio:3/4;
+      overflow:hidden;
+      background:var(--soft);
     }
-    .lb-tile:hover img { transform: scale(1.03); opacity: .88; }
+    .lb-card-slide img {
+      width:100%; height:100%; object-fit:cover; display:block;
+      transition:transform .7s cubic-bezier(.25,.46,.45,.94);
+    }
+    .lb-card:hover .lb-card-slide img { transform:scale(1.03); }
+    .lb-card-dots {
+      display:flex; gap:5px; justify-content:center;
+      padding:8px 0 6px;
+    }
+    .lb-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; }
+    .lb-dot.active { background:var(--ink); }
 
     /* MODAL */
     .modal-overlay {
@@ -59,30 +74,28 @@
       display:flex; align-items:center; justify-content:center;
     }
     .modal-overlay.open { opacity:1; pointer-events:all; }
-
     .modal {
-      display:flex; width:100%; max-width:1200px; height:90dvh;
-      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+      display:flex; width:100%; max-width:1100px; height:88dvh;
       margin:0 24px;
+      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
     }
     .modal-overlay.open .modal { transform:translateY(0); }
 
-    /* gallery side */
     .modal-gallery {
-      flex:1; position:relative; background:#000; overflow:hidden;
-      display:flex; flex-direction:column;
+      flex:1; position:relative; background:#000;
+      display:flex; flex-direction:column; overflow:hidden;
     }
     .modal-slides {
-      flex:1; display:flex; overflow-x:auto;
-      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+      flex:1; display:flex;
+      overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
     }
     .modal-slides::-webkit-scrollbar { display:none; }
     .modal-slide { flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; justify-content:center; }
     .modal-slide img { max-width:100%; max-height:100%; object-fit:contain; }
     .modal-dots-row {
-      display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; background:#000;
+      display:flex; gap:8px; justify-content:center; padding:14px; background:#000;
     }
-    .mdot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .2s; flex-shrink:0; }
+    .mdot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .2s; }
     .mdot.active { background:#fff; }
     .marr {
       position:absolute; top:50%; transform:translateY(-50%);
@@ -94,7 +107,6 @@
     #arrPrev { left:12px; }
     #arrNext { right:12px; }
 
-    /* info side */
     .modal-info {
       width:360px; flex-shrink:0; background:#fff;
       display:flex; flex-direction:column; overflow-y:auto;
@@ -134,14 +146,13 @@
     @media(max-width:900px) {
       nav { padding:16px 20px; }
       .nav-center { display:none; }
-      .lb-grid { columns:2; }
+      .lb-grid { grid-template-columns:repeat(2,1fr); }
       .modal { flex-direction:column; height:96dvh; margin:0; }
       .modal-info { width:100%; padding:24px 20px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
     }
     @media(max-width:500px) {
-      .lb-grid { columns:2; column-gap:2px; padding:2px; }
-      .lb-tile { margin-bottom:2px; }
+      .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
     }
   </style>
 </head>
@@ -221,27 +232,76 @@ const ITEMS = [
   },
 ];
 
-// Build grid — all photos from all items as tiles
 const grid = document.getElementById('grid');
+
 ITEMS.forEach(item => {
+  const card = document.createElement('div');
+  card.className = 'lb-card';
+
+  // slides
+  const slidesEl = document.createElement('div');
+  slidesEl.className = 'lb-card-slides';
   for (let i = 1; i <= item.photos; i++) {
-    const src = `images/lookbook/${item.folder}/${String(i).padStart(2,'0')}.jpeg`;
-    const tile = document.createElement('div');
-    tile.className = 'lb-tile';
-    tile.innerHTML = `<img src="${src}" loading="lazy" alt="${item.name}">`;
-    tile.addEventListener('click', () => openModal(item, i - 1));
-    grid.appendChild(tile);
+    const slide = document.createElement('div');
+    slide.className = 'lb-card-slide';
+    const img = document.createElement('img');
+    img.src = `images/lookbook/${item.folder}/${String(i).padStart(2,'0')}.jpeg`;
+    img.loading = 'lazy';
+    img.alt = item.name;
+    slide.appendChild(img);
+    slidesEl.appendChild(slide);
   }
+
+  // dots
+  const dotsEl = document.createElement('div');
+  dotsEl.className = 'lb-card-dots';
+  if (item.photos > 1) {
+    for (let i = 0; i < item.photos; i++) {
+      const d = document.createElement('div');
+      d.className = 'lb-dot' + (i === 0 ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+    slidesEl.addEventListener('scroll', () => {
+      const idx = Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth);
+      dotsEl.querySelectorAll('.lb-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    }, {passive:true});
+  }
+
+  card.appendChild(slidesEl);
+  card.appendChild(dotsEl);
+
+  // drag scroll
+  let isDown = false, startX, sl;
+  slidesEl.addEventListener('mousedown', e => { isDown=true; startX=e.pageX; sl=slidesEl.scrollLeft; slidesEl.style.cursor='grabbing'; });
+  window.addEventListener('mouseup', () => { isDown=false; slidesEl.style.cursor=''; });
+  slidesEl.addEventListener('mousemove', e => { if(!isDown) return; e.preventDefault(); slidesEl.scrollLeft = sl-(e.pageX-startX); });
+
+  // click card → modal (not swipe)
+  let moved = false;
+  slidesEl.addEventListener('mousedown', () => moved = false);
+  slidesEl.addEventListener('mousemove', () => moved = true);
+  card.addEventListener('click', e => {
+    if (moved) return;
+    openModal(item);
+  });
+
+  // touch tap
+  let touchStart = 0;
+  card.addEventListener('touchstart', e => { touchStart = e.touches[0].clientX; }, {passive:true});
+  card.addEventListener('touchend', e => {
+    if (Math.abs(e.changedTouches[0].clientX - touchStart) < 10) openModal(item);
+  });
+
+  grid.appendChild(card);
 });
 
-// Modal logic
+// Modal
 let cur = null, curSlide = 0;
 const mSlides = document.getElementById('mSlides');
 const mDots   = document.getElementById('mDots');
 
-function openModal(item, startIdx) {
-  cur = item;
-  curSlide = startIdx;
+function openModal(item) {
+  cur = item; curSlide = 0;
 
   mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
     const src = `images/lookbook/${item.folder}/${String(i+1).padStart(2,'0')}.jpeg`;
@@ -249,14 +309,14 @@ function openModal(item, startIdx) {
   }).join('');
 
   mDots.innerHTML = Array.from({length: item.photos}, (_, i) =>
-    `<div class="mdot${i===startIdx?' active':''}" data-i="${i}"></div>`
+    `<div class="mdot${i===0?' active':''}" data-i="${i}"></div>`
   ).join('');
 
   mDots.querySelectorAll('.mdot').forEach(d =>
     d.addEventListener('click', () => goSlide(+d.dataset.i))
   );
 
-  mSlides.scrollLeft = startIdx * mSlides.offsetWidth;
+  mSlides.scrollLeft = 0;
   mSlides.addEventListener('scroll', onScroll, {passive:true});
 
   document.getElementById('mNum').textContent = item.num;
@@ -288,13 +348,14 @@ function closeModal() {
   mSlides.removeEventListener('scroll', onScroll);
 }
 document.getElementById('mClose').addEventListener('click', closeModal);
-document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
 document.getElementById('mOrderBtn').addEventListener('click', () => {
   if (!cur) return;
-  const ref = encodeURIComponent(cur.name);
-  window.location.href = `index.html#order?ref=${ref}`;
+  window.location.href = `index.html#order?ref=${encodeURIComponent(cur.name)}`;
 });
 </script>
 </body>
