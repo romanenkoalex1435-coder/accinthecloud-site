@@ -63,17 +63,28 @@
     .products { padding:2px 48px 120px; }
     .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; padding-top:2px; }
     .product-card { cursor:pointer; }
-    .card-img { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--soft); }
-    .card-img img, .card-img .ph {
+    /* card scroll gallery */
+    .card-gallery {
+      overflow-x:auto; display:flex; gap:2px;
+      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+      cursor:grab;
+    }
+    .card-gallery::-webkit-scrollbar { display:none; }
+    .card-gallery .slide {
+      flex:0 0 100%; scroll-snap-align:start;
+      aspect-ratio:3/4; overflow:hidden; background:var(--soft);
+    }
+    .card-gallery .slide img,
+    .card-gallery .slide .ph {
       width:100%; height:100%; object-fit:cover;
       transition:transform .8s cubic-bezier(.25,.46,.45,.94);
     }
-    .product-card:hover .card-img img,
-    .product-card:hover .card-img .ph { transform:scale(1.04); }
-    .card-thumbs { display:flex; gap:2px; height:64px; margin-top:2px; }
-    .card-thumbs .thumb { flex:1; overflow:hidden; background:var(--soft); }
-    .card-thumbs .thumb img,
-    .card-thumbs .thumb .ph-s { width:100%; height:100%; object-fit:cover; }
+    .product-card:hover .card-gallery .slide img,
+    .product-card:hover .card-gallery .slide .ph { transform:scale(1.03); }
+    /* dot indicators */
+    .card-dots { display:flex; gap:5px; padding:8px 0 0; }
+    .card-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; }
+    .card-dot.active { background:var(--ink); }
     .card-info { padding:16px 0 0; }
     .card-type { font-size:9px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
     .card-name { font-size:17px; font-weight:400; margin-bottom:6px; }
@@ -305,10 +316,24 @@ const grid = document.getElementById('grid');
 PRODUCTS.forEach(p => {
   const card = document.createElement('div');
   card.className = 'product-card reveal';
-  const thumbsHtml = (p.thumbs||[]).map(t=>`<div class="thumb"><div class="ph-s" style="background:${t};width:100%;height:100%;"></div></div>`).join('');
+
+  // all images: main + thumbs
+  const allImgs = [p.bg, ...(p.thumbs||[])];
+  const slidesHtml = allImgs.map(src => {
+    const isUrl = src.startsWith('url(');
+    return `<div class="slide">${isUrl
+      ? `<img src="${src.replace(/url\(["']?|["']?\)/g,'')}" loading="lazy" alt="">`
+      : `<div class="ph" style="background:${src};"></div>`
+    }</div>`;
+  }).join('');
+
+  const dotsHtml = allImgs.length > 1
+    ? `<div class="card-dots">${allImgs.map((_,i)=>`<div class="card-dot${i===0?' active':''}"></div>`).join('')}</div>`
+    : '';
+
   card.innerHTML = `
-    <div class="card-img"><div class="ph" style="background:${p.bg};"></div></div>
-    ${p.thumbs&&p.thumbs.length?`<div class="card-thumbs">${thumbsHtml}</div>`:''}
+    <div class="card-gallery" data-gallery>${slidesHtml}</div>
+    ${dotsHtml}
     <div class="card-info">
       <p class="card-type">${p.typeLabel}</p>
       <p class="card-name">${p.name}</p>
@@ -316,7 +341,36 @@ PRODUCTS.forEach(p => {
       <p class="card-desc">${p.desc}</p>
       <span class="card-cta">${p.cta}</span>
     </div>`;
-  card.addEventListener('click', ()=>openModal(p));
+
+  // sync dots on scroll
+  const gallery = card.querySelector('[data-gallery]');
+  const dots = card.querySelectorAll('.card-dot');
+  if (dots.length) {
+    gallery.addEventListener('scroll', () => {
+      const idx = Math.round(gallery.scrollLeft / gallery.offsetWidth);
+      dots.forEach((d,i) => d.classList.toggle('active', i===idx));
+    }, {passive:true});
+  }
+
+  // drag to scroll
+  let isDown=false, startX, scrollLeft;
+  gallery.addEventListener('mousedown', e=>{isDown=true;startX=e.pageX-gallery.offsetLeft;scrollLeft=gallery.scrollLeft;});
+  gallery.addEventListener('mouseleave',()=>isDown=false);
+  gallery.addEventListener('mouseup',()=>isDown=false);
+  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-gallery.offsetLeft;gallery.scrollLeft=scrollLeft-(x-startX)*1.5;});
+
+  card.addEventListener('click', e=>{
+    if(!e.target.closest('[data-gallery]')) openModal(p);
+    else {
+      // tap to advance slide
+      const rect=gallery.getBoundingClientRect();
+      const half=rect.width/2;
+      const clickX=e.clientX-rect.left;
+      if(clickX>half) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
+      else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
+    }
+  });
+
   grid.appendChild(card);
 });
 
