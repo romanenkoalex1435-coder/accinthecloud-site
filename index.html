@@ -56,10 +56,9 @@
       display: flex; justify-content: space-between; align-items: center;
     }
     .nav-logo {
-      font-family: var(--serif);
-      font-style: italic; font-weight: 300; font-size: 15px;
-      letter-spacing: 0.04em; opacity: 0;
+      display: flex; align-items: center; opacity: 0;
     }
+    .nav-logo img { height: 28px; width: auto; display: block; }
     .nav-links { display: flex; gap: 36px; list-style: none; opacity: 0; }
     .nav-links a {
       font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -73,39 +72,36 @@
       justify-content: center; align-items: center;
       position: relative; overflow: hidden;
     }
-    .hero-bg {
-      position: absolute; inset: 0; z-index: 0;
-      /* Replace with: background-image: url('images/hero.jpg'); background-size: cover; */
-      background: var(--bg);
-    }
     .hero-content { position: relative; z-index: 1; text-align: center; }
+    .hero-logo-img {
+      width: clamp(180px, 32vw, 440px); margin: 0 auto;
+      opacity: 0; filter: blur(12px);
+      transform: scale(0.88);
+      transition: none; /* GSAP handles it */
+    }
+    .hero-logo-img img { width: 100%; height: auto; display: block; }
     .hero-eyebrow {
       font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 28px; opacity: 0;
+      color: var(--muted); margin-bottom: 48px; opacity: 0;
     }
-    .hero-logo-video {
-      width: clamp(220px, 38vw, 520px);
-      opacity: 0;
-    }
-    .hero-logo-video video {
-      width: 100%; height: auto; display: block;
-      mix-blend-mode: multiply; /* убирает белый фон если есть */
+    .hero-brand {
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(13px, 1.8vw, 20px); font-weight: 300;
+      letter-spacing: 0.12em; color: var(--ink);
+      margin-top: 36px; opacity: 0;
     }
     .hero-sub {
-      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--muted); margin-top: 24px; opacity: 0;
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted); margin-top: 12px; opacity: 0;
     }
     .hero-cta {
       display: inline-flex; align-items: center; gap: 12px;
-      margin-top: 56px; font-size: 11px; letter-spacing: 0.2em;
+      margin-top: 52px; font-size: 10px; letter-spacing: 0.22em;
       text-transform: uppercase; opacity: 0; transition: opacity 0.3s;
     }
-    .hero-cta:hover { opacity: 0.6 !important; }
-    .hero-cta-line {
-      width: 32px; height: 1px; background: var(--ink);
-      transition: width 0.4s ease;
-    }
-    .hero-cta:hover .hero-cta-line { width: 56px; }
+    .hero-cta:hover { opacity: 0.55 !important; }
+    .hero-cta-line { width: 28px; height: 1px; background: var(--ink); transition: width 0.4s ease; }
+    .hero-cta:hover .hero-cta-line { width: 52px; }
     .hero-scroll-hint {
       position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
       display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -332,9 +328,9 @@
     .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
 
     /* ─── Animated reveal base ───────────────────────────── */
-    .reveal { opacity: 0; transform: translateY(28px); }
-    .reveal-left { opacity: 0; transform: translateX(-28px); }
-    .reveal-right { opacity: 0; transform: translateX(28px); }
+    .reveal { opacity: 0; }
+    .reveal-left { opacity: 0; }
+    .reveal-right { opacity: 0; }
 
     /* ─── Responsive ─────────────────────────────────────── */
     @media (max-width: 900px) {
@@ -359,7 +355,7 @@
 
 <!-- ─── NAV ─────────────────────────────────────────────── -->
 <nav>
-  <a href="#" class="nav-logo">accinthecloud</a>
+  <a href="#" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <ul class="nav-links">
     <li><a href="lookbook.html">Lookbook</a></li>
     <li><a href="#capsules">Capsules</a></li>
@@ -372,12 +368,12 @@
 
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
-  <div class="hero-bg"></div>
   <div class="hero-content">
-    <p class="hero-eyebrow">Handmade · Russian independent brand</p>
-    <div class="hero-logo-video">
-      <video src="LogoPolyacc.MOV" autoplay loop muted playsinline></video>
+    <p class="hero-eyebrow">Handmade · Moscow</p>
+    <div class="hero-logo-img">
+      <img src="images/logo.png" alt="accinthecloud">
     </div>
+    <p class="hero-brand">accinthecloud</p>
     <p class="hero-sub">Denim · Jackets · Bags — crafted by hand</p>
     <a href="#capsules" class="hero-cta">
       <span class="hero-cta-line"></span>
@@ -412,7 +408,7 @@
 <section id="capsules" class="section">
   <div class="section-label reveal">Capsule Collections</div>
   <div class="capsules-header">
-    <h2 class="reveal">Три капсулы —<br><em>три главы</em></h2>
+    <h2 class="reveal">Три капсулы.<br><em>Сшито один раз.</em></h2>
     <span class="reveal">2023 — 2025</span>
   </div>
 
@@ -426,8 +422,8 @@
       </div>
       <div class="capsule-body">
         <p class="capsule-name">Capsule a1</p>
-        <p class="capsule-desc">Первая капсула. Базовый деним, отработка кроя, минималистичные формы.</p>
-        <p class="capsule-items">Jeans · Basics · Denim</p>
+        <p class="capsule-desc">ACCESS shoulder bag — сумка ручного пошива из канваса и денима. Каждый стежок в ручную.</p>
+        <p class="capsule-items">Bags · Canvas · Handstitched</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -440,8 +436,8 @@
       </div>
       <div class="capsule-body">
         <p class="capsule-name">Capsule a2</p>
-        <p class="capsule-desc">Access bags из денима и японского хлопка. Сотни ручных стежков на каждой штуке.</p>
-        <p class="capsule-items">Bags · Accessories · Handstitched</p>
+        <p class="capsule-desc">ACCORD — куртки из плотного канваса и сырого денима. Металлическая фурнитура, работа на годы.</p>
+        <p class="capsule-items">Jackets · Canvas · Raw Denim</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -454,8 +450,8 @@
       </div>
       <div class="capsule-body">
         <p class="capsule-name">Capsule a3</p>
-        <p class="capsule-desc">Accent pants, BOLT — широкие джинсы из японского денима, муслиновые штаны.</p>
-        <p class="capsule-items">Pants · Jackets · Bags · Japanese Denim</p>
+        <p class="capsule-desc">Джинсы и рабочие штаны из японского сырого денима и плотного канваса. Широкий крой, долгая жизнь.</p>
+        <p class="capsule-items">Jeans · Workpants · Japanese Denim</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -630,33 +626,40 @@ document.querySelectorAll('a,button,.work-item,.capsule-card,.check-pill').forEa
 });
 
 // ── Hero entrance ──
-const tl = gsap.timeline({ delay: 0.2 });
-tl.to('.hero-eyebrow',     { opacity:1, y:0, duration:0.7, ease:'power2.out' })
-  .to('.hero-logo-video',  { opacity:1, y:0, duration:1.0, ease:'power3.out' }, '-=0.3')
-  .to('.hero-sub',         { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.4')
-  .to('.hero-cta',         { opacity:1, y:0, duration:0.6, ease:'power2.out' }, '-=0.3')
+const tl = gsap.timeline({ delay: 0.15 });
+tl.to('.hero-eyebrow', { opacity:1, duration:0.6, ease:'power2.out' })
+  .to('.hero-logo-img', {
+    opacity:1, scale:1, filter:'blur(0px)',
+    duration:1.4, ease:'power3.out'
+  }, '-=0.2')
+  .to('.hero-brand',   { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
+  .to('.hero-sub',     { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
+  .to('.hero-cta',     { opacity:0.75, duration:0.6, ease:'power2.out' }, '-=0.2')
   .to('.hero-scroll-hint', { opacity:1, duration:0.5 }, '-=0.1')
-  .to('.nav-logo',         { opacity:1, duration:0.5 }, '-=0.8')
-  .to('.nav-links',        { opacity:1, duration:0.5 }, '-=0.4');
+  .to('.nav-logo',     { opacity:1, duration:0.5 }, '-=1.2')
+  .to('.nav-links',    { opacity:1, duration:0.5 }, '-=0.6');
 
 // ── Scroll reveals ──
 gsap.utils.toArray('.reveal').forEach(el => {
-  gsap.to(el, {
-    opacity:1, y:0, duration:0.85, ease:'power2.out',
-    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
-  });
+  gsap.fromTo(el,
+    { opacity:0, y:18 },
+    { opacity:1, y:0, duration:0.85, ease:'power2.out',
+      scrollTrigger: { trigger:el, start:'top 90%', toggleActions:'play none none none' }
+    });
 });
 gsap.utils.toArray('.reveal-left').forEach(el => {
-  gsap.to(el, {
-    opacity:1, x:0, duration:0.85, ease:'power2.out',
-    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
-  });
+  gsap.fromTo(el,
+    { opacity:0, x:-18 },
+    { opacity:1, x:0, duration:0.85, ease:'power2.out',
+      scrollTrigger: { trigger:el, start:'top 90%', toggleActions:'play none none none' }
+    });
 });
 gsap.utils.toArray('.reveal-right').forEach(el => {
-  gsap.to(el, {
-    opacity:1, x:0, duration:0.85, ease:'power2.out',
-    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
-  });
+  gsap.fromTo(el,
+    { opacity:0, x:18 },
+    { opacity:1, x:0, duration:0.85, ease:'power2.out',
+      scrollTrigger: { trigger:el, start:'top 90%', toggleActions:'play none none none' }
+    });
 });
 
 // Stagger capsules
