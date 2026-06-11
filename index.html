@@ -59,7 +59,7 @@
       display: flex; align-items: center; opacity: 0;
     }
     .nav-logo img { height: 28px; width: auto; display: block; }
-    .nav-links { display: flex; gap: 36px; list-style: none; opacity: 0; }
+    .nav-links { display: none; }
     .nav-links a {
       font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
       color: var(--ink); opacity: 0.45; transition: opacity 0.3s;
@@ -347,9 +347,9 @@
     .reveal-left { opacity: 0; }
     .reveal-right { opacity: 0; }
 
-    /* ─── Mobile menu ────────────────────────────────────── */
+    /* ─── Burger & mobile menu ───────────────────────────── */
     .burger {
-      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      display: flex; flex-direction: column; gap: 5px; cursor: pointer;
       padding: 4px; background: none; border: none;
     }
     .burger span {
@@ -721,10 +721,8 @@ tl.fromTo('.hero-logo-video',
     { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
   .fromTo('.hero-eyebrow',
     { opacity:0 }, { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
-  .fromTo('.nav-logo',
-    { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
-  .fromTo('.nav-links',
-    { opacity:0 }, { opacity:1, duration:0.6 }, 1.0);
+  .fromTo('.nav-logo', { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
+  .fromTo('.burger',  { opacity:0 }, { opacity:1, duration:0.6 }, 1.0);
 
 // ── Scroll reveals ──
 gsap.utils.toArray('.reveal').forEach(el => {

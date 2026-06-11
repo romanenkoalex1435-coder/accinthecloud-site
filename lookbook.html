@@ -21,15 +21,22 @@
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
       padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
     }
-    .nav-logo { font-family:var(--serif); font-style:italic; font-size:15px; font-weight:300; }
-    .nav-center { display:flex; gap:32px; list-style:none; }
-    .nav-center a { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
-    .nav-center a:hover, .nav-center a.active { color:var(--ink); }
-    .nav-right a {
-      font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
-      padding:8px 16px; border:1px solid var(--border); transition:border-color .2s;
+    .nav-logo { display:flex; align-items:center; }
+    .nav-logo img { height:28px; width:auto; }
+    .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+    .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu {
+      display:none; position:fixed; inset:0; z-index:300;
+      background:#fff; flex-direction:column; align-items:center; justify-content:center;
+      gap:32px; opacity:0; transition:opacity .3s;
     }
-    .nav-right a:hover { border-color:var(--ink); }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu.visible { opacity:1; }
+    .mobile-menu a { font-size:clamp(22px,5vw,36px); font-family:var(--serif); font-style:italic; font-weight:300; color:var(--ink); transition:opacity .2s; }
+    .mobile-menu a:hover { opacity:.5; }
 
     /* GRID */
     .lb-grid {
@@ -145,7 +152,6 @@
 
     @media(max-width:900px) {
       nav { padding:16px 20px; }
-      .nav-center { display:none; }
       .lb-grid { grid-template-columns:repeat(2,1fr); }
       .modal { flex-direction:column; height:96dvh; margin:0; }
       .modal-info { width:100%; padding:24px 20px; }
@@ -158,15 +164,19 @@
 </head>
 <body>
 
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
+  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="collection-a1.html" onclick="closeMobileMenu()">a1 — ACCESS</a>
+  <a href="collection-a2.html" onclick="closeMobileMenu()">a2 — ACCORD</a>
+  <a href="collection-a3.html" onclick="closeMobileMenu()">a3 — Jeans</a>
+  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+</div>
 <nav>
-  <a href="index.html" class="nav-logo">accinthecloud</a>
-  <ul class="nav-center">
-    <li><a href="lookbook.html" class="active">Lookbook</a></li>
-    <li><a href="collection-a1.html">a1</a></li>
-    <li><a href="collection-a2.html">a2</a></li>
-    <li><a href="collection-a3.html">a3</a></li>
-  </ul>
-  <div class="nav-right"><a href="cart.html">Корзина</a></div>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <button class="burger" id="burgerBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <div class="lb-grid" id="grid"></div>
@@ -356,6 +366,25 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 document.getElementById('mOrderBtn').addEventListener('click', () => {
   if (!cur) return;
   window.location.href = `index.html#order?ref=${encodeURIComponent(cur.name)}`;
+});
+
+const burgerBtn = document.getElementById('burgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+function closeMobileMenu() {
+  burgerBtn.classList.remove('open');
+  mobileMenu.classList.remove('visible');
+  setTimeout(() => mobileMenu.classList.remove('open'), 300);
+  document.body.style.overflow = '';
+}
+burgerBtn.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.contains('open');
+  if (isOpen) { closeMobileMenu(); }
+  else {
+    burgerBtn.classList.add('open');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => mobileMenu.classList.add('visible'));
+  }
 });
 </script>
 </body>
