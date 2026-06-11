@@ -58,6 +58,8 @@
     .hero-right { text-align:right; flex-shrink:0; }
     .hero-info { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); line-height:2; }
     .hero-info strong { color:var(--ink); }
+    .capsule-cover { width:100%; max-height:70vh; overflow:hidden; }
+    .capsule-cover img { width:100%; height:100%; object-fit:cover; display:block; }
     .products { padding:2px 48px 120px; }
     .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; padding-top:2px; }
     .product-card { cursor:pointer; }
@@ -192,6 +194,9 @@
     </div>
   </div>
 </div>
+<div class="capsule-cover">
+  <img src="images/a1/bunch.jpeg" alt="ACCESS Capsule a1" />
+</div>
 <div class="products">
   <div class="products-grid" id="grid"></div>
 </div>
@@ -291,7 +296,7 @@ const PRODUCTS = [
     price:'от 4 500 &#8381;', priceUsd:'from 60$', priceNum:4500,
     desc:'Ты придумываешь — я шью. Свой материал, свой цвет, своя идея. Обсуждаем детали в Telegram, определяем цену и сроки индивидуально.',
     cta:'Описать идею &#8594;',
-    bg:'url("images/a1/bunch.jpeg") center/cover',
+    bg:'linear-gradient(160deg,#e8e4e0,#d8d4d0)',
     thumbs:[],
   },
 ];
