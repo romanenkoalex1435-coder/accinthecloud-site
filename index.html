@@ -309,6 +309,47 @@
     .form-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
     .form-success p { font-size: 13px; color: var(--muted); }
 
+    /* ─── FAQ ───────────────────────────────────────────── */
+    .faq-section { padding: 100px 48px; border-top: 1px solid var(--border); }
+    .faq-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; }
+    .faq-title { font-family: var(--serif); font-size: clamp(36px,5vw,64px); font-weight: 400; }
+    .faq-subtitle { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .faq-list { max-width: 760px; }
+    .faq-item { border-top: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; background: none; border: none; padding: 24px 0;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--sans); font-size: 15px; font-weight: 400;
+      text-align: left; cursor: pointer; gap: 24px; color: var(--ink);
+    }
+    .faq-q:hover { color: var(--muted); }
+    .faq-icon { flex-shrink: 0; font-size: 18px; transition: transform .3s ease; line-height:1; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .4s cubic-bezier(.25,.46,.45,.94), padding .3s;
+      font-size: 13px; color: var(--muted); line-height: 1.9;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-bottom: 24px; }
+    .faq-a a { color: var(--ink); border-bottom: 1px solid var(--border); transition: border-color .2s; }
+    .faq-a a:hover { border-color: var(--ink); }
+    .faq-note {
+      margin-top: 48px; padding: 24px 28px; border: 1px solid var(--border);
+      font-size: 12px; color: var(--muted); line-height: 1.8; max-width: 760px;
+    }
+    .faq-note strong { color: var(--ink); }
+    .faq-contact {
+      margin-top: 32px; max-width: 760px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .faq-contact-text { font-size: 12px; color: var(--muted); }
+    .faq-contact-link {
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      border-bottom: 1px solid var(--ink); padding-bottom: 2px; transition: opacity .2s;
+    }
+    .faq-contact-link:hover { opacity: .5; }
+
     /* ─── Footer ─────────────────────────────────────────── */
     footer {
       padding: 48px; border-top: 1px solid var(--border);
@@ -362,6 +403,7 @@
     <li><a href="lookbook.html">Lookbook</a></li>
     <li><a href="#capsules">Capsules</a></li>
     <li><a href="#order">Order</a></li>
+    <li><a href="#faq">FAQ</a></li>
     <li><a href="https://t.me/accinthecloud1" target="_blank">Telegram</a></li>
     <li><a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a></li>
   </ul>
@@ -575,6 +617,43 @@
   </div>
 </section>
 
+<!-- ─── FAQ ─────────────────────────────────────────────────── -->
+<section class="faq-section" id="faq">
+  <div class="faq-header reveal">
+    <h2 class="faq-title">FAQ</h2>
+    <span class="faq-subtitle">Частые вопросы</span>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <button class="faq-q">Кто я?<span class="faq-icon">+</span></button>
+      <div class="faq-a">Меня зовут Алексей, я портной.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Как сделать заказ?<span class="faq-icon">+</span></button>
+      <div class="faq-a">Напиши мне в личку <a href="https://t.me/accinthecloud" target="_blank">@accinthecloud</a>, и мы обсудим все детали!</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Сколько времени занимает пошив?<span class="faq-icon">+</span></button>
+      <div class="faq-a">Это зависит от сложности заказа. Сроки обсуждаются индивидуально после уточнения деталей.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Могу ли я заказать одежду по своему эскизу?<span class="faq-icon">+</span></button>
+      <div class="faq-a">Конечно! Если у тебя есть идея, эскиз или набросок — я с радостью помогу воплотить её в жизнь.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Как снять мерки для идеальной посадки?<span class="faq-icon">+</span></button>
+      <div class="faq-a">Если ты в Москве — приезжай в мастерскую, сниму все мерки сам. Если из другого города — не переживай, напиши мне и я подскажу, как это сделать.</div>
+    </div>
+  </div>
+  <div class="faq-note reveal">
+    <strong>Важно:</strong> Возвратов за индивидуальный пошив нет. На все изделия действует ремонтно-восстановительная гарантия.
+  </div>
+  <div class="faq-contact reveal">
+    <span class="faq-contact-text">Остались вопросы?</span>
+    <a href="https://t.me/accinthecloud" target="_blank" class="faq-contact-link">Написать @accinthecloud →</a>
+  </div>
+</section>
+
 <!-- ─── FOOTER ─────────────────────────────────────────────── -->
 <footer>
   <span class="footer-logo">accinthecloud</span>
@@ -739,6 +818,16 @@ document.getElementById('orderForm').addEventListener('submit', async e => {
 
   form.style.display = 'none';
   document.getElementById('formSuccess').classList.add('show');
+});
+
+// ── FAQ accordion ──────────────────────────────────────────
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
 });
 </script>
 </body>
