@@ -18,8 +18,6 @@
     html { scroll-behavior:smooth; }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
     a { text-decoration:none; color:inherit; }
-
-    /* ── Nav ── */
     nav {
       position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
@@ -29,7 +27,7 @@
     .nav-center { display:flex; gap:32px; list-style:none; }
     .nav-center a { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .nav-center a:hover, .nav-center a.active { color:var(--ink); }
-    .nav-right { display:flex; align-items:center; gap:20px; }
+    .nav-right { display:flex; align-items:center; }
     .cart-link {
       position:relative; display:flex; align-items:center; gap:8px;
       font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
@@ -41,8 +39,6 @@
       width:18px; height:18px; background:var(--ink); color:white;
       font-size:10px; border-radius:50%; align-items:center; justify-content:center;
     }
-
-    /* ── Toast ── */
     #cartFeedback {
       position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
       background:var(--ink); color:white; padding:12px 28px;
@@ -50,110 +46,43 @@
       opacity:0; transition:all .35s; z-index:9999; pointer-events:none;
     }
     #cartFeedback.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-    /* ── Hero ── */
-    .collection-hero {
-      padding:80px 48px 60px; border-bottom:1px solid var(--border);
+    .hero {
+      padding:80px 48px 56px; border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:flex-end; gap:32px;
     }
     .breadcrumb { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
-    .breadcrumb a { color:var(--muted); transition:color .2s; }
+    .breadcrumb a { color:var(--muted); }
     .breadcrumb a:hover { color:var(--ink); }
-    .hero-row { display:flex; justify-content:space-between; align-items:flex-end; gap:40px; }
-    .collection-title {
-      font-family:var(--serif); font-size:clamp(40px,7vw,80px);
-      font-weight:400; line-height:1;
-    }
-    .collection-sub { font-size:13px; color:var(--muted); margin-top:10px; font-style:italic; }
-    .hero-meta { text-align:right; display:flex; flex-direction:column; gap:8px; align-items:flex-end; flex-shrink:0; }
-    .hero-badge {
-      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
-      border:1px solid var(--border); padding:6px 12px; color:var(--muted);
-    }
-    .hero-badge.live { border-color:var(--ink); color:var(--ink); }
-    .hero-shipping {
-      font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);
-    }
-
-    /* ── Section label ── */
-    .section-label {
-      padding:40px 48px 24px;
-      font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted);
-      border-bottom:1px solid var(--border);
-    }
-
-    /* ── Products Grid ── */
-    .products-section { padding:0 48px 120px; }
-    .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
-
-    /* ── Product Card ── */
-    .product-card { cursor:pointer; position:relative; }
-    .product-card.sold-out { cursor:default; }
-    .product-thumb {
-      aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--soft);
-    }
-    .product-thumb .ph {
-      width:100%; height:100%;
-      transition:transform .8s cubic-bezier(.25,.46,.45,.94);
-    }
-    .product-thumb img {
+    .hero-title { font-family:var(--serif); font-size:clamp(44px,7vw,84px); font-weight:400; line-height:1; }
+    .hero-sub { font-size:13px; color:var(--muted); margin-top:10px; font-style:italic; }
+    .hero-right { text-align:right; flex-shrink:0; }
+    .hero-info { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); line-height:2; }
+    .hero-info strong { color:var(--ink); }
+    .products { padding:2px 48px 120px; }
+    .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; padding-top:2px; }
+    .product-card { cursor:pointer; }
+    .card-img { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--soft); }
+    .card-img img, .card-img .ph {
       width:100%; height:100%; object-fit:cover;
       transition:transform .8s cubic-bezier(.25,.46,.45,.94);
     }
-    .product-card:not(.sold-out):hover .product-thumb .ph,
-    .product-card:not(.sold-out):hover .product-thumb img { transform:scale(1.05); }
-    .product-thumb-overlay {
-      position:absolute; inset:0; background:rgba(0,0,0,0);
-      display:flex; align-items:flex-end; justify-content:flex-start;
-      padding:16px; transition:background .3s;
+    .product-card:hover .card-img img,
+    .product-card:hover .card-img .ph { transform:scale(1.04); }
+    .card-thumbs { display:flex; gap:2px; height:64px; margin-top:2px; }
+    .card-thumbs .thumb { flex:1; overflow:hidden; background:var(--soft); }
+    .card-thumbs .thumb img,
+    .card-thumbs .thumb .ph-s { width:100%; height:100%; object-fit:cover; }
+    .card-info { padding:16px 0 0; }
+    .card-type { font-size:9px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    .card-name { font-size:17px; font-weight:400; margin-bottom:6px; }
+    .card-price { font-size:13px; margin-bottom:10px; }
+    .card-desc { font-size:12px; color:var(--muted); line-height:1.7; }
+    .card-cta {
+      display:inline-block; margin-top:16px; margin-bottom:32px;
+      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+      border-bottom:1px solid var(--ink); padding-bottom:2px; transition:opacity .2s;
     }
-    .product-card:not(.sold-out):hover .product-thumb-overlay { background:rgba(0,0,0,0.08); }
-    .quick-add {
-      font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
-      color:white; background:rgba(0,0,0,0.75); padding:10px 20px;
-      opacity:0; transform:translateY(8px); transition:all .3s;
-    }
-    .product-card:not(.sold-out):hover .quick-add { opacity:1; transform:translateY(0); }
-
-    /* sold badge */
-    .sold-badge {
-      position:absolute; top:16px; left:16px;
-      font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
-      background:rgba(255,255,255,0.9); color:var(--muted);
-      padding:5px 10px; border:1px solid var(--border);
-    }
-    /* available badge */
-    .avail-badge {
-      position:absolute; top:16px; left:16px;
-      font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
-      background:var(--ink); color:white;
-      padding:5px 10px;
-    }
-
-    .product-info { padding:14px 0 32px; }
-    .product-tag { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
-    .product-name { font-size:15px; font-weight:400; margin-bottom:4px; }
-    .product-price { font-size:13px; color:var(--muted); }
-    .product-price.active-price { color:var(--ink); font-weight:500; }
-
-    /* ── Pre-order banner ── */
-    .preorder-banner {
-      margin:0 48px 2px;
-      background:var(--soft); padding:28px 32px;
-      display:flex; justify-content:space-between; align-items:center; gap:24px;
-    }
-    .preorder-text { }
-    .preorder-text h3 { font-size:13px; letter-spacing:0.08em; font-weight:500; margin-bottom:6px; }
-    .preorder-text p { font-size:12px; color:var(--muted); line-height:1.6; }
-    .preorder-colors {
-      display:flex; flex-wrap:wrap; gap:4px; max-width:280px; justify-content:flex-end;
-    }
-    .color-dot {
-      width:20px; height:20px; border-radius:50%; border:1px solid rgba(0,0,0,0.08);
-      flex-shrink:0; cursor:pointer; transition:transform .2s;
-    }
-    .color-dot:hover { transform:scale(1.2); }
-
-    /* ── Modal ── */
+    .product-card:hover .card-cta { opacity:.5; }
     .modal-overlay {
       position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5);
       backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s;
@@ -161,7 +90,7 @@
     }
     .modal-overlay.open { opacity:1; pointer-events:all; }
     .modal {
-      background:var(--bg); width:100%; max-width:880px; max-height:90vh;
+      background:var(--bg); width:100%; max-width:860px; max-height:90vh;
       overflow-y:auto; display:grid; grid-template-columns:1fr 1fr;
       transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
       position:relative;
@@ -172,111 +101,71 @@
       width:36px; height:36px; display:flex; align-items:center; justify-content:center;
       background:white; border:1px solid var(--border); cursor:pointer; font-size:16px;
     }
-    .modal-gallery {
-      position:sticky; top:0; height:100%; min-height:400px; background:var(--soft); overflow:hidden;
-    }
-    .modal-gallery .ph { width:100%; height:100%; min-height:500px; }
-    .modal-gallery img { width:100%; height:100%; min-height:500px; object-fit:cover; }
-    .modal-body { padding:40px 36px 40px; }
+    .modal-img { position:sticky; top:0; min-height:400px; background:var(--soft); overflow:hidden; }
+    .modal-img img, .modal-img .ph { width:100%; height:100%; min-height:500px; object-fit:cover; }
+    .modal-body { padding:40px 36px; }
     .modal-tag { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-    .modal-name { font-family:var(--serif); font-size:28px; font-weight:400; margin-bottom:8px; }
-    .modal-price { font-size:20px; margin-bottom:4px; }
-    .modal-price-usd { font-size:12px; color:var(--muted); margin-bottom:16px; }
-    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; margin-bottom:28px; padding-bottom:28px; border-bottom:1px solid var(--border); }
-
-    .modal-field { margin-bottom:24px; }
-    .modal-field label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-
-    /* color grid in modal */
-    .color-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; }
-    .color-cell {
-      aspect-ratio:1; border:2px solid transparent; cursor:pointer;
-      transition:all .2s; position:relative;
-    }
-    .color-cell:hover { transform:scale(1.1); }
-    .color-cell.selected { border-color:var(--ink); }
-    .color-cell span {
-      position:absolute; bottom:-16px; left:50%; transform:translateX(-50%);
-      font-size:8px; color:var(--muted); white-space:nowrap; opacity:0;
-      transition:opacity .2s;
-    }
-    .color-cell:hover span { opacity:1; }
-
-    .size-grid { display:flex; flex-wrap:wrap; gap:6px; }
-    .size-btn {
+    .modal-name { font-family:var(--serif); font-size:26px; font-weight:400; margin-bottom:6px; }
+    .modal-price { font-size:18px; margin-bottom:4px; }
+    .modal-price-usd { font-size:12px; color:var(--muted); margin-bottom:20px; }
+    .modal-divider { height:1px; background:var(--border); margin-bottom:24px; }
+    .mfield { margin-bottom:22px; }
+    .mfield label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .color-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin-bottom:8px; }
+    .color-cell { aspect-ratio:1; border:2px solid transparent; cursor:pointer; transition:all .2s; border-radius:2px; }
+    .color-cell:hover { transform:scale(1.12); }
+    .color-cell.sel { border-color:var(--ink); }
+    .color-label { font-size:11px; color:var(--muted); min-height:16px; }
+    .variant-grid { display:flex; flex-wrap:wrap; gap:6px; }
+    .var-btn {
       padding:7px 14px; border:1px solid var(--border); font-family:var(--sans);
-      font-size:11px; letter-spacing:0.06em; cursor:pointer; background:transparent;
-      transition:all .2s;
+      font-size:11px; cursor:pointer; background:transparent; transition:all .2s;
     }
-    .size-btn:hover { border-color:var(--ink); }
-    .size-btn.active { background:var(--ink); color:white; border-color:var(--ink); }
-
-    .modal-field input, .modal-field textarea {
+    .var-btn:hover { border-color:var(--ink); }
+    .var-btn.sel { background:var(--ink); color:white; border-color:var(--ink); }
+    .var-btn.sold { opacity:.35; cursor:not-allowed; text-decoration:line-through; }
+    .mfield input, .mfield textarea {
       width:100%; padding:11px 0; border:none; border-bottom:1px solid var(--border);
-      background:transparent; font-family:var(--sans); font-size:13px; outline:none;
-      transition:border-color .3s;
+      background:transparent; font-family:var(--sans); font-size:13px; outline:none; transition:border-color .3s;
     }
-    .modal-field input:focus, .modal-field textarea:focus { border-bottom-color:var(--ink); }
-    .modal-field textarea { resize:none; line-height:1.6; }
-
-    .qty-row { display:flex; align-items:center; gap:0; margin-bottom:24px; }
+    .mfield input:focus, .mfield textarea:focus { border-bottom-color:var(--ink); }
+    .mfield textarea { resize:none; line-height:1.6; }
+    .qty-row { display:flex; align-items:center; margin-bottom:20px; }
     .qty-btn {
       width:36px; height:36px; border:1px solid var(--border); background:transparent;
-      font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-      transition:all .2s;
+      font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s;
     }
     .qty-btn:hover { background:var(--soft); }
-    .qty-val { width:44px; text-align:center; font-size:14px; border:1px solid var(--border); border-left:0; border-right:0; height:36px; line-height:36px; }
-    .btn-add-cart {
+    .qty-val { width:44px; text-align:center; font-size:14px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); height:36px; line-height:36px; }
+    .btn-cart {
       width:100%; padding:16px; background:var(--ink); color:white; border:none;
       font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
       cursor:pointer; transition:opacity .3s;
     }
-    .btn-add-cart:hover { opacity:.75; }
-
-    .shipping-note {
-      margin-top:12px; font-size:10px; color:var(--muted); letter-spacing:0.08em; text-align:center;
-    }
-
-    /* ── Footer ── */
-    footer {
-      padding:40px 48px; border-top:1px solid var(--border);
-      display:flex; justify-content:space-between; align-items:center;
-    }
+    .btn-cart:hover { opacity:.75; }
+    .modal-note { font-size:10px; color:var(--muted); text-align:center; margin-top:10px; }
+    footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
     .footer-logo { font-family:var(--serif); font-style:italic; font-size:14px; }
     .footer-links { display:flex; gap:24px; }
     .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .footer-links a:hover { color:var(--ink); }
-
-    .reveal { opacity:0; transform:translateY(20px); }
-
+    .reveal { opacity:0; transform:translateY(24px); }
     @media(max-width:900px) {
       nav { padding:16px 20px; }
       .nav-center { display:none; }
-      .collection-hero { padding:60px 20px 40px; }
-      .hero-row { flex-direction:column; align-items:flex-start; }
-      .hero-meta { align-items:flex-start; text-align:left; }
-      .section-label { padding:32px 20px 20px; }
-      .products-section { padding:0 20px 80px; }
-      .products-grid { grid-template-columns:repeat(2,1fr); }
+      .hero { padding:60px 20px 40px; flex-direction:column; gap:20px; }
+      .hero-right { text-align:left; }
+      .products { padding:2px 20px 80px; }
+      .products-grid { grid-template-columns:1fr; }
       .modal { grid-template-columns:1fr; }
-      .modal-gallery { min-height:260px; position:relative; }
+      .modal-img { min-height:260px; position:relative; }
       .modal-body { padding:28px 20px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
-      .preorder-banner { margin:0 20px 2px; flex-direction:column; }
-      .preorder-colors { justify-content:flex-start; }
-    }
-    @media(max-width:480px) {
-      .products-grid { grid-template-columns:1fr; }
-      .color-grid { grid-template-columns:repeat(6,1fr); }
     }
   </style>
 </head>
 <body>
-
 <div id="cartFeedback">Добавлено в корзину ✓</div>
-
-<!-- NAV -->
 <nav>
   <a href="index.html" class="nav-logo">accinthecloud</a>
   <ul class="nav-center">
@@ -286,88 +175,71 @@
     <li><a href="collection-a3.html">a3</a></li>
   </ul>
   <div class="nav-right">
-    <a href="cart.html" class="cart-link">
-      Корзина <span class="cart-badge"></span>
-    </a>
+    <a href="cart.html" class="cart-link">Корзина <span class="cart-badge"></span></a>
   </div>
 </nav>
-
-<!-- HERO -->
-<div class="collection-hero reveal">
-  <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a1</p>
-  <div class="hero-row">
-    <div>
-      <h1 class="collection-title">'ACCESS'</h1>
-      <p class="collection-sub">Shoulder bag — Capsule a1</p>
-    </div>
-    <div class="hero-meta">
-      <span class="hero-badge live">Pre-order open</span>
-      <span class="hero-shipping">Free shipping · Russia only</span>
+<div class="hero reveal">
+  <div>
+    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a1</p>
+    <h1 class="hero-title">'ACCESS'</h1>
+    <p class="hero-sub">Shoulder bag &mdash; Capsule a1</p>
+  </div>
+  <div class="hero-right">
+    <div class="hero-info">
+      <strong>Pre-order open</strong><br>
+      Free shipping &middot; Russia<br>
+      Release &mdash; 15.08.25
     </div>
   </div>
 </div>
-
-<!-- PRE-ORDER BANNER -->
-<div class="preorder-banner reveal">
-  <div class="preorder-text">
-    <h3>Classic — Pre-order · 16 цветов</h3>
-    <p>Выбери номер цвета и укажи в заказе.<br>Срок изготовления обсуждается индивидуально.</p>
-  </div>
-  <div class="preorder-colors" id="bannerColors"></div>
+<div class="products">
+  <div class="products-grid" id="grid"></div>
 </div>
-
-<!-- PRODUCTS -->
-<p class="section-label">Доступно к заказу</p>
-<div class="products-section">
-  <div class="products-grid" id="productsGrid"></div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose">✕</button>
-    <div class="modal-gallery">
-      <!-- ИНСТРУКЦИЯ: замени <div class="ph"> на <img src="images/..."> когда будут фото -->
-      <div class="ph" id="modalImg" style="background:var(--soft);"></div>
+<div class="modal-overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="mClose">&#10005;</button>
+    <div class="modal-img">
+      <div class="ph" id="mImg" style="background:var(--soft);"></div>
     </div>
     <div class="modal-body">
-      <p class="modal-tag" id="modalTag"></p>
-      <h2 class="modal-name" id="modalName"></h2>
-      <p class="modal-price" id="modalPrice"></p>
-      <p class="modal-price-usd" id="modalPriceUsd"></p>
-      <p class="modal-desc" id="modalDesc"></p>
-
-      <!-- Classic: color picker -->
-      <div class="modal-field" id="fieldColor" style="display:none;">
-        <label>Выбери цвет (1–16)</label>
-        <div class="color-grid" id="colorGrid" style="margin-bottom:20px;"></div>
-        <p id="selectedColorLabel" style="font-size:11px;color:var(--muted);margin-top:8px;height:16px;"></p>
+      <p class="modal-tag" id="mTag"></p>
+      <h2 class="modal-name" id="mName"></h2>
+      <p class="modal-price" id="mPrice"></p>
+      <p class="modal-price-usd" id="mPriceUsd"></p>
+      <div class="modal-divider"></div>
+      <div id="secClassic" style="display:none;">
+        <div class="mfield">
+          <label>Выбери цвет (1&ndash;16)</label>
+          <div class="color-grid" id="colorGrid"></div>
+          <p class="color-label" id="colorLabel"></p>
+        </div>
       </div>
-
-      <!-- Unique: description -->
-      <div class="modal-field" id="fieldUnique" style="display:none;">
-        <label>Твой дизайн</label>
-        <textarea id="inputUnique" rows="4" placeholder="Опиши идею: материал, цвет, детали, референсы..."></textarea>
+      <div id="secUnique" style="display:none;">
+        <div class="mfield">
+          <label>Вариант</label>
+          <div class="variant-grid" id="varGrid"></div>
+        </div>
       </div>
-
-      <div class="modal-field">
+      <div id="secCustom" style="display:none;">
+        <div class="mfield">
+          <label>Опиши свою идею</label>
+          <textarea id="inputCustom" rows="4" placeholder="Материал, цвет, детали, референсы..."></textarea>
+        </div>
+      </div>
+      <div class="mfield">
         <label>Дополнительные пожелания</label>
-        <textarea id="inputNotes" rows="2" placeholder="Особые детали, параметры, сроки..."></textarea>
+        <textarea id="inputNotes" rows="2" placeholder="Сроки, особые детали..."></textarea>
       </div>
-
       <div class="qty-row">
-        <button class="qty-btn" id="qtyMinus">−</button>
-        <div class="qty-val" id="qtyVal">1</div>
-        <button class="qty-btn" id="qtyPlus">+</button>
+        <button class="qty-btn" id="qMinus">&#8722;</button>
+        <div class="qty-val" id="qVal">1</div>
+        <button class="qty-btn" id="qPlus">+</button>
       </div>
-
-      <button class="btn-add-cart" id="btnAddCart">Добавить в корзину</button>
-      <p class="shipping-note">Бесплатная доставка по России</p>
+      <button class="btn-cart" id="btnCart">Добавить в корзину</button>
+      <p class="modal-note">Бесплатная доставка по России</p>
     </div>
   </div>
 </div>
-
-<!-- FOOTER -->
 <footer>
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
@@ -376,301 +248,147 @@
     <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
   </div>
 </footer>
-
 <script>
-const CAPSULE = "Capsule a1 · 'ACCESS'";
-
-/* ── 16 pre-order colors (по порядку из сетки) ── */
-const CLASSIC_COLORS = [
-  { n:1,  name:'Dark Navy',    hex:'#2c2d35' },
-  { n:2,  name:'Cream',        hex:'#e8e0d0' },
-  { n:3,  name:'Navy Blue',    hex:'#1e2d4a' },
-  { n:4,  name:'Charcoal',     hex:'#3a3a3a' },
-  { n:5,  name:'Army Olive',   hex:'#5a5c4a' },
-  { n:6,  name:'Brown',        hex:'#7a5c48' },
-  { n:7,  name:'Camel',        hex:'#b89070' },
-  { n:8,  name:'Mauve',        hex:'#9a7080' },
-  { n:9,  name:'Slate Grey',   hex:'#8a8a8a' },
-  { n:10, name:'Sand',         hex:'#c8b090' },
-  { n:11, name:'Light Grey',   hex:'#b0b0b0' },
-  { n:12, name:'Graphite',     hex:'#4a4a4a' },
-  { n:13, name:'Silver Grey',  hex:'#c8c8c8' },
-  { n:14, name:'Limestone',    hex:'#d8d0c0' },
-  { n:15, name:'Steel Blue',   hex:'#7090b0' },
-  { n:16, name:'B&W Stripe',   hex:'linear-gradient(90deg,#2a2a2a 50%,#e8e8e8 50%)' },
+const CAPSULE = "Capsule a1 · ACCESS";
+const COLORS = [
+  {n:1,name:'Dark Navy',hex:'#2c2d35'},{n:2,name:'Cream',hex:'#e8e0d0'},
+  {n:3,name:'Navy Blue',hex:'#1e2d4a'},{n:4,name:'Charcoal',hex:'#3a3a3a'},
+  {n:5,name:'Army Olive',hex:'#5a5c4a'},{n:6,name:'Brown',hex:'#7a5c48'},
+  {n:7,name:'Camel',hex:'#b89070'},{n:8,name:'Mauve',hex:'#9a7080'},
+  {n:9,name:'Slate Grey',hex:'#8a8a8a'},{n:10,name:'Sand',hex:'#c8b090'},
+  {n:11,name:'Light Grey',hex:'#b0b0b0'},{n:12,name:'Graphite',hex:'#4a4a4a'},
+  {n:13,name:'Silver',hex:'#c8c8c8'},{n:14,name:'Limestone',hex:'#d8d0c0'},
+  {n:15,name:'Steel Blue',hex:'#7090b0'},{n:16,name:'B&W Stripe',hex:'linear-gradient(90deg,#222 50%,#e8e8e8 50%)'},
 ];
-
+const UNIQUES = [
+  {name:'Texas',sold:true},{name:'Camo',sold:true},{name:'Grey TR',sold:true},
+  {name:'Jeans',sold:true},{name:'Carhartt',sold:true},{name:'Limestone',sold:true},
+  {name:'Black',sold:true},{name:'Stripe',sold:true},{name:'Beige',sold:true},
+];
 const PRODUCTS = [
-  /* ── Pre-order (active) ── */
   {
-    id: 'a1-classic-preorder',
-    type: 'classic',
-    name: 'ACCESS Classic',
-    tag: 'Pre-order · 16 цветов',
-    price: '4 500 ₽',
-    priceUsd: '60$',
-    priceNum: 4500,
-    desc: 'Классическая сумка ACCESS ручной работы. Предзаказ на любой из 16 цветов. Срок и детали обсуждаем в Telegram после отправки заявки.',
-    sold: false,
-    bg: 'linear-gradient(160deg,#c8c8c8,#f0f0f0)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-classic-preorder.jpg") center/cover' */
+    id:'a1-classic', type:'classic',
+    name:'ACCESS Classic', typeLabel:'Pre-order · 16 цветов',
+    price:'4 500 &#8381;', priceUsd:'60$', priceNum:4500,
+    desc:'Классическая сумка ручного пошива. Предзаказ на любой из 16 цветов. Доступные цвета: Limestone #14, Black, Stripe, Beige — sold. Все 16 цветов открыты для предзаказа.',
+    cta:'Выбрать цвет &#8594;',
+    /* ИНСТРУКЦИЯ: bg:'url("images/a1/classic-all.jpg") center/cover' */
+    bg:'linear-gradient(160deg,#d0ccc4,#e8e4dc)',
+    thumbs:['linear-gradient(160deg,#d8d0c0,#ece8e0)','linear-gradient(160deg,#111,#2a2a2a)','repeating-linear-gradient(90deg,#222 0 8px,#e8e8e8 8px 16px)','linear-gradient(160deg,#d8c8a8,#c8b890)'],
   },
   {
-    id: 'a1-unique-order',
-    type: 'unique',
-    name: 'ACCESS Unique',
-    tag: 'Твой дизайн',
-    price: '7 500 ₽',
-    priceUsd: '100$',
-    priceNum: 7500,
-    desc: 'Уникальная сумка под твой заказ. Мы обсуждаем материал, цвет и детали — я кроюю и шью. Каждая такая сумка существует в одном экземпляре.',
-    sold: false,
-    bg: 'linear-gradient(160deg,#3a3530,#252220)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-unique-order.jpg") center/cover' */
-  },
-  /* ── Sold out ── */
-  {
-    id: 'a1-limestone',
-    type: 'classic',
-    name: 'ACCESS Classic — Limestone',
-    tag: 'Classic · Color #14',
-    price: '4 500 ₽',
-    priceUsd: '60$',
-    priceNum: 4500,
-    desc: 'Известняк. Цвет №14 из классической линейки. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#d8d0c0,#ece8e0)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-limestone.jpg") center/cover' */
+    id:'a1-unique', type:'unique',
+    name:'ACCESS Unique', typeLabel:'Unique · Ваш дизайн',
+    price:'7 500 &#8381;', priceUsd:'100$', priceNum:7500,
+    desc:'Из переработанных материалов. Каждая сумка в одном экземпляре. Texas, Camo, Grey TR, Jeans, Carhartt — sold. Новые варианты появляются постоянно — следи в Telegram.',
+    cta:'Посмотреть варианты &#8594;',
+    /* ИНСТРУКЦИЯ: bg:'url("images/a1/unique-all.jpg") center/cover' */
+    bg:'linear-gradient(160deg,#3a3530,#252220)',
+    thumbs:['linear-gradient(160deg,#c0a880,#a08860)','linear-gradient(160deg,#5a6840,#384828)','linear-gradient(160deg,#686868,#4a4a4a)','linear-gradient(160deg,#7090b8,#5070a0)'],
   },
   {
-    id: 'a1-black',
-    type: 'classic',
-    name: 'ACCESS Classic — Black',
-    tag: 'Classic',
-    price: '4 500 ₽',
-    priceUsd: '60$',
-    priceNum: 4500,
-    desc: 'Чёрная. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#111,#2a2a2a)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-black.jpg") center/cover' */
-  },
-  {
-    id: 'a1-stripe',
-    type: 'classic',
-    name: 'ACCESS Classic — Stripe',
-    tag: 'Classic',
-    price: '4 500 ₽',
-    priceUsd: '60$',
-    priceNum: 4500,
-    desc: 'Чёрно-белая полоска. Продано.',
-    sold: true,
-    bg: 'repeating-linear-gradient(90deg,#222 0 10px,#e8e8e8 10px 20px)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-stripe.jpg") center/cover' */
-  },
-  {
-    id: 'a1-beige',
-    type: 'classic',
-    name: 'ACCESS Classic — Beige',
-    tag: 'Classic',
-    price: '4 500 ₽',
-    priceUsd: '60$',
-    priceNum: 4500,
-    desc: 'Бежевая. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#d8c8a8,#c8b890)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-beige.jpg") center/cover' */
-  },
-  {
-    id: 'a1-texas',
-    type: 'unique',
-    name: 'ACCESS Unique — Texas',
-    tag: 'Unique',
-    price: '7 500 ₽',
-    priceUsd: '100$',
-    priceNum: 7500,
-    desc: 'Из переработанных штанин с нашивками Cross. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#c0a880,#a08860)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-texas.jpg") center/cover' */
-  },
-  {
-    id: 'a1-camo',
-    type: 'unique',
-    name: 'ACCESS Unique — Camo',
-    tag: 'Unique',
-    price: '7 500 ₽',
-    priceUsd: '100$',
-    priceNum: 7500,
-    desc: 'Камуфляж, карго-карман, вышивка accinthecloud. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#5a6840,#384828)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-camo.jpg") center/cover' */
-  },
-  {
-    id: 'a1-grey-tr',
-    type: 'unique',
-    name: 'ACCESS Unique — Grey TR',
-    tag: 'Unique',
-    price: '7 500 ₽',
-    priceUsd: '100$',
-    priceNum: 7500,
-    desc: 'Серая вощёная ткань. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#686868,#4a4a4a)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-grey-tr.jpg") center/cover' */
-  },
-  {
-    id: 'a1-jeans',
-    type: 'unique',
-    name: 'ACCESS Unique — Jeans',
-    tag: 'Unique',
-    price: '7 500 ₽',
-    priceUsd: '100$',
-    priceNum: 7500,
-    desc: 'Из переработанных джинс. Продано.',
-    sold: true,
-    bg: 'linear-gradient(160deg,#7090b8,#5070a0)',
-    /* ИНСТРУКЦИЯ: bg:'url("images/a1-jeans.jpg") center/cover' */
+    id:'a1-custom', type:'custom',
+    name:'Make Your Own', typeLabel:'Кастом · Своя идея',
+    price:'от 4 500 &#8381;', priceUsd:'from 60$', priceNum:4500,
+    desc:'Ты придумываешь — я шью. Свой материал, свой цвет, своя идея. Обсуждаем детали в Telegram, определяем цену и сроки индивидуально.',
+    cta:'Описать идею &#8594;',
+    /* ИНСТРУКЦИЯ: bg:'url("images/a1/colors-grid.jpg") center/cover' */
+    bg:'linear-gradient(160deg,#e8e4e0,#d8d4d0)',
+    thumbs:['linear-gradient(160deg,#2c2d35,#1e2d4a)','linear-gradient(160deg,#9a7080,#7a5c48)','linear-gradient(160deg,#5a5c4a,#384828)','linear-gradient(160deg,#c8b090,#b89070)'],
   },
 ];
 
-/* ── Banner color dots ── */
-const bannerColors = document.getElementById('bannerColors');
-CLASSIC_COLORS.forEach(c => {
-  const dot = document.createElement('div');
-  dot.className = 'color-dot';
-  dot.title = `${c.n}. ${c.name}`;
-  dot.style.background = c.hex;
-  bannerColors.appendChild(dot);
-});
-
-/* ── Render cards ── */
-const grid = document.getElementById('productsGrid');
+const grid = document.getElementById('grid');
 PRODUCTS.forEach(p => {
   const card = document.createElement('div');
-  card.className = 'product-card reveal' + (p.sold ? ' sold-out' : '');
+  card.className = 'product-card reveal';
+  const thumbsHtml = (p.thumbs||[]).map(t=>`<div class="thumb"><div class="ph-s" style="background:${t};width:100%;height:100%;"></div></div>`).join('');
   card.innerHTML = `
-    <div class="product-thumb" style="background:${p.bg};">
-      <div class="ph" style="background:${p.bg};"></div>
-      <div class="product-thumb-overlay">
-        ${p.sold
-          ? '<span class="sold-badge">Sold out</span>'
-          : '<span class="avail-badge">Available</span><span class="quick-add">Заказать</span>'}
-      </div>
-    </div>
-    <div class="product-info">
-      <p class="product-tag">${p.tag}</p>
-      <p class="product-name">${p.name}</p>
-      <p class="product-price${p.sold ? '' : ' active-price'}">${p.price} / ${p.priceUsd}</p>
+    <div class="card-img"><div class="ph" style="background:${p.bg};"></div></div>
+    ${p.thumbs&&p.thumbs.length?`<div class="card-thumbs">${thumbsHtml}</div>`:''}
+    <div class="card-info">
+      <p class="card-type">${p.typeLabel}</p>
+      <p class="card-name">${p.name}</p>
+      <p class="card-price">${p.price} / ${p.priceUsd}</p>
+      <p class="card-desc">${p.desc}</p>
+      <span class="card-cta">${p.cta}</span>
     </div>`;
-  if (!p.sold) card.addEventListener('click', () => openModal(p));
+  card.addEventListener('click', ()=>openModal(p));
   grid.appendChild(card);
 });
 
-/* ── GSAP ── */
-document.addEventListener('DOMContentLoaded', () => {
-  gsap.to('.reveal', { opacity:1, y:0, duration:.75, stagger:.06, ease:'power2.out', delay:.1 });
+document.addEventListener('DOMContentLoaded', ()=>{
+  gsap.to('.reveal',{opacity:1,y:0,duration:.8,stagger:.1,ease:'power2.out',delay:.1});
 });
 
-/* ── Modal ── */
-let currentProduct = null;
-let currentQty = 1;
-let selectedColor = null;
+let cur=null, qty=1, selColor=null, selVariant='';
 
-function openModal(p) {
-  currentProduct = p;
-  currentQty = 1;
-  selectedColor = null;
-
-  document.getElementById('modalImg').style.background = p.bg;
-  document.getElementById('modalTag').textContent = CAPSULE;
-  document.getElementById('modalName').textContent = p.name;
-  document.getElementById('modalPrice').textContent = p.price;
-  document.getElementById('modalPriceUsd').textContent = p.priceUsd;
-  document.getElementById('modalDesc').textContent = p.desc;
-  document.getElementById('inputNotes').value = '';
-  document.getElementById('qtyVal').textContent = 1;
-
-  const fieldColor  = document.getElementById('fieldColor');
-  const fieldUnique = document.getElementById('fieldUnique');
-
-  if (p.type === 'classic') {
-    fieldColor.style.display  = 'block';
-    fieldUnique.style.display = 'none';
-    document.getElementById('inputUnique').value = '';
-
-    const cg = document.getElementById('colorGrid');
-    cg.innerHTML = '';
-    selectedColor = null;
-    document.getElementById('selectedColorLabel').textContent = '';
-
-    CLASSIC_COLORS.forEach(c => {
-      const cell = document.createElement('div');
-      cell.className = 'color-cell';
-      cell.style.background = c.hex;
-      cell.title = `${c.n}. ${c.name}`;
-      const lbl = document.createElement('span');
-      lbl.textContent = c.n;
-      cell.appendChild(lbl);
-      cell.addEventListener('click', () => {
-        cg.querySelectorAll('.color-cell').forEach(x => x.classList.remove('selected'));
-        cell.classList.add('selected');
-        selectedColor = c;
-        document.getElementById('selectedColorLabel').textContent = `${c.n}. ${c.name}`;
+function openModal(p){
+  cur=p; qty=1; selColor=null; selVariant='';
+  document.getElementById('mImg').style.background=p.bg;
+  document.getElementById('mTag').textContent=CAPSULE;
+  document.getElementById('mName').innerHTML=p.name;
+  document.getElementById('mPrice').innerHTML=p.price;
+  document.getElementById('mPriceUsd').textContent=p.priceUsd;
+  document.getElementById('qVal').textContent=1;
+  document.getElementById('inputNotes').value='';
+  document.getElementById('inputCustom').value='';
+  document.getElementById('secClassic').style.display='none';
+  document.getElementById('secUnique').style.display='none';
+  document.getElementById('secCustom').style.display='none';
+  if(p.type==='classic'){
+    document.getElementById('secClassic').style.display='block';
+    const cg=document.getElementById('colorGrid');
+    cg.innerHTML=''; selColor=null;
+    document.getElementById('colorLabel').textContent='';
+    COLORS.forEach(c=>{
+      const cell=document.createElement('div');
+      cell.className='color-cell';
+      cell.style.background=c.hex;
+      cell.title=`${c.n}. ${c.name}`;
+      cell.addEventListener('click',()=>{
+        cg.querySelectorAll('.color-cell').forEach(x=>x.classList.remove('sel'));
+        cell.classList.add('sel'); selColor=c;
+        document.getElementById('colorLabel').textContent=`${c.n}. ${c.name}`;
       });
       cg.appendChild(cell);
     });
+  } else if(p.type==='unique'){
+    document.getElementById('secUnique').style.display='block';
+    const vg=document.getElementById('varGrid');
+    vg.innerHTML=''; selVariant='';
+    UNIQUES.forEach(v=>{
+      const btn=document.createElement('button');
+      btn.className='var-btn'+(v.sold?' sold':'');
+      btn.textContent=v.sold?v.name+' (sold)':v.name;
+      btn.disabled=v.sold;
+      if(!v.sold){btn.addEventListener('click',()=>{vg.querySelectorAll('.var-btn').forEach(x=>x.classList.remove('sel'));btn.classList.add('sel');selVariant=v.name;});}
+      vg.appendChild(btn);
+    });
   } else {
-    fieldColor.style.display  = 'none';
-    fieldUnique.style.display = 'block';
+    document.getElementById('secCustom').style.display='block';
   }
-
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
 }
 
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-document.getElementById('qtyMinus').addEventListener('click', () => {
-  if (currentQty > 1) { currentQty--; document.getElementById('qtyVal').textContent = currentQty; }
-});
-document.getElementById('qtyPlus').addEventListener('click', () => {
-  if (currentQty < 9) { currentQty++; document.getElementById('qtyVal').textContent = currentQty; }
-});
-
-document.getElementById('btnAddCart').addEventListener('click', () => {
-  const notes  = document.getElementById('inputNotes').value.trim();
-  const unique = document.getElementById('inputUnique').value.trim();
-
-  let colorStr = '';
-  if (currentProduct.type === 'classic' && selectedColor) {
-    colorStr = `Цвет #${selectedColor.n} — ${selectedColor.name}`;
-  } else if (currentProduct.type === 'unique') {
-    colorStr = unique;
-  }
-
-  ACC.add({
-    id:       currentProduct.id,
-    capsule:  CAPSULE,
-    name:     currentProduct.name,
-    price:    currentProduct.price,
-    priceNum: currentProduct.priceNum,
-    size:     '',
-    color:    colorStr,
-    notes,
-    qty:      currentQty,
-    bg:       currentProduct.bg
-  });
+document.getElementById('mClose').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('qMinus').addEventListener('click',()=>{if(qty>1){qty--;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('qPlus').addEventListener('click',()=>{if(qty<9){qty++;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('btnCart').addEventListener('click',()=>{
+  const notes=document.getElementById('inputNotes').value.trim();
+  let color='';
+  if(cur.type==='classic') color=selColor?`Color #${selColor.n} - ${selColor.name}`:'';
+  else if(cur.type==='unique') color=selVariant;
+  else color=document.getElementById('inputCustom').value.trim();
+  ACC.add({id:cur.id,capsule:CAPSULE,name:cur.name,price:cur.price,priceNum:cur.priceNum,size:'',color,notes,qty,bg:cur.bg});
   closeModal();
 });
 </script>
