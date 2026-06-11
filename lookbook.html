@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lookbook — accinthecloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -14,11 +13,9 @@
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
     }
-    html { scroll-behavior:smooth; }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
     a { text-decoration:none; color:inherit; }
 
-    /* NAV */
     nav {
       position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
@@ -34,125 +31,99 @@
     }
     .nav-right a:hover { border-color:var(--ink); }
 
-    /* HERO */
-    .lb-hero {
-      padding:80px 48px 60px; border-bottom:1px solid var(--border);
-      display:flex; justify-content:space-between; align-items:flex-end;
+    /* GRID */
+    .lb-grid {
+      columns: 3;
+      column-gap: 3px;
+      padding: 3px;
     }
-    .lb-title { font-family:var(--serif); font-size:clamp(48px,8vw,96px); font-weight:400; line-height:1; }
-    .lb-sub { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
-
-    /* FEED */
-    .lb-feed { display:flex; flex-direction:column; }
-
-    .lb-item {
-      display:grid; grid-template-columns:1fr 1fr;
-      border-bottom:1px solid var(--border); cursor:pointer;
-      transition:background .2s;
+    .lb-tile {
+      break-inside: avoid;
+      margin-bottom: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
     }
-    .lb-item:hover { background:var(--soft); }
-    .lb-item:nth-child(even) { direction:rtl; }
-    .lb-item:nth-child(even) > * { direction:ltr; }
-
-    /* cover photo */
-    .lb-cover {
-      aspect-ratio:4/5; overflow:hidden; background:var(--soft);
+    .lb-tile img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform .7s cubic-bezier(.25,.46,.45,.94), opacity .3s;
     }
-    .lb-cover img {
-      width:100%; height:100%; object-fit:cover;
-      transition:transform .9s cubic-bezier(.25,.46,.45,.94);
-    }
-    .lb-item:hover .lb-cover img { transform:scale(1.04); }
-
-    /* info panel */
-    .lb-info {
-      padding:48px 56px; display:flex; flex-direction:column; justify-content:space-between;
-    }
-    .lb-num { font-size:11px; letter-spacing:0.2em; color:var(--muted); margin-bottom:20px; }
-    .lb-name { font-family:var(--serif); font-size:clamp(22px,3vw,36px); font-weight:400; line-height:1.2; margin-bottom:20px; }
-    .lb-desc { font-size:13px; color:var(--muted); line-height:1.9; flex:1; }
-    .lb-bottom { margin-top:40px; }
-    .lb-made { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
-    .lb-order-btn {
-      display:inline-flex; align-items:center; gap:10px;
-      font-size:11px; letter-spacing:0.2em; text-transform:uppercase;
-      padding:14px 28px; background:var(--ink); color:white; border:none;
-      cursor:pointer; transition:opacity .3s; font-family:var(--sans);
-    }
-    .lb-order-btn:hover { opacity:.75; }
+    .lb-tile:hover img { transform: scale(1.03); opacity: .88; }
 
     /* MODAL */
     .modal-overlay {
-      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.85);
-      opacity:0; pointer-events:none; transition:opacity .35s;
-      display:flex; align-items:stretch;
+      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.92);
+      opacity:0; pointer-events:none; transition:opacity .3s;
+      display:flex; align-items:center; justify-content:center;
     }
     .modal-overlay.open { opacity:1; pointer-events:all; }
+
     .modal {
-      display:flex; width:100%; height:100dvh;
-      transform:translateY(40px); transition:transform .45s cubic-bezier(.25,.46,.45,.94);
+      display:flex; width:100%; max-width:1200px; height:90dvh;
+      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+      margin:0 24px;
     }
     .modal-overlay.open .modal { transform:translateY(0); }
 
-    /* left: gallery */
-    .modal-gallery-wrap {
+    /* gallery side */
+    .modal-gallery {
       flex:1; position:relative; background:#000; overflow:hidden;
       display:flex; flex-direction:column;
     }
     .modal-slides {
-      flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory;
-      -webkit-overflow-scrolling:touch;
+      flex:1; display:flex; overflow-x:auto;
+      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
     }
     .modal-slides::-webkit-scrollbar { display:none; }
-    .modal-slide { flex:0 0 100%; scroll-snap-align:start; }
-    .modal-slide img { width:100%; height:100%; object-fit:contain; display:block; }
-    .modal-nav {
-      display:flex; align-items:center; justify-content:center; gap:10px;
-      padding:16px; background:#000;
+    .modal-slide { flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; justify-content:center; }
+    .modal-slide img { max-width:100%; max-height:100%; object-fit:contain; }
+    .modal-dots-row {
+      display:flex; align-items:center; justify-content:center; gap:8px; padding:14px 16px; background:#000;
     }
-    .modal-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.3); cursor:pointer; transition:background .2s; }
-    .modal-dot.active { background:#fff; }
-    .modal-arr {
+    .mdot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .2s; flex-shrink:0; }
+    .mdot.active { background:#fff; }
+    .marr {
       position:absolute; top:50%; transform:translateY(-50%);
-      width:44px; height:44px; background:rgba(255,255,255,0.08); border:none;
-      color:white; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      width:44px; height:44px; border:none; background:rgba(255,255,255,0.1);
+      color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:background .2s; z-index:2;
     }
-    .modal-arr:hover { background:rgba(255,255,255,0.18); }
-    .modal-arr-prev { left:16px; }
-    .modal-arr-next { right:16px; }
+    .marr:hover { background:rgba(255,255,255,0.22); }
+    #arrPrev { left:12px; }
+    #arrNext { right:12px; }
 
-    /* right: info */
+    /* info side */
     .modal-info {
-      width:400px; flex-shrink:0; background:var(--bg);
-      display:flex; flex-direction:column; overflow-y:auto; padding:48px 40px;
-      position:relative;
+      width:360px; flex-shrink:0; background:#fff;
+      display:flex; flex-direction:column; overflow-y:auto;
+      padding:44px 36px 36px; position:relative;
     }
     .modal-close {
-      position:absolute; top:20px; right:20px;
-      width:36px; height:36px; background:none; border:1px solid var(--border);
-      cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;
+      position:absolute; top:18px; right:18px;
+      width:34px; height:34px; background:none; border:1px solid var(--border);
+      cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center;
     }
-    .modal-num { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
-    .modal-name { font-family:var(--serif); font-size:24px; font-weight:400; line-height:1.25; margin-bottom:24px; }
-    .modal-divider { height:1px; background:var(--border); margin-bottom:24px; }
-    .modal-text { font-size:13px; color:var(--muted); line-height:1.95; flex:1; }
-    .modal-footer { margin-top:40px; }
-    .modal-made { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .modal-num { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .modal-name { font-family:var(--serif); font-size:22px; font-weight:400; line-height:1.3; margin-bottom:22px; }
+    .modal-divider { height:1px; background:var(--border); margin-bottom:22px; }
+    .modal-text { font-size:13px; color:var(--muted); line-height:1.95; flex:1; white-space:pre-line; }
+    .modal-footer { margin-top:36px; }
+    .modal-made { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
     .modal-disclaimer {
-      font-size:11px; color:var(--muted); line-height:1.7; margin-bottom:24px;
-      padding:14px 16px; border:1px solid var(--border);
+      font-size:11px; color:var(--muted); line-height:1.7;
+      padding:12px 14px; border:1px solid var(--border); margin-bottom:20px;
     }
-    .modal-order-btn {
-      display:block; width:100%; padding:16px; background:var(--ink); color:white;
-      border:none; font-family:var(--sans); font-size:11px; letter-spacing:0.22em;
+    .modal-order {
+      display:block; width:100%; padding:15px; background:var(--ink); color:#fff;
+      border:none; font-family:var(--sans); font-size:11px; letter-spacing:0.2em;
       text-transform:uppercase; cursor:pointer; text-align:center; transition:opacity .3s;
     }
-    .modal-order-btn:hover { opacity:.75; }
+    .modal-order:hover { opacity:.72; }
 
-    /* footer */
     footer {
-      padding:40px 48px; border-top:1px solid var(--border);
+      padding:36px 48px; border-top:1px solid var(--border);
       display:flex; justify-content:space-between; align-items:center;
     }
     .footer-logo { font-family:var(--serif); font-style:italic; font-size:14px; }
@@ -160,18 +131,17 @@
     .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .footer-links a:hover { color:var(--ink); }
 
-    .reveal { opacity:0; transform:translateY(24px); }
-
     @media(max-width:900px) {
       nav { padding:16px 20px; }
       .nav-center { display:none; }
-      .lb-hero { padding:60px 20px 40px; flex-direction:column; gap:12px; }
-      .lb-item { grid-template-columns:1fr; direction:ltr !important; }
-      .lb-item:nth-child(even) { direction:ltr; }
-      .lb-info { padding:28px 20px 36px; }
-      .modal { flex-direction:column; }
-      .modal-info { width:100%; padding:28px 20px; }
+      .lb-grid { columns:2; }
+      .modal { flex-direction:column; height:96dvh; margin:0; }
+      .modal-info { width:100%; padding:24px 20px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
+    }
+    @media(max-width:500px) {
+      .lb-grid { columns:2; column-gap:2px; padding:2px; }
+      .lb-tile { margin-bottom:2px; }
     }
   </style>
 </head>
@@ -185,17 +155,10 @@
     <li><a href="collection-a2.html">a2</a></li>
     <li><a href="collection-a3.html">a3</a></li>
   </ul>
-  <div class="nav-right">
-    <a href="cart.html">Корзина</a>
-  </div>
+  <div class="nav-right"><a href="cart.html">Корзина</a></div>
 </nav>
 
-<div class="lb-hero reveal">
-  <h1 class="lb-title">Lookbook</h1>
-  <p class="lb-sub">Архив работ</p>
-</div>
-
-<div class="lb-feed" id="feed"></div>
+<div class="lb-grid" id="grid"></div>
 
 <footer>
   <span class="footer-logo">accinthecloud</span>
@@ -209,11 +172,11 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="overlay">
   <div class="modal">
-    <div class="modal-gallery-wrap">
-      <button class="modal-arr modal-arr-prev" id="arrPrev">&#8592;</button>
-      <button class="modal-arr modal-arr-next" id="arrNext">&#8594;</button>
+    <div class="modal-gallery">
+      <button class="marr" id="arrPrev">&#8592;</button>
+      <button class="marr" id="arrNext">&#8594;</button>
       <div class="modal-slides" id="mSlides"></div>
-      <div class="modal-nav" id="mDots"></div>
+      <div class="modal-dots-row" id="mDots"></div>
     </div>
     <div class="modal-info">
       <button class="modal-close" id="mClose">&#10005;</button>
@@ -223,10 +186,8 @@
       <p class="modal-text" id="mText"></p>
       <div class="modal-footer">
         <p class="modal-made">Индивидуальный пошив</p>
-        <div class="modal-disclaimer">
-          Изготовление — под ваши параметры и запрос. Точное повторение изделия не гарантируется: материалы, фурнитура и поставки могут отличаться от образца. Каждая вещь создаётся заново.
-        </div>
-        <button class="modal-order-btn" id="mOrderBtn">Заказать похожее →</button>
+        <div class="modal-disclaimer">Точное повторение не гарантируется — материалы, фурнитура и поставки могут отличаться. Каждое изделие создаётся заново под ваши параметры.</div>
+        <button class="modal-order" id="mOrderBtn">Заказать похожее →</button>
       </div>
     </div>
   </div>
@@ -237,7 +198,7 @@ const ITEMS = [
   {
     id: 'raspberry-orbit',
     num: 'no. 17',
-    name: "'raspberry orbit'\nwork jacket",
+    name: "'raspberry orbit' work jacket",
     desc: `Укороченная куртка из плотного канваса с объёмной простёжкой в форме кругов. Материал держит форму и придаёт изделию скульптурный силуэт. Металлическая фурнитура и контрастная отделка добавляют индустриальный характер.`,
     photos: 3,
     folder: 'raspberry-orbit',
@@ -245,7 +206,7 @@ const ITEMS = [
   {
     id: 'indigo-line',
     num: 'no. 14 · sample 1',
-    name: '«Indigo Line»\nselvedge denim',
+    name: '«Indigo Line» selvedge denim',
     desc: `Винтаж в чистом виде, переосмысленный с уважением к деталям. Эти джинсы сшиты из японского селвидж денима с характерной красно-белой кромкой и дополнены поясом из плотного канваса, как дань рабочей одежде 1940–50-х годов. Контраст фактур и оттенков отсылает к эпохе, когда каждая вещь служила годами и несла в себе следы истории.\n\nПрямой крой, высокая посадка, классические заклёпки и задний регулировочный ремешок в стиле cinch back. Это выбор тех, кто чувствует связь с прошлым, но живёт в настоящем.`,
     photos: 9,
     folder: 'indigo-line',
@@ -253,92 +214,54 @@ const ITEMS = [
   {
     id: 'olive-maverick',
     num: 'no. 18',
-    name: "'OLIVE MAVERICK'\nwork jacket",
+    name: "'OLIVE MAVERICK' work jacket",
     desc: ``,
     photos: 6,
     folder: 'olive-maverick',
   },
 ];
 
-function imgs(item) {
-  return Array.from({length: item.photos}, (_, i) =>
-    `images/lookbook/${item.folder}/${String(i+1).padStart(2,'0')}.jpeg`
-  );
-}
-
-// Build feed
-const feed = document.getElementById('feed');
-ITEMS.forEach((item, idx) => {
-  const el = document.createElement('div');
-  el.className = 'lb-item reveal';
-
-  const shortDesc = item.desc.length > 220
-    ? item.desc.replace(/\n/g,' ').slice(0, 220) + '…'
-    : item.desc.replace(/\n/g,' ');
-
-  el.innerHTML = `
-    <div class="lb-cover">
-      <img src="images/lookbook/${item.folder}/01.jpeg" loading="lazy" alt="${item.name}">
-    </div>
-    <div class="lb-info">
-      <div>
-        <p class="lb-num">${item.num}</p>
-        <h2 class="lb-name">${item.name.replace(/\n/g,'<br>')}</h2>
-        <p class="lb-desc">${shortDesc || 'Описание скоро появится...'}</p>
-      </div>
-      <div class="lb-bottom">
-        <p class="lb-made">Индивидуальный пошив</p>
-        <button class="lb-order-btn" data-idx="${idx}">Заказать похожее →</button>
-      </div>
-    </div>`;
-
-  // click on card → open modal
-  el.addEventListener('click', (e) => {
-    if (e.target.closest('.lb-order-btn')) return; // handled separately
-    openModal(idx);
-  });
-
-  // click on order btn → go to order form
-  el.querySelector('.lb-order-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    goOrder(item);
-  });
-
-  feed.appendChild(el);
+// Build grid — all photos from all items as tiles
+const grid = document.getElementById('grid');
+ITEMS.forEach(item => {
+  for (let i = 1; i <= item.photos; i++) {
+    const src = `images/lookbook/${item.folder}/${String(i).padStart(2,'0')}.jpeg`;
+    const tile = document.createElement('div');
+    tile.className = 'lb-tile';
+    tile.innerHTML = `<img src="${src}" loading="lazy" alt="${item.name}">`;
+    tile.addEventListener('click', () => openModal(item, i - 1));
+    grid.appendChild(tile);
+  }
 });
 
-// Animate
-gsap.to('.reveal', { opacity:1, y:0, duration:.8, stagger:.1, ease:'power2.out', delay:.1 });
-
-// Modal
-let curItem = null;
-let curSlide = 0;
+// Modal logic
+let cur = null, curSlide = 0;
 const mSlides = document.getElementById('mSlides');
-const mDots = document.getElementById('mDots');
+const mDots   = document.getElementById('mDots');
 
-function openModal(idx) {
-  curItem = ITEMS[idx];
-  curSlide = 0;
+function openModal(item, startIdx) {
+  cur = item;
+  curSlide = startIdx;
 
-  const photos = imgs(curItem);
-  mSlides.innerHTML = photos.map(src =>
-    `<div class="modal-slide"><img src="${src}" loading="lazy" alt=""></div>`
+  mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
+    const src = `images/lookbook/${item.folder}/${String(i+1).padStart(2,'0')}.jpeg`;
+    return `<div class="modal-slide"><img src="${src}" loading="lazy" alt=""></div>`;
+  }).join('');
+
+  mDots.innerHTML = Array.from({length: item.photos}, (_, i) =>
+    `<div class="mdot${i===startIdx?' active':''}" data-i="${i}"></div>`
   ).join('');
 
-  mDots.innerHTML = photos.map((_, i) =>
-    `<div class="modal-dot${i===0?' active':''}" data-i="${i}"></div>`
-  ).join('');
+  mDots.querySelectorAll('.mdot').forEach(d =>
+    d.addEventListener('click', () => goSlide(+d.dataset.i))
+  );
 
-  mDots.querySelectorAll('.modal-dot').forEach(d => {
-    d.addEventListener('click', () => goSlide(+d.dataset.i));
-  });
-
-  mSlides.scrollLeft = 0;
+  mSlides.scrollLeft = startIdx * mSlides.offsetWidth;
   mSlides.addEventListener('scroll', onScroll, {passive:true});
 
-  document.getElementById('mNum').textContent = curItem.num;
-  document.getElementById('mName').innerHTML = curItem.name.replace(/\n/g,'<br>');
-  document.getElementById('mText').innerHTML = (curItem.desc || 'Описание скоро появится...').replace(/\n/g,'<br><br>');
+  document.getElementById('mNum').textContent = item.num;
+  document.getElementById('mName').textContent = item.name;
+  document.getElementById('mText').textContent = item.desc || 'Описание скоро появится...';
 
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -348,19 +271,16 @@ function onScroll() {
   const idx = Math.round(mSlides.scrollLeft / mSlides.offsetWidth);
   if (idx !== curSlide) {
     curSlide = idx;
-    document.querySelectorAll('.modal-dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+    mDots.querySelectorAll('.mdot').forEach((d,i) => d.classList.toggle('active', i===idx));
   }
 }
 
 function goSlide(i) {
-  mSlides.scrollTo({ left: i * mSlides.offsetWidth, behavior:'smooth' });
+  mSlides.scrollTo({left: i * mSlides.offsetWidth, behavior:'smooth'});
 }
 
-document.getElementById('arrPrev').addEventListener('click', () => goSlide(Math.max(0, curSlide - 1)));
-document.getElementById('arrNext').addEventListener('click', () => {
-  if (!curItem) return;
-  goSlide(Math.min(curItem.photos - 1, curSlide + 1));
-});
+document.getElementById('arrPrev').addEventListener('click', () => goSlide(Math.max(0, curSlide-1)));
+document.getElementById('arrNext').addEventListener('click', () => { if(cur) goSlide(Math.min(cur.photos-1, curSlide+1)); });
 
 function closeModal() {
   document.getElementById('overlay').classList.remove('open');
@@ -368,19 +288,14 @@ function closeModal() {
   mSlides.removeEventListener('scroll', onScroll);
 }
 document.getElementById('mClose').addEventListener('click', closeModal);
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('overlay')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
 document.getElementById('mOrderBtn').addEventListener('click', () => {
-  if (curItem) goOrder(curItem);
+  if (!cur) return;
+  const ref = encodeURIComponent(cur.name);
+  window.location.href = `index.html#order?ref=${ref}`;
 });
-
-function goOrder(item) {
-  const label = encodeURIComponent(item.name.replace(/\n/g,' '));
-  window.location.href = `index.html#order?ref=${label}`;
-}
 </script>
 </body>
 </html>
