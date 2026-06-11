@@ -81,53 +81,24 @@
     }
     .hero-content { position: relative; z-index: 1; text-align: center; }
     .hero-logo-video {
-      width: clamp(260px, 46vw, 600px); margin: 0 auto;
+      width: clamp(240px, 44vw, 560px); margin: 0 auto;
       opacity: 0;
     }
-    .hero-logo-video video {
-      width: 100%; height: auto; display: block;
-      mix-blend-mode: multiply;
-    }
+    .hero-logo-video video { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
     @keyframes logoBreathe {
       0%,100% { transform: scale(1); }
-      50% { transform: scale(1.025); }
+      50% { transform: scale(1.022); }
     }
-    .hero-logo-video.breathing { animation: logoBreathe 4s ease-in-out infinite; }
-    .hero-eyebrow {
-      font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 52px; opacity: 0;
-    }
+    .hero-logo-video.breathing { animation: logoBreathe 4.5s ease-in-out infinite; }
     .hero-brand {
       font-family: var(--serif); font-style: italic;
-      font-size: clamp(14px, 1.6vw, 22px); font-weight: 300;
-      letter-spacing: 0.1em; color: var(--ink);
-      margin-top: 32px; opacity: 0;
+      font-size: clamp(15px, 1.8vw, 24px); font-weight: 300;
+      letter-spacing: 0.08em; color: var(--ink);
+      margin-top: 16px; opacity: 0;
     }
-    .hero-sub {
-      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
-      color: var(--muted); margin-top: 10px; opacity: 0;
-    }
-    .hero-cta {
-      display: inline-flex; align-items: center; gap: 12px;
-      margin-top: 48px; font-size: 10px; letter-spacing: 0.22em;
-      text-transform: uppercase; opacity: 0; transition: opacity 0.3s;
-    }
-    .hero-cta:hover { opacity: 0.55 !important; }
-    .hero-cta-line { width: 28px; height: 1px; background: var(--ink); transition: width 0.4s ease; }
-    .hero-cta:hover .hero-cta-line { width: 52px; }
-    .hero-scroll-hint {
-      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: var(--muted); opacity: 0;
-    }
-    .scroll-bar {
-      width: 1px; height: 48px; background: linear-gradient(to bottom, var(--muted), transparent);
-      animation: scrollPulse 2.4s ease-in-out infinite;
-    }
-    @keyframes scrollPulse {
-      0%,100% { opacity: 0.25; transform: scaleY(0.5); }
-      50% { opacity: 1; transform: scaleY(1); }
+    .hero-eyebrow {
+      font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted); margin-top: 8px; opacity: 0;
     }
 
     /* ─── Section Shared ─────────────────────────────────── */
@@ -210,19 +181,38 @@
     .marquee-item::after { content:'·'; font-style:normal; }
 
     /* ─── Order ──────────────────────────────────────────── */
-    #order { background: var(--soft); }
-    .order-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    #order { background: var(--bg); padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; }
+    .order-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 72vh; }
+    .order-left {
+      background: var(--ink); color: white;
+      padding: 80px 64px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .order-left::before {
+      content: 'acc'; position: absolute;
+      font-family: var(--serif); font-style: italic;
+      font-size: 28vw; font-weight: 400; color: rgba(255,255,255,0.04);
+      bottom: -8vw; right: -4vw; line-height: 1; pointer-events: none;
+      white-space: nowrap;
+    }
     .order-left h2 {
-      font-family: var(--serif); font-size: clamp(28px, 4vw, 52px); font-weight: 400;
-      line-height: 1.15; margin-bottom: 20px;
+      font-family: var(--serif); font-size: clamp(32px, 4vw, 58px); font-weight: 400;
+      line-height: 1.15; margin-bottom: 20px; color: white; position: relative;
     }
-    .order-left p { font-size: 13px; color: var(--muted); line-height: 1.85; margin-bottom: 32px; }
-    .order-note {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 20px; background: white; border: 1px solid var(--border);
+    .order-left p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.9; margin-bottom: 0; position: relative; }
+    .order-facts {
+      display: flex; gap: 40px; margin-top: 52px; position: relative;
     }
-    .order-note-icon { font-size: 18px; margin-top: 1px; }
-    .order-note p { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
+    .order-fact-num {
+      font-family: var(--serif); font-style: italic;
+      font-size: 38px; font-weight: 400; color: white; display: block; line-height: 1;
+    }
+    .order-fact-label {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); margin-top: 6px; display: block;
+    }
+    .order-right { padding: 80px 64px; background: var(--soft); }
 
     /* Tabs */
     .form-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
@@ -259,10 +249,11 @@
 
     .check-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .check-pill {
-      padding: 8px 18px; border: 1px solid var(--border); font-size: 11px;
-      letter-spacing: 0.1em; text-transform: uppercase; cursor: none;
-      transition: all 0.22s; user-select: none;
+      padding: 9px 20px; border: 1px solid var(--border); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s; user-select: none; background: white;
     }
+    .check-pill:hover { border-color: var(--ink); }
     .check-pill input[type=checkbox] { display: none; }
     .check-pill.checked { background: var(--ink); color: white; border-color: var(--ink); }
 
@@ -283,11 +274,22 @@
     .form-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
     .form-success p { font-size: 13px; color: var(--muted); }
 
+    /* ─── File upload ────────────────────────────────────── */
+    .file-upload { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .file-btn {
+      padding: 9px 20px; border: 1px dashed var(--border); background: none;
+      font-family: var(--sans); font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; cursor: pointer; transition: border-color .2s, color .2s;
+      color: var(--muted);
+    }
+    .file-btn:hover { border-color: var(--ink); color: var(--ink); }
+    .file-names { font-size: 11px; color: var(--muted); }
+
     /* ─── FAQ ───────────────────────────────────────────── */
     .faq-section { padding: 100px 48px; border-top: 1px solid var(--border); }
-    .faq-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; }
-    .faq-title { font-family: var(--serif); font-size: clamp(36px,5vw,64px); font-weight: 400; }
-    .faq-subtitle { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .faq-header { margin-bottom: 56px; }
+    .faq-label { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .faq-title { font-family: var(--serif); font-size: clamp(32px,4vw,52px); font-weight: 400; }
     .faq-list { max-width: 760px; }
     .faq-item { border-top: 1px solid var(--border); }
     .faq-item:last-child { border-bottom: 1px solid var(--border); }
@@ -345,14 +347,46 @@
     .reveal-left { opacity: 0; }
     .reveal-right { opacity: 0; }
 
+    /* ─── Mobile menu ────────────────────────────────────── */
+    .burger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      padding: 4px; background: none; border: none;
+    }
+    .burger span {
+      display: block; width: 24px; height: 1.5px; background: var(--ink);
+      transition: transform .3s, opacity .3s;
+    }
+    .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity: 0; }
+    .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu {
+      display: none; position: fixed; inset: 0; z-index: 150;
+      background: var(--bg); flex-direction: column;
+      justify-content: center; align-items: center; gap: 36px;
+      opacity: 0; transition: opacity .3s;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu.visible { opacity: 1; }
+    .mobile-menu a {
+      font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); transition: color .2s;
+    }
+    .mobile-menu a:hover { color: var(--ink); }
+
     /* ─── Responsive ─────────────────────────────────────── */
     @media (max-width: 900px) {
       nav { padding: 20px 24px; }
       .nav-links { display: none; }
+      .burger { display: flex; }
       .section { padding: 80px 24px; }
-.capsules-grid { grid-template-columns: 1fr; gap: 32px; }
+      .capsules-grid { grid-template-columns: 1fr; gap: 32px; }
       .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .order-layout { grid-template-columns: 1fr; gap: 48px; }
+      .order-layout { grid-template-columns: 1fr; }
+      .order-left { padding: 60px 28px; }
+      .order-left::before { font-size: 50vw; }
+      .order-right { padding: 48px 28px; }
+      .order-facts { gap: 24px; }
+      .faq-section { padding: 72px 24px; }
       footer { flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
       body { cursor: auto; }
@@ -366,6 +400,16 @@
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
 
+<!-- ─── MOBILE MENU ───────────────────────────────────────── -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="#order" onclick="closeMobileMenu()">Order</a>
+  <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+  <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+</div>
+
 <!-- ─── NAV ─────────────────────────────────────────────── -->
 <nav>
   <a href="#" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
@@ -377,6 +421,9 @@
     <li><a href="https://t.me/accinthecloud1" target="_blank">Telegram</a></li>
     <li><a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a></li>
   </ul>
+  <button class="burger" id="burgerBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- ─── PAGE CURTAIN ──────────────────────────────────────── -->
@@ -385,20 +432,11 @@
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
   <div class="hero-content">
-    <p class="hero-eyebrow">Handmade · Moscow</p>
     <div class="hero-logo-video">
       <video src="LogoPolyacc.MOV" autoplay loop muted playsinline></video>
     </div>
     <p class="hero-brand">accinthecloud</p>
-    <p class="hero-sub">Denim · Jackets · Bags — crafted by hand</p>
-    <a href="#capsules" class="hero-cta">
-      <span class="hero-cta-line"></span>
-      <span>Capsule collections</span>
-    </a>
-  </div>
-  <div class="hero-scroll-hint">
-    <span>scroll</span>
-    <div class="scroll-bar"></div>
+    <p class="hero-eyebrow">Handmade · Moscow</p>
   </div>
 </section>
 
@@ -480,12 +518,22 @@
   <div class="section-label reveal">Order</div>
   <div class="order-layout">
 
-    <div class="order-left">
-      <h2 class="reveal">Давай сошьём<br><em>что-нибудь</em></h2>
-      <p class="reveal">Выбери вещь из капсулы или опиши свою идею — я свяжусь с тобой в телеграме и обсудим детали.</p>
-      <div class="order-note reveal">
-        <div class="order-note-icon">✦</div>
-        <p>Все вещи шьются вручную. Срок — обсуждается индивидуально. Для заказа из капсул возможна доставка по России.</p>
+    <div class="order-left reveal">
+      <h2>Давай<br>сошьём<br><em>что-нибудь</em></h2>
+      <p>Выбери вещь из капсулы или опиши свою идею — свяжусь в телеграме и обсудим детали.</p>
+      <div class="order-facts">
+        <div>
+          <span class="order-fact-num">1000+</span>
+          <span class="order-fact-label">изделий</span>
+        </div>
+        <div>
+          <span class="order-fact-num">100%</span>
+          <span class="order-fact-label">ручная работа</span>
+        </div>
+        <div>
+          <span class="order-fact-num">a1–a3</span>
+          <span class="order-fact-label">капсулы</span>
+        </div>
       </div>
     </div>
 
@@ -543,6 +591,14 @@
           <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
         </div>
 
+        <div class="field">
+          <label>Фото / референсы</label>
+          <div class="file-upload" id="fileUploadArea">
+            <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+            <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
+            <span class="file-names" id="fileNames"></span>
+          </div>
+        </div>
         <button type="submit" class="btn-submit" id="submitBtn">Отправить запрос</button>
       </form>
 
@@ -559,8 +615,8 @@
 <!-- ─── FAQ ─────────────────────────────────────────────────── -->
 <section class="faq-section" id="faq">
   <div class="faq-header reveal">
+    <p class="faq-label">Частые вопросы</p>
     <h2 class="faq-title">FAQ</h2>
-    <span class="faq-subtitle">Частые вопросы</span>
   </div>
   <div class="faq-list reveal">
     <div class="faq-item">
@@ -656,21 +712,15 @@ gsap.to('#page-curtain', {
 
 // ── Hero entrance (fires after curtain lifts) ──
 const tl = gsap.timeline({ delay: 0.6 });
-tl.fromTo('.hero-eyebrow',
-    { opacity:0, y:10 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' })
-  .fromTo('.hero-logo-video',
+tl.fromTo('.hero-logo-video',
     { opacity:0, scale:0.94 },
     { opacity:1, scale:1, duration:1.3, ease:'power3.out',
       onComplete: () => document.querySelector('.hero-logo-video').classList.add('breathing')
-    }, '-=0.3')
+    })
   .fromTo('.hero-brand',
-    { opacity:0, y:12 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.6')
-  .fromTo('.hero-sub',
-    { opacity:0 }, { opacity:1, duration:0.5, ease:'power2.out' }, '-=0.3')
-  .fromTo('.hero-cta',
-    { opacity:0 }, { opacity:0.8, duration:0.6, ease:'power2.out' }, '-=0.2')
-  .fromTo('.hero-scroll-hint',
-    { opacity:0 }, { opacity:1, duration:0.5 }, '+=0.2')
+    { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
+  .fromTo('.hero-eyebrow',
+    { opacity:0 }, { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
   .fromTo('.nav-logo',
     { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
   .fromTo('.nav-links',
@@ -796,6 +846,35 @@ document.getElementById('orderForm').addEventListener('submit', async e => {
   form.style.display = 'none';
   document.getElementById('formSuccess').classList.add('show');
 });
+
+// ── Mobile menu ────────────────────────────────────────────
+const burgerBtn = document.getElementById('burgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+function closeMobileMenu() {
+  burgerBtn.classList.remove('open');
+  mobileMenu.classList.remove('visible');
+  setTimeout(() => mobileMenu.classList.remove('open'), 300);
+  document.body.style.overflow = '';
+}
+burgerBtn.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.contains('open');
+  if (isOpen) { closeMobileMenu(); }
+  else {
+    burgerBtn.classList.add('open');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => mobileMenu.classList.add('visible'));
+  }
+});
+
+// ── File upload preview ─────────────────────────────────────
+const fileInput = document.getElementById('fileInput');
+if (fileInput) {
+  fileInput.addEventListener('change', () => {
+    const names = Array.from(fileInput.files).map(f => f.name).join(', ');
+    document.getElementById('fileNames').textContent = names || '';
+  });
+}
 
 // ── FAQ accordion ──────────────────────────────────────────
 document.querySelectorAll('.faq-q').forEach(btn => {
