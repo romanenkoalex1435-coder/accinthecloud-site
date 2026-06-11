@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Корзина — accinthecloud</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <script src="cart.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
+      --border:#ebebeb; --soft:#f5f5f5;
+      --serif:'Playfair Display',Georgia,serif;
+      --sans:'Inter',-apple-system,sans-serif;
+    }
+    body { font-family:var(--sans); background:var(--bg); color:var(--ink); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+
+    /* ── Nav ── */
+    nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+    }
+    .nav-logo { font-family:var(--serif); font-style:italic; font-size:15px; font-weight:300; }
+    .nav-center { display:flex; gap:32px; list-style:none; }
+    .nav-center a { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .nav-center a:hover { color:var(--ink); }
+    .cart-badge-nav {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:18px; height:18px; background:var(--ink); color:white;
+      font-size:10px; border-radius:50%; margin-left:6px;
+    }
+    .cart-badge { display:none; }
+
+    /* ── Page ── */
+    .page-header {
+      padding:64px 48px 40px; border-bottom:1px solid var(--border);
+    }
+    .breadcrumb { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .breadcrumb a { color:var(--muted); transition:color .2s; }
+    .breadcrumb a:hover { color:var(--ink); }
+    h1 { font-family:var(--serif); font-size:clamp(32px,5vw,60px); font-weight:400; }
+
+    /* ── Layout ── */
+    .cart-layout {
+      display:grid; grid-template-columns:1fr 380px; gap:0;
+      min-height:calc(100vh - 200px);
+    }
+
+    /* ── Items ── */
+    .cart-items { padding:40px 48px; border-right:1px solid var(--border); }
+    .items-label { font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:32px; }
+
+    .cart-item {
+      display:grid; grid-template-columns:80px 1fr auto;
+      gap:20px; padding:24px 0; border-bottom:1px solid var(--border);
+      align-items:start;
+    }
+    .item-thumb {
+      width:80px; height:100px; flex-shrink:0;
+    }
+    .item-thumb .ph { width:100%; height:100%; }
+    .item-body {}
+    .item-capsule { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .item-name { font-size:15px; margin-bottom:6px; }
+    .item-meta { font-size:11px; color:var(--muted); line-height:1.6; }
+    .item-meta span { display:block; }
+    .item-right { display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+    .item-price { font-size:14px; }
+
+    .item-qty { display:flex; align-items:center; gap:0; }
+    .iqty-btn {
+      width:28px; height:28px; border:1px solid var(--border);
+      background:transparent; font-size:14px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; transition:all .2s;
+    }
+    .iqty-btn:hover { background:var(--soft); }
+    .iqty-val {
+      width:36px; text-align:center; font-size:13px;
+      border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+      height:28px; line-height:28px;
+    }
+    .item-remove {
+      font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--muted); background:none; border:none; cursor:pointer;
+      transition:color .2s; padding:0;
+    }
+    .item-remove:hover { color:var(--ink); }
+
+    /* Empty state */
+    .empty-cart {
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      padding:80px 0; text-align:center; gap:16px;
+    }
+    .empty-cart.show { display:flex; }
+    .empty-icon { font-size:40px; opacity:0.3; }
+    .empty-cart p { font-size:14px; color:var(--muted); }
+    .btn-browse {
+      display:inline-block; margin-top:8px; padding:12px 32px;
+      border:1px solid var(--ink); font-size:11px; letter-spacing:0.18em;
+      text-transform:uppercase; transition:all .2s;
+    }
+    .btn-browse:hover { background:var(--ink); color:white; }
+
+    /* ── Checkout ── */
+    .cart-checkout { padding:40px 40px; position:sticky; top:80px; align-self:start; }
+    .checkout-label { font-size:10px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:28px; }
+
+    .summary-row {
+      display:flex; justify-content:space-between;
+      font-size:13px; padding:10px 0; border-bottom:1px solid var(--border);
+    }
+    .summary-row.total {
+      font-size:16px; font-weight:500; border-bottom:none; margin-top:4px; padding-top:16px;
+    }
+    .summary-row .label { color:var(--muted); }
+
+    .checkout-divider { height:1px; background:var(--border); margin:28px 0; }
+
+    .field { margin-bottom:20px; }
+    .field label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    .field input, .field textarea {
+      width:100%; padding:10px 0; border:none; border-bottom:1px solid var(--border);
+      background:transparent; font-family:var(--sans); font-size:13px; color:var(--ink);
+      outline:none; transition:border-color .3s;
+    }
+    .field input:focus, .field textarea:focus { border-bottom-color:var(--ink); }
+    .field textarea { resize:none; line-height:1.6; }
+
+    .btn-order {
+      width:100%; padding:16px; background:var(--ink); color:white; border:none;
+      font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+      cursor:pointer; transition:opacity .3s; margin-top:8px;
+    }
+    .btn-order:hover { opacity:.75; }
+    .btn-order:disabled { opacity:.35; cursor:not-allowed; }
+
+    .checkout-note { font-size:11px; color:var(--muted); line-height:1.6; margin-top:16px; text-align:center; }
+
+    /* ── Success ── */
+    #successScreen {
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      padding:80px 40px; text-align:center; gap:16px;
+    }
+    #successScreen.show { display:flex; }
+    .success-icon { font-size:40px; margin-bottom:8px; }
+    #successScreen h2 { font-family:var(--serif); font-size:28px; font-weight:400; }
+    #successScreen p { font-size:13px; color:var(--muted); line-height:1.7; max-width:280px; }
+    .btn-back { display:inline-block; margin-top:16px; padding:12px 32px; border:1px solid var(--ink); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; transition:all .2s; }
+    .btn-back:hover { background:var(--ink); color:white; }
+
+    /* ── Footer ── */
+    footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .footer-logo { font-family:var(--serif); font-style:italic; font-size:14px; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .footer-links a:hover { color:var(--ink); }
+
+    @media(max-width:900px) {
+      nav { padding:16px 20px; }
+      .nav-center { display:none; }
+      .page-header { padding:48px 20px 28px; }
+      .cart-layout { grid-template-columns:1fr; }
+      .cart-items { padding:32px 20px; border-right:none; border-bottom:1px solid var(--border); }
+      .cart-checkout { padding:32px 20px; position:static; }
+      footer { flex-direction:column; gap:16px; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">accinthecloud</a>
+  <ul class="nav-center">
+    <li><a href="lookbook.html">Lookbook</a></li>
+    <li><a href="collection-a1.html">a1</a></li>
+    <li><a href="collection-a2.html">a2</a></li>
+    <li><a href="collection-a3.html">a3</a></li>
+  </ul>
+  <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;">
+    Корзина
+    <span class="cart-badge-nav" id="cartCountNav" style="display:none;"></span>
+  </div>
+</nav>
+
+<div class="page-header">
+  <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Корзина</p>
+  <h1>Корзина</h1>
+</div>
+
+<div class="cart-layout">
+
+  <!-- Items -->
+  <div class="cart-items">
+    <p class="items-label" id="itemsLabel">0 позиций</p>
+    <div id="cartItemsList"></div>
+    <div class="empty-cart" id="emptyCart">
+      <div class="empty-icon">○</div>
+      <p>Корзина пустая</p>
+      <a href="collection-a1.html" class="btn-browse">Смотреть коллекции</a>
+    </div>
+  </div>
+
+  <!-- Checkout -->
+  <div class="cart-checkout" id="checkoutPanel">
+    <p class="checkout-label">Оформление</p>
+
+    <div class="summary-row">
+      <span class="label">Позиций</span>
+      <span id="summaryCount">0</span>
+    </div>
+    <div class="summary-row total">
+      <span class="label">Итого от</span>
+      <span id="summaryTotal">0 ₽</span>
+    </div>
+
+    <div class="checkout-divider"></div>
+
+    <div class="field">
+      <label>Имя</label>
+      <input type="text" id="checkName" placeholder="Как тебя зовут?" required />
+    </div>
+    <div class="field">
+      <label>Telegram</label>
+      <input type="text" id="checkTelegram" placeholder="@username" required />
+    </div>
+    <div class="field">
+      <label>Комментарий</label>
+      <textarea id="checkComment" rows="3" placeholder="Параметры тела, срочность, любые вопросы..."></textarea>
+    </div>
+
+    <button class="btn-order" id="btnOrder">Отправить запрос на пошив</button>
+    <p class="checkout-note">Я свяжусь с тобой в Telegram, уточню детали и подтвержу заказ.</p>
+
+    <div id="successScreen">
+      <div class="success-icon">✓</div>
+      <h2>Запрос отправлен</h2>
+      <p>Скоро свяжусь с тобой в Telegram — обсудим детали и согласуем сроки.</p>
+      <a href="index.html" class="btn-back">На главную</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="index.html">Главная</a>
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+  </div>
+</footer>
+
+<script>
+// ── Telegram config (должен совпадать с index.html) ──
+const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
+const CHAT_ID   = 'YOUR_CHAT_ID_HERE';
+
+// ── Render cart ──
+function renderCart() {
+  const cart = ACC.get();
+  const list = document.getElementById('cartItemsList');
+  const empty = document.getElementById('emptyCart');
+  const count = cart.reduce((s,i) => s + (i.qty||1), 0);
+  const total = ACC.total();
+
+  document.getElementById('itemsLabel').textContent = count + ' ' + plural(count,'позиция','позиции','позиций');
+  document.getElementById('summaryCount').textContent = count;
+  document.getElementById('summaryTotal').textContent = total > 0 ? total.toLocaleString('ru-RU') + ' ₽' : '—';
+
+  const navBadge = document.getElementById('cartCountNav');
+  if (count > 0) { navBadge.textContent = count; navBadge.style.display = 'inline-flex'; }
+  else           { navBadge.style.display = 'none'; }
+
+  if (cart.length === 0) {
+    list.innerHTML = '';
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  list.innerHTML = cart.map(item => {
+    const metas = [];
+    if (item.size)  metas.push(`Размер: ${item.size}`);
+    if (item.color) metas.push(`Цвет/ткань: ${item.color}`);
+    if (item.notes) metas.push(`Пожелания: ${item.notes}`);
+    return `
+      <div class="cart-item" data-uid="${item.uid}">
+        <div class="item-thumb">
+          <div class="ph" style="background:${item.bg || '#e8e8e8'};"></div>
+        </div>
+        <div class="item-body">
+          <p class="item-capsule">${item.capsule}</p>
+          <p class="item-name">${item.name}</p>
+          ${metas.length ? `<div class="item-meta">${metas.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="item-right">
+          <p class="item-price">${item.price}</p>
+          <div class="item-qty">
+            <button class="iqty-btn" data-uid="${item.uid}" data-action="minus">−</button>
+            <div class="iqty-val">${item.qty||1}</div>
+            <button class="iqty-btn" data-uid="${item.uid}" data-action="plus">+</button>
+          </div>
+          <button class="item-remove" data-uid="${item.uid}">Удалить</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Qty buttons
+  list.querySelectorAll('.iqty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const uid = btn.dataset.uid;
+      const item = ACC.get().find(i => i.uid === uid);
+      if (!item) return;
+      let qty = item.qty || 1;
+      if (btn.dataset.action === 'plus'  && qty < 9) qty++;
+      if (btn.dataset.action === 'minus' && qty > 1) qty--;
+      ACC.updateQty(uid, qty);
+      renderCart();
+    });
+  });
+
+  // Remove
+  list.querySelectorAll('.item-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ACC.remove(btn.dataset.uid);
+      renderCart();
+    });
+  });
+}
+
+// ── Submit order ──
+document.getElementById('btnOrder').addEventListener('click', async () => {
+  const name     = document.getElementById('checkName').value.trim();
+  const telegram = document.getElementById('checkTelegram').value.trim();
+  const comment  = document.getElementById('checkComment').value.trim();
+
+  if (!name || !telegram) {
+    document.getElementById('checkName').focus();
+    return;
+  }
+  if (ACC.get().length === 0) return;
+
+  const btn = document.getElementById('btnOrder');
+  btn.disabled = true;
+  btn.textContent = 'Отправляем...';
+
+  const text = ACC.formatTelegramMessage(name, telegram, comment);
+
+  // Save to localStorage for admin
+  ACC.saveOrder({
+    type: 'cart',
+    name, telegram, comment,
+    details: text,
+    items: ACC.get()
+  });
+
+  // Send to Telegram
+  try {
+    if (BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
+      const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error('API error');
+    }
+  } catch(err) {
+    console.warn('Telegram error:', err.message);
+  }
+
+  ACC.clear();
+  document.getElementById('checkoutPanel').querySelector('.checkout-label').style.display = 'none';
+  document.querySelectorAll('.summary-row, .checkout-divider, .field, .btn-order, .checkout-note').forEach(el => el.style.display = 'none');
+  document.getElementById('successScreen').classList.add('show');
+  renderCart();
+});
+
+// ── Helpers ──
+function plural(n, one, few, many) {
+  const m = Math.abs(n) % 100;
+  if (m >= 11 && m <= 19) return many;
+  const d = m % 10;
+  if (d === 1) return one;
+  if (d >= 2 && d <= 4) return few;
+  return many;
+}
+
+renderCart();
+</script>
+</body>
+</html>

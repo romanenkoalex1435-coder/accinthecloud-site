@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accinthecloud</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ─── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #ffffff;
+      --ink: #0d0d0d;
+      --muted: #909090;
+      --border: #ebebeb;
+      --soft: #f5f5f5;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x: hidden;
+      cursor: none; /* custom cursor */
+    }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─── Custom Cursor ──────────────────────────────────── */
+    #cursor {
+      position: fixed; z-index: 9999; pointer-events: none;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ink); transform: translate(-50%,-50%);
+      transition: transform 0.08s ease, opacity 0.2s;
+    }
+    #cursor-ring {
+      position: fixed; z-index: 9998; pointer-events: none;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(13,13,13,0.3);
+      transform: translate(-50%,-50%);
+      transition: transform 0.18s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s;
+    }
+    body.cursor-hover #cursor { transform: translate(-50%,-50%) scale(2.5); }
+    body.cursor-hover #cursor-ring { width:56px; height:56px; border-color:rgba(13,13,13,0.15); }
+
+    /* ─── Nav ────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 28px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-style: italic; font-weight: 300; font-size: 15px;
+      letter-spacing: 0.04em; opacity: 0;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; opacity: 0; }
+    .nav-links a {
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--ink); opacity: 0.45; transition: opacity 0.3s;
+    }
+    .nav-links a:hover { opacity: 1; }
+
+    /* ─── Hero ───────────────────────────────────────────── */
+    #hero {
+      height: 100vh; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      /* Replace with: background-image: url('images/hero.jpg'); background-size: cover; */
+      background: var(--bg);
+    }
+    .hero-content { position: relative; z-index: 1; text-align: center; }
+    .hero-eyebrow {
+      font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 28px; opacity: 0;
+    }
+    .hero-logo-video {
+      width: clamp(220px, 38vw, 520px);
+      opacity: 0;
+    }
+    .hero-logo-video video {
+      width: 100%; height: auto; display: block;
+      mix-blend-mode: multiply; /* убирает белый фон если есть */
+    }
+    .hero-sub {
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-top: 24px; opacity: 0;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 12px;
+      margin-top: 56px; font-size: 11px; letter-spacing: 0.2em;
+      text-transform: uppercase; opacity: 0; transition: opacity 0.3s;
+    }
+    .hero-cta:hover { opacity: 0.6 !important; }
+    .hero-cta-line {
+      width: 32px; height: 1px; background: var(--ink);
+      transition: width 0.4s ease;
+    }
+    .hero-cta:hover .hero-cta-line { width: 56px; }
+    .hero-scroll-hint {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted); opacity: 0;
+    }
+    .scroll-bar {
+      width: 1px; height: 48px; background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%,100% { opacity: 0.3; transform: scaleY(0.6); }
+      50% { opacity: 1; transform: scaleY(1); }
+    }
+
+    /* ─── Section Shared ─────────────────────────────────── */
+    .section { padding: 120px 48px; }
+    .section-label {
+      font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 56px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; max-width: 48px; height: 1px; background: var(--border);
+    }
+
+    /* ─── Works ──────────────────────────────────────────── */
+    #works { background: var(--soft); }
+    .works-intro {
+      max-width: 480px; margin-bottom: 64px;
+    }
+    .works-intro h2 {
+      font-family: var(--serif); font-size: clamp(28px, 4vw, 48px);
+      font-weight: 400; line-height: 1.2; margin-bottom: 16px;
+    }
+    .works-intro p { font-size: 13px; color: var(--muted); line-height: 1.8; }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: auto;
+      gap: 6px;
+    }
+    .work-item {
+      overflow: hidden; position: relative; background: var(--border);
+      cursor: none;
+    }
+    /* Layout mosaic */
+    .work-item:nth-child(1) { grid-column: 1/6; aspect-ratio: 4/5; }
+    .work-item:nth-child(2) { grid-column: 6/9; aspect-ratio: 3/5; }
+    .work-item:nth-child(3) { grid-column: 9/13; aspect-ratio: 4/5; }
+    .work-item:nth-child(4) { grid-column: 1/4; aspect-ratio: 3/4; }
+    .work-item:nth-child(5) { grid-column: 4/9; aspect-ratio: 5/4; }
+    .work-item:nth-child(6) { grid-column: 9/13; aspect-ratio: 4/4; }
+
+    .work-item .ph {
+      width: 100%; height: 100%;
+      transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .work-item:hover .ph { transform: scale(1.04); }
+
+    /* ─── Capsules ───────────────────────────────────────── */
+    #capsules { background: var(--bg); }
+    .capsules-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 64px;
+    }
+    .capsules-header h2 {
+      font-family: var(--serif); font-size: clamp(28px, 4vw, 48px); font-weight: 400;
+    }
+    .capsules-header span {
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .capsules-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    }
+    .capsule-card { position: relative; overflow: hidden; cursor: none; display:block; }
+    .capsule-card-link { display:block; }
+    .capsule-view {
+      display:inline-flex; align-items:center; gap:10px; margin-top:14px;
+      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+      color:var(--muted); transition:color .3s;
+    }
+    .capsule-view::after { content:'→'; transition:transform .3s; }
+    .capsule-card:hover .capsule-view { color:var(--ink); }
+    .capsule-card:hover .capsule-view::after { transform:translateX(4px); }
+    .capsule-thumb {
+      aspect-ratio: 2/3; overflow: hidden; position: relative;
+    }
+    .capsule-thumb .ph {
+      width: 100%; height: 100%;
+      transition: transform 0.9s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .capsule-card:hover .capsule-thumb .ph { transform: scale(1.06); }
+
+    .capsule-tag {
+      position: absolute; top: 20px; left: 20px;
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: white; background: rgba(0,0,0,0.5);
+      padding: 5px 10px; backdrop-filter: blur(4px);
+    }
+    .capsule-body { padding: 22px 0 40px; }
+    .capsule-name {
+      font-family: var(--serif); font-size: 26px; font-weight: 400;
+      letter-spacing: 0.02em; margin-bottom: 8px;
+    }
+    .capsule-desc { font-size: 12px; color: var(--muted); line-height: 1.75; margin-bottom: 12px; }
+    .capsule-items { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+
+    /* ─── Marquee ────────────────────────────────────────── */
+    .marquee-section {
+      overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 20px 0; background: var(--bg);
+    }
+    .marquee-track {
+      display: flex; gap: 64px; width: max-content;
+      animation: marquee 18s linear infinite;
+    }
+    .marquee-section:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-item {
+      font-family: var(--serif); font-style: italic;
+      font-size: 15px; color: var(--muted); white-space: nowrap;
+      display: flex; align-items: center; gap: 64px;
+    }
+    .marquee-item::after { content:'·'; font-style:normal; }
+
+    /* ─── Order ──────────────────────────────────────────── */
+    #order { background: var(--soft); }
+    .order-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .order-left h2 {
+      font-family: var(--serif); font-size: clamp(28px, 4vw, 52px); font-weight: 400;
+      line-height: 1.15; margin-bottom: 20px;
+    }
+    .order-left p { font-size: 13px; color: var(--muted); line-height: 1.85; margin-bottom: 32px; }
+    .order-note {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 20px; background: white; border: 1px solid var(--border);
+    }
+    .order-note-icon { font-size: 18px; margin-top: 1px; }
+    .order-note p { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
+
+    /* Tabs */
+    .form-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+    .tab-btn {
+      padding: 12px 0; margin-right: 28px; font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase; cursor: none;
+      border-bottom: 1px solid transparent; margin-bottom: -1px;
+      color: var(--muted); transition: all 0.3s; background: none; border-top: none;
+      border-left: none; border-right: none; font-family: var(--sans);
+    }
+    .tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form fields */
+    .field { margin-bottom: 28px; }
+    .field label {
+      display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%; padding: 12px 0;
+      border: none; border-bottom: 1px solid var(--border);
+      background: transparent; font-family: var(--sans); font-size: 14px;
+      color: var(--ink); outline: none; transition: border-color 0.3s;
+      cursor: none;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-bottom-color: var(--ink);
+    }
+    .field textarea { resize: none; line-height: 1.6; }
+    .field select { appearance: none; cursor: none; }
+
+    .check-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .check-pill {
+      padding: 8px 18px; border: 1px solid var(--border); font-size: 11px;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: none;
+      transition: all 0.22s; user-select: none;
+    }
+    .check-pill input[type=checkbox] { display: none; }
+    .check-pill.checked { background: var(--ink); color: white; border-color: var(--ink); }
+
+    .btn-submit {
+      width: 100%; padding: 18px; margin-top: 8px;
+      background: var(--ink); color: white; border: none;
+      font-family: var(--sans); font-size: 11px; letter-spacing: 0.22em;
+      text-transform: uppercase; cursor: none; transition: opacity 0.3s;
+    }
+    .btn-submit:hover { opacity: 0.75; }
+    .btn-submit:disabled { opacity: 0.35; cursor: none; }
+
+    .form-success {
+      display: none; padding: 40px 0; text-align: center;
+    }
+    .form-success.show { display: block; }
+    .success-icon { font-size: 32px; margin-bottom: 16px; }
+    .form-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+    .form-success p { font-size: 13px; color: var(--muted); }
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    footer {
+      padding: 48px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-logo {
+      font-family: var(--serif); font-style: italic; font-size: 15px; font-weight: 300;
+    }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a {
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--ink); }
+    .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
+
+    /* ─── Animated reveal base ───────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(28px); }
+    .reveal-left { opacity: 0; transform: translateX(-28px); }
+    .reveal-right { opacity: 0; transform: translateX(28px); }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .section { padding: 80px 24px; }
+      .works-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .work-item { grid-column: auto !important; aspect-ratio: 1 !important; }
+      .capsules-grid { grid-template-columns: 1fr; gap: 32px; }
+      .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .order-layout { grid-template-columns: 1fr; gap: 48px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      body { cursor: auto; }
+      #cursor, #cursor-ring { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ─── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">accinthecloud</a>
+  <ul class="nav-links">
+    <li><a href="lookbook.html">Lookbook</a></li>
+    <li><a href="#capsules">Capsules</a></li>
+    <li><a href="#order">Order</a></li>
+    <li><a href="https://t.me/accinthecloud1" target="_blank">Telegram</a></li>
+    <li><a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ─────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Handmade · Russian independent brand</p>
+    <div class="hero-logo-video">
+      <video src="LogoPolyacc.MOV" autoplay loop muted playsinline></video>
+    </div>
+    <p class="hero-sub">Denim · Jackets · Bags — crafted by hand</p>
+    <a href="#works" class="hero-cta">
+      <span class="hero-cta-line"></span>
+      <span>See the work</span>
+    </a>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-bar"></div>
+  </div>
+</section>
+
+<!-- ─── WORKS ─────────────────────────────────────────────── -->
+<section id="works" class="section">
+  <div class="section-label reveal">Works</div>
+  <div class="works-intro">
+    <h2 class="reveal">Шьём с душой,<br><em>носите годами</em></h2>
+    <p class="reveal">Каждая вещь сшита вручную — японский деним, натуральные ткани, металлическая фурнитура. Больше 1000 изделий с момента основания.</p>
+  </div>
+  <div class="works-grid">
+    <!--
+      ИНСТРУКЦИЯ: Замените заглушки ниже на реальные фото.
+      Пример: <img src="images/work1.jpg" alt="...">
+      Рекомендуемые размеры: минимум 800×1000px
+    -->
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#c8c4be,#a09890);"></div>
+    </div>
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#3a3530,#1e1a16);"></div>
+    </div>
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#6b6560,#4a4540);"></div>
+    </div>
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#d4cfc8,#b0aaa0);"></div>
+    </div>
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#1a1a1a,#383838);"></div>
+    </div>
+    <div class="work-item reveal">
+      <div class="ph" style="background:linear-gradient(160deg,#888078,#605850);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── MARQUEE ───────────────────────────────────────────── -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Japanese denim</span>
+    <span class="marquee-item">Handcrafted</span>
+    <span class="marquee-item">accinthecloud</span>
+    <span class="marquee-item">Capsule collections</span>
+    <span class="marquee-item">Made to order</span>
+    <span class="marquee-item">4.4K followers</span>
+    <span class="marquee-item">Japanese denim</span>
+    <span class="marquee-item">Handcrafted</span>
+    <span class="marquee-item">accinthecloud</span>
+    <span class="marquee-item">Capsule collections</span>
+    <span class="marquee-item">Made to order</span>
+    <span class="marquee-item">4.4K followers</span>
+  </div>
+</div>
+
+<!-- ─── CAPSULES ─────────────────────────────────────────── -->
+<section id="capsules" class="section">
+  <div class="section-label reveal">Capsule Collections</div>
+  <div class="capsules-header">
+    <h2 class="reveal">Три капсулы —<br><em>три главы</em></h2>
+    <span class="reveal">2023 — 2025</span>
+  </div>
+
+  <div class="capsules-grid">
+
+    <!-- a1 -->
+    <a class="capsule-card reveal capsule-card-link" href="collection-a1.html">
+      <div class="capsule-thumb">
+        <div class="ph" style="background:linear-gradient(170deg,#1a1714,#2e2a26);"></div>
+        <div class="capsule-tag">a1</div>
+      </div>
+      <div class="capsule-body">
+        <p class="capsule-name">Capsule a1</p>
+        <p class="capsule-desc">Первая капсула. Базовый деним, отработка кроя, минималистичные формы.</p>
+        <p class="capsule-items">Jeans · Basics · Denim</p>
+        <span class="capsule-view">Смотреть</span>
+      </div>
+    </a>
+
+    <!-- a2 -->
+    <a class="capsule-card reveal capsule-card-link" href="collection-a2.html">
+      <div class="capsule-thumb">
+        <div class="ph" style="background:linear-gradient(170deg,#2a2520,#3e3830);"></div>
+        <div class="capsule-tag">a2</div>
+      </div>
+      <div class="capsule-body">
+        <p class="capsule-name">Capsule a2</p>
+        <p class="capsule-desc">Access bags из денима и японского хлопка. Сотни ручных стежков на каждой штуке.</p>
+        <p class="capsule-items">Bags · Accessories · Handstitched</p>
+        <span class="capsule-view">Смотреть</span>
+      </div>
+    </a>
+
+    <!-- a3 -->
+    <a class="capsule-card reveal capsule-card-link" href="collection-a3.html">
+      <div class="capsule-thumb">
+        <div class="ph" style="background:linear-gradient(170deg,#363028,#4a4238);"></div>
+        <div class="capsule-tag">a3</div>
+      </div>
+      <div class="capsule-body">
+        <p class="capsule-name">Capsule a3</p>
+        <p class="capsule-desc">Accent pants, BOLT — широкие джинсы из японского денима, муслиновые штаны.</p>
+        <p class="capsule-items">Pants · Jackets · Bags · Japanese Denim</p>
+        <span class="capsule-view">Смотреть</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ─── ORDER ─────────────────────────────────────────────── -->
+<section id="order" class="section">
+  <div class="section-label reveal">Order</div>
+  <div class="order-layout">
+
+    <div class="order-left">
+      <h2 class="reveal">Давай сошьём<br><em>что-нибудь</em></h2>
+      <p class="reveal">Выбери вещь из капсулы или опиши свою идею — я свяжусь с тобой в телеграме и обсудим детали.</p>
+      <div class="order-note reveal">
+        <div class="order-note-icon">✦</div>
+        <p>Все вещи шьются вручную. Срок — обсуждается индивидуально. Для заказа из капсул возможна доставка по России.</p>
+      </div>
+    </div>
+
+    <div class="order-right reveal">
+      <div class="form-tabs">
+        <button class="tab-btn active" data-tab="capsule">Из капсулы</button>
+        <button class="tab-btn" data-tab="custom">Своя идея</button>
+      </div>
+
+      <form id="orderForm">
+
+        <!-- Capsule tab -->
+        <div class="tab-panel active" id="panel-capsule">
+          <div class="field">
+            <label>Что хочешь заказать?</label>
+            <div class="check-grid">
+              <label class="check-pill"><input type="checkbox" value="Куртка">Куртка</label>
+              <label class="check-pill"><input type="checkbox" value="Джинсы">Джинсы</label>
+              <label class="check-pill"><input type="checkbox" value="Сумка">Сумка</label>
+              <label class="check-pill"><input type="checkbox" value="Штаны">Штаны</label>
+              <label class="check-pill"><input type="checkbox" value="Другое">Другое</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Капсула</label>
+            <select name="capsule">
+              <option value="">— выбери —</option>
+              <option value="a1">a1</option>
+              <option value="a2">a2</option>
+              <option value="a3">a3</option>
+              <option value="any">Не важно</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom tab -->
+        <div class="tab-panel" id="panel-custom">
+          <div class="field">
+            <label>Опиши свою идею</label>
+            <textarea name="idea" rows="5" placeholder="Что хочешь сшить? Материал, фасон, референсы — всё пригодится. Картинки можно скинуть в телеге."></textarea>
+          </div>
+        </div>
+
+        <!-- Common -->
+        <div class="field">
+          <label>Имя</label>
+          <input type="text" name="name" placeholder="Как тебя зовут?" required />
+        </div>
+        <div class="field">
+          <label>Telegram</label>
+          <input type="text" name="telegram" placeholder="@username" required />
+        </div>
+        <div class="field">
+          <label>Комментарий</label>
+          <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Отправить запрос</button>
+      </form>
+
+      <div class="form-success" id="formSuccess">
+        <div class="success-icon">✓</div>
+        <h3>Запрос отправлен</h3>
+        <p>Скоро свяжусь с тобой в телеграме.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+    <a href="https://t.me/cloudbyaccin" target="_blank">Chat</a>
+    <a href="admin.html">Admin</a>
+  </div>
+  <span class="footer-copy">© 2025 accinthecloud</span>
+</footer>
+
+
+<!-- ─── SCRIPTS ───────────────────────────────────────────── -->
+<script>
+// ══════════════════════════════════════════════
+//  КОНФИГ — заполни перед деплоем
+// ══════════════════════════════════════════════
+const CONFIG = {
+  // 1. Создай бота через @BotFather → получи токен
+  BOT_TOKEN: 'YOUR_BOT_TOKEN_HERE',
+
+  // 2. Напиши боту любое сообщение, потом открой:
+  //    https://api.telegram.org/bot<TOKEN>/getUpdates
+  //    Найди "chat":{"id":XXXXXXX} — это твой chat_id
+  CHAT_ID: 'YOUR_CHAT_ID_HERE',
+
+  // 3. Пароль для admin.html
+  ADMIN_PASS: 'accin2025'
+};
+// ══════════════════════════════════════════════
+
+gsap.registerPlugin(ScrollTrigger);
+
+// ── Custom cursor ──
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let rx=0, ry=0;
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+  gsap.to(ring, { left: e.clientX, top: e.clientY, duration: 0.18, ease:'power2.out' });
+});
+document.querySelectorAll('a,button,.work-item,.capsule-card,.check-pill').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+});
+
+// ── Hero entrance ──
+const tl = gsap.timeline({ delay: 0.2 });
+tl.to('.hero-eyebrow',     { opacity:1, y:0, duration:0.7, ease:'power2.out' })
+  .to('.hero-logo-video',  { opacity:1, y:0, duration:1.0, ease:'power3.out' }, '-=0.3')
+  .to('.hero-sub',         { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.4')
+  .to('.hero-cta',         { opacity:1, y:0, duration:0.6, ease:'power2.out' }, '-=0.3')
+  .to('.hero-scroll-hint', { opacity:1, duration:0.5 }, '-=0.1')
+  .to('.nav-logo',         { opacity:1, duration:0.5 }, '-=0.8')
+  .to('.nav-links',        { opacity:1, duration:0.5 }, '-=0.4');
+
+// ── Scroll reveals ──
+gsap.utils.toArray('.reveal').forEach(el => {
+  gsap.to(el, {
+    opacity:1, y:0, duration:0.85, ease:'power2.out',
+    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
+  });
+});
+gsap.utils.toArray('.reveal-left').forEach(el => {
+  gsap.to(el, {
+    opacity:1, x:0, duration:0.85, ease:'power2.out',
+    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
+  });
+});
+gsap.utils.toArray('.reveal-right').forEach(el => {
+  gsap.to(el, {
+    opacity:1, x:0, duration:0.85, ease:'power2.out',
+    scrollTrigger: { trigger:el, start:'top 87%', toggleActions:'play none none none' }
+  });
+});
+
+// Stagger works grid
+ScrollTrigger.create({
+  trigger: '.works-grid', start: 'top 80%',
+  onEnter: () => gsap.to('.work-item', {
+    opacity:1, y:0, duration:0.75, stagger:0.07, ease:'power2.out'
+  })
+});
+
+// Stagger capsules
+ScrollTrigger.create({
+  trigger: '.capsules-grid', start: 'top 80%',
+  onEnter: () => gsap.to('.capsule-card', {
+    opacity:1, y:0, duration:0.85, stagger:0.12, ease:'power2.out'
+  })
+});
+
+// ── Tabs ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Checkbox pills ──
+document.querySelectorAll('.check-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    pill.classList.toggle('checked');
+    pill.querySelector('input').checked = pill.classList.contains('checked');
+  });
+});
+
+// ── Form submit → Telegram ──
+document.getElementById('orderForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Отправляем...';
+
+  const form = e.target;
+  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  const name     = form.name.value.trim();
+  const telegram = form.telegram.value.trim();
+  const comment  = form.comment.value.trim();
+  const ts       = new Date().toLocaleString('ru-RU', { timeZone:'Europe/Moscow' });
+
+  let details = '';
+  if (activeTab === 'capsule') {
+    const items   = [...document.querySelectorAll('.check-pill.checked')].map(p => p.querySelector('input').value);
+    const capsule = form.capsule.value;
+    details = `Тип: Из капсулы\nВещи: ${items.join(', ') || '—'}\nКапсула: ${capsule || '—'}`;
+  } else {
+    const idea = (form.idea ? form.idea.value.trim() : '');
+    details = `Тип: Своя идея\nОписание: ${idea || '—'}`;
+  }
+
+  const text = `🛍 <b>Новый заказ — accinthecloud</b>\n\n${details}\n\nИмя: ${name}\nTelegram: ${telegram}${comment ? '\nКомментарий: ' + comment : ''}\n\n⏱ ${ts}`;
+
+  // Сохранить в localStorage для admin.html
+  const orders = JSON.parse(localStorage.getItem('acc_orders') || '[]');
+  orders.unshift({ name, telegram, details, comment, ts });
+  localStorage.setItem('acc_orders', JSON.stringify(orders));
+
+  try {
+    if (CONFIG.BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') {
+      throw new Error('bot not configured');
+    }
+    const res = await fetch(
+      `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text, parse_mode: 'HTML' })
+      }
+    );
+    const data = await res.json();
+    if (!data.ok) throw new Error('API error');
+  } catch(err) {
+    // Если бот не настроен — всё равно показываем успех (заказ сохранён в localStorage)
+    console.warn('Telegram bot not configured or error:', err.message);
+  }
+
+  form.style.display = 'none';
+  document.getElementById('formSuccess').classList.add('show');
+});
+</script>
+</body>
+</html>

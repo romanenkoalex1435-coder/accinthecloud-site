@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capsule a2 — accinthecloud</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="cart.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
+      --border:#ebebeb; --soft:#f5f5f5;
+      --serif:'Playfair Display',Georgia,serif;
+      --sans:'Inter',-apple-system,sans-serif;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
+    a { text-decoration:none; color:inherit; }
+    nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+    }
+    .nav-logo { font-family:var(--serif); font-style:italic; font-size:15px; font-weight:300; }
+    .nav-center { display:flex; gap:32px; list-style:none; }
+    .nav-center a { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .nav-center a:hover, .nav-center a.active { color:var(--ink); }
+    .nav-right { display:flex; align-items:center; gap:20px; }
+    .cart-link {
+      position:relative; display:flex; align-items:center; gap:8px;
+      font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+      padding:8px 16px; border:1px solid var(--border); transition:all .2s;
+    }
+    .cart-link:hover { border-color:var(--ink); }
+    .cart-badge {
+      display:none; position:absolute; top:-6px; right:-6px;
+      width:18px; height:18px; background:var(--ink); color:white;
+      font-size:10px; border-radius:50%; align-items:center; justify-content:center;
+    }
+    #cartFeedback {
+      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:var(--ink); color:white; padding:12px 28px;
+      font-size:11px; letter-spacing:0.15em; text-transform:uppercase;
+      opacity:0; transition:all .35s; z-index:9999; pointer-events:none;
+    }
+    #cartFeedback.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .collection-hero {
+      padding:80px 48px 60px; border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:flex-end;
+    }
+    .breadcrumb { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+    .breadcrumb a { color:var(--muted); transition:color .2s; }
+    .breadcrumb a:hover { color:var(--ink); }
+    .collection-title { font-family:var(--serif); font-size:clamp(40px,7vw,80px); font-weight:400; line-height:1; }
+    .collection-subtitle { font-size:13px; color:var(--muted); margin-top:12px; line-height:1.7; max-width:440px; }
+    .item-count { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
+    .products-section { padding:64px 48px 120px; }
+    .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
+    .product-card { cursor:pointer; }
+    .product-thumb { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--soft); }
+    .product-thumb .ph { width:100%; height:100%; transition:transform .8s cubic-bezier(.25,.46,.45,.94); }
+    .product-card:hover .product-thumb .ph { transform:scale(1.05); }
+    .product-thumb-overlay {
+      position:absolute; inset:0; background:rgba(0,0,0,0);
+      display:flex; align-items:center; justify-content:center; transition:background .3s;
+    }
+    .product-card:hover .product-thumb-overlay { background:rgba(0,0,0,0.08); }
+    .quick-add {
+      font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+      color:white; background:rgba(0,0,0,0.7); padding:10px 20px;
+      opacity:0; transform:translateY(8px); transition:all .3s;
+    }
+    .product-card:hover .quick-add { opacity:1; transform:translateY(0); }
+    .product-info { padding:16px 0 32px; }
+    .product-tag { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .product-name { font-size:15px; font-weight:400; margin-bottom:4px; }
+    .product-desc { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:8px; }
+    .product-price { font-size:14px; }
+    .modal-overlay {
+      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5);
+      backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s;
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal {
+      background:var(--bg); width:100%; max-width:880px; max-height:90vh;
+      overflow-y:auto; display:grid; grid-template-columns:1fr 1fr;
+      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+      position:relative;
+    }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-close {
+      position:absolute; top:20px; right:20px; z-index:10;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      background:white; border:1px solid var(--border); cursor:pointer; font-size:16px;
+    }
+    .modal-gallery { position:sticky; top:0; height:100%; min-height:400px; background:var(--soft); overflow:hidden; }
+    .modal-gallery .ph { width:100%; height:100%; min-height:500px; }
+    .modal-body { padding:40px 36px 40px; }
+    .modal-tag { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .modal-name { font-family:var(--serif); font-size:28px; font-weight:400; margin-bottom:8px; }
+    .modal-price { font-size:20px; margin-bottom:16px; }
+    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; margin-bottom:32px; padding-bottom:32px; border-bottom:1px solid var(--border); }
+    .modal-field { margin-bottom:24px; }
+    .modal-field label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .size-grid { display:flex; flex-wrap:wrap; gap:6px; }
+    .size-btn {
+      padding:7px 14px; border:1px solid var(--border); font-family:var(--sans);
+      font-size:11px; letter-spacing:0.06em; cursor:pointer; background:transparent; transition:all .2s;
+    }
+    .size-btn:hover { border-color:var(--ink); }
+    .size-btn.active { background:var(--ink); color:white; border-color:var(--ink); }
+    .modal-field input, .modal-field textarea {
+      width:100%; padding:11px 0; border:none; border-bottom:1px solid var(--border);
+      background:transparent; font-family:var(--sans); font-size:13px; outline:none; transition:border-color .3s;
+    }
+    .modal-field input:focus, .modal-field textarea:focus { border-bottom-color:var(--ink); }
+    .modal-field textarea { resize:none; line-height:1.6; }
+    .qty-row { display:flex; align-items:center; gap:0; margin-bottom:24px; }
+    .qty-btn { width:36px; height:36px; border:1px solid var(--border); background:transparent; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .qty-btn:hover { background:var(--soft); }
+    .qty-val { width:44px; text-align:center; font-size:14px; border:1px solid var(--border); border-left:0; border-right:0; height:36px; line-height:36px; }
+    .btn-add-cart {
+      width:100%; padding:16px; background:var(--ink); color:white; border:none;
+      font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+      cursor:pointer; transition:opacity .3s;
+    }
+    .btn-add-cart:hover { opacity:.75; }
+    footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .footer-logo { font-family:var(--serif); font-style:italic; font-size:14px; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .footer-links a:hover { color:var(--ink); }
+    .reveal { opacity:0; transform:translateY(20px); }
+    @media(max-width:900px) {
+      nav { padding:16px 20px; }
+      .nav-center { display:none; }
+      .collection-hero { padding:60px 20px 40px; flex-direction:column; gap:16px; }
+      .products-section { padding:40px 20px 80px; }
+      .products-grid { grid-template-columns:repeat(2,1fr); }
+      .modal { grid-template-columns:1fr; }
+      .modal-gallery { min-height:260px; position:relative; }
+      .modal-body { padding:28px 20px; }
+      footer { flex-direction:column; gap:16px; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cartFeedback">Добавлено в корзину ✓</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">accinthecloud</a>
+  <ul class="nav-center">
+    <li><a href="lookbook.html">Lookbook</a></li>
+    <li><a href="collection-a1.html">a1</a></li>
+    <li><a href="collection-a2.html" class="active">a2</a></li>
+    <li><a href="collection-a3.html">a3</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="cart.html" class="cart-link">Корзина<span class="cart-badge"></span></a>
+  </div>
+</nav>
+
+<div class="collection-hero">
+  <div class="hero-left">
+    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a2</p>
+    <h1 class="collection-title">Capsule a2</h1>
+    <p class="collection-subtitle">Access bags — дроп сумок из среднеплотного денима и японского фактурного хлопка. Каждая штука — сотни ручных стежков.</p>
+  </div>
+  <div class="hero-right"><p class="item-count">5 позиций</p></div>
+</div>
+
+<div class="products-section">
+  <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-gallery">
+      <div class="ph" id="modalImg" style="background:var(--soft);"></div>
+    </div>
+    <div class="modal-body">
+      <p class="modal-tag" id="modalTag"></p>
+      <h2 class="modal-name" id="modalName"></h2>
+      <p class="modal-price" id="modalPrice"></p>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-field">
+        <label>Вариант / цвет ткани</label>
+        <div class="size-grid" id="sizeGrid"></div>
+      </div>
+      <div class="modal-field">
+        <label>Пожелания по размеру или деталям</label>
+        <input type="text" id="inputColor" placeholder="Например: увеличить ремешок, добавить карман" />
+      </div>
+      <div class="modal-field">
+        <label>Дополнительные пожелания</label>
+        <textarea id="inputNotes" rows="3" placeholder="Любые детали — стежки, фурнитура, форма..."></textarea>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">−</button>
+        <div class="qty-val" id="qtyVal">1</div>
+        <button class="qty-btn" id="qtyPlus">+</button>
+      </div>
+      <button class="btn-add-cart" id="btnAddCart">Добавить в корзину</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="index.html">Главная</a>
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+  </div>
+</footer>
+
+<script>
+const CAPSULE = 'Capsule a2';
+const PRODUCTS = [
+  {
+    id: 'a2-01',
+    name: 'Access Bag Large',
+    tag: 'Сумка',
+    price: 'от 7 500 ₽',
+    priceNum: 7500,
+    desc: 'Большая сумка из среднеплотного денима с фактурными вставками из японского хлопка. Ручные стежки по периметру. Внутренний карман на молнии. Ремень регулируется.',
+    sizes: ['Стандарт','Увеличенный','Custom'],
+    bg: 'linear-gradient(160deg,#2a2520,#1a1714)'
+  },
+  {
+    id: 'a2-02',
+    name: 'Access Bag Small',
+    tag: 'Сумка',
+    price: 'от 5 500 ₽',
+    priceNum: 5500,
+    desc: 'Компактная версия Access Bag. Носится через плечо или на пояс. Деним + японский хлопок, латунные хольнитены. Влезает A5, телефон, ключи.',
+    sizes: ['Стандарт','Custom'],
+    bg: 'linear-gradient(160deg,#3a3530,#252220)'
+  },
+  {
+    id: 'a2-03',
+    name: 'Card Holder',
+    tag: 'Аксессуар',
+    price: 'от 2 800 ₽',
+    priceNum: 2800,
+    desc: 'Кард-холдер с большим количеством ручных стежков — вдохновлён самодельным образцом. Средняя плотность денима + японский фактурный хлопок. До 6 карт.',
+    sizes: ['Один размер'],
+    bg: 'linear-gradient(160deg,#1a1a1a,#333333)'
+  },
+  {
+    id: 'a2-04',
+    name: 'Denim Tote',
+    tag: 'Шопер',
+    price: 'от 6 000 ₽',
+    priceNum: 6000,
+    desc: 'Вместительный шопер из плотного денима. Двойные ручки, усиленное дно. Подходит для повседневного использования — ноутбук, документы, всё влезет.',
+    sizes: ['Стандарт','Большой','Custom'],
+    bg: 'linear-gradient(160deg,#4a4540,#2e2a26)'
+  },
+  {
+    id: 'a2-05',
+    name: 'Crossbody Mini',
+    tag: 'Сумка',
+    price: 'от 4 800 ₽',
+    priceNum: 4800,
+    desc: 'Маленький кросс-боди из денима с металлической фурнитурой. Один основной отсек, передний карман на магните. Длинный ремень.',
+    sizes: ['Один размер','Custom'],
+    bg: 'linear-gradient(160deg,#888078,#5a5048)'
+  }
+];
+
+const grid = document.getElementById('productsGrid');
+PRODUCTS.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'product-card reveal';
+  card.innerHTML = `
+    <div class="product-thumb">
+      <div class="ph" style="background:${p.bg};"></div>
+      <div class="product-thumb-overlay"><span class="quick-add">Подробнее</span></div>
+    </div>
+    <div class="product-info">
+      <p class="product-tag">${p.tag}</p>
+      <p class="product-name">${p.name}</p>
+      <p class="product-desc">${p.desc.slice(0,80)}…</p>
+      <p class="product-price">${p.price}</p>
+    </div>`;
+  card.addEventListener('click', () => openModal(p));
+  grid.appendChild(card);
+});
+
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.create({
+  trigger:'#productsGrid', start:'top 85%',
+  onEnter:() => gsap.to('.reveal',{opacity:1,y:0,duration:.75,stagger:.08,ease:'power2.out'})
+});
+
+let currentProduct=null, currentQty=1, selectedSize='';
+function openModal(p) {
+  currentProduct=p; currentQty=1; selectedSize='';
+  document.getElementById('modalImg').style.background=p.bg;
+  document.getElementById('modalTag').textContent=p.tag+' · '+CAPSULE;
+  document.getElementById('modalName').textContent=p.name;
+  document.getElementById('modalPrice').textContent=p.price;
+  document.getElementById('modalDesc').textContent=p.desc;
+  document.getElementById('inputColor').value='';
+  document.getElementById('inputNotes').value='';
+  document.getElementById('qtyVal').textContent=1;
+  const sg=document.getElementById('sizeGrid');
+  sg.innerHTML='';
+  p.sizes.forEach(s=>{
+    const btn=document.createElement('button');
+    btn.className='size-btn'; btn.textContent=s;
+    btn.addEventListener('click',()=>{
+      sg.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); selectedSize=s;
+    });
+    sg.appendChild(btn);
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('qtyMinus').addEventListener('click',()=>{if(currentQty>1){currentQty--;document.getElementById('qtyVal').textContent=currentQty;}});
+document.getElementById('qtyPlus').addEventListener('click',()=>{if(currentQty<9){currentQty++;document.getElementById('qtyVal').textContent=currentQty;}});
+document.getElementById('btnAddCart').addEventListener('click',()=>{
+  ACC.add({id:currentProduct.id,capsule:CAPSULE,name:currentProduct.name,price:currentProduct.price,priceNum:currentProduct.priceNum,size:selectedSize,color:document.getElementById('inputColor').value.trim(),notes:document.getElementById('inputNotes').value.trim(),qty:currentQty,bg:currentProduct.bg});
+  closeModal();
+});
+</script>
+</body>
+</html>
