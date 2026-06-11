@@ -685,6 +685,24 @@ document.querySelectorAll('.check-pill').forEach(pill => {
   });
 });
 
+// ── Pre-fill from lookbook ref ──
+(function(){
+  const hash = window.location.hash; // #order?ref=...
+  if (hash.startsWith('#order')) {
+    const qs = hash.split('?')[1] || '';
+    const params = new URLSearchParams(qs);
+    const ref = params.get('ref');
+    if (ref) {
+      const commentField = document.getElementById('comment');
+      if (commentField) {
+        commentField.value = 'Хочу похожее: ' + decodeURIComponent(ref) + '\n\nИндивидуальный пошив — прошу учесть мои параметры.';
+      }
+      // scroll to form
+      setTimeout(() => document.getElementById('order')?.scrollIntoView({behavior:'smooth'}), 300);
+    }
+  }
+})();
+
 // ── Form submit → Telegram ──
 document.getElementById('orderForm').addEventListener('submit', async e => {
   e.preventDefault();
