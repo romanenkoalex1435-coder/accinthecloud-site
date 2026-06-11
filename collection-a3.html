@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Capsule a3 — accinthecloud</title>
+  <title>a3 — accinthecloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="cart.js"></script>
@@ -27,7 +27,7 @@
     .nav-center { display:flex; gap:32px; list-style:none; }
     .nav-center a { font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .nav-center a:hover, .nav-center a.active { color:var(--ink); }
-    .nav-right { display:flex; align-items:center; gap:20px; }
+    .nav-right { display:flex; align-items:center; }
     .cart-link {
       position:relative; display:flex; align-items:center; gap:8px;
       font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
@@ -46,81 +46,133 @@
       opacity:0; transition:all .35s; z-index:9999; pointer-events:none;
     }
     #cartFeedback.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    .collection-hero {
-      padding:80px 48px 60px; border-bottom:1px solid var(--border);
-      display:flex; justify-content:space-between; align-items:flex-end;
+    .hero {
+      padding:80px 48px 56px; border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:flex-end; gap:32px;
     }
-    .breadcrumb { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
-    .breadcrumb a { color:var(--muted); transition:color .2s; }
+    .breadcrumb { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
+    .breadcrumb a { color:var(--muted); }
     .breadcrumb a:hover { color:var(--ink); }
-    .collection-title { font-family:var(--serif); font-size:clamp(40px,7vw,80px); font-weight:400; line-height:1; }
-    .collection-subtitle { font-size:13px; color:var(--muted); margin-top:12px; line-height:1.7; max-width:440px; }
-    .item-count { font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
-    .products-section { padding:64px 48px 120px; }
-    .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
-    .product-card { cursor:pointer; }
-    .product-thumb { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--soft); }
-    .product-thumb .ph { width:100%; height:100%; transition:transform .8s cubic-bezier(.25,.46,.45,.94); }
-    .product-card:hover .product-thumb .ph { transform:scale(1.05); }
-    .product-thumb-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); display:flex; align-items:center; justify-content:center; transition:background .3s; }
-    .product-card:hover .product-thumb-overlay { background:rgba(0,0,0,0.08); }
-    .quick-add { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:white; background:rgba(0,0,0,0.7); padding:10px 20px; opacity:0; transform:translateY(8px); transition:all .3s; }
-    .product-card:hover .quick-add { opacity:1; transform:translateY(0); }
-    .product-info { padding:16px 0 32px; }
-    .product-tag { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
-    .product-name { font-size:15px; font-weight:400; margin-bottom:4px; }
-    .product-desc { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:8px; }
-    .product-price { font-size:14px; }
-    .modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .hero-title { font-family:var(--serif); font-size:clamp(44px,7vw,84px); font-weight:400; line-height:1; }
+    .hero-sub { font-size:13px; color:var(--muted); margin-top:10px; font-style:italic; }
+    .hero-right { text-align:right; flex-shrink:0; }
+    .hero-info { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); line-height:2; }
+    .hero-info strong { color:var(--ink); }
+    .products { padding:2px 48px 120px; }
+    .products-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; padding-top:2px; }
+    .product-card { cursor:pointer; position:relative; }
+    .card-gallery {
+      overflow-x:auto; display:flex;
+      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; cursor:grab;
+    }
+    .card-gallery::-webkit-scrollbar { display:none; }
+    .card-gallery .slide {
+      flex:0 0 100%; scroll-snap-align:start; aspect-ratio:3/4; overflow:hidden; background:var(--soft);
+    }
+    .card-gallery .slide img,
+    .card-gallery .slide .ph {
+      width:100%; height:100%; object-fit:cover; display:block;
+      transition:transform .8s cubic-bezier(.25,.46,.45,.94);
+    }
+    .product-card:hover .slide img,
+    .product-card:hover .slide .ph { transform:scale(1.04); }
+    .card-dots { display:flex; gap:5px; padding:8px 0 0; }
+    .card-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; flex-shrink:0; }
+    .card-dot.active { background:var(--ink); }
+    .avail-tag {
+      position:absolute; top:12px; left:12px; z-index:2;
+      font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+      background:var(--ink); color:white; padding:4px 10px; pointer-events:none;
+    }
+    .card-info { padding:14px 0 0; }
+    .card-type { font-size:9px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .card-name { font-size:15px; font-weight:400; margin-bottom:4px; }
+    .card-price { font-size:13px; margin-bottom:6px; }
+    .card-specs { font-size:11px; color:var(--muted); line-height:1.7; margin-bottom:10px; }
+    .card-cta {
+      display:inline-block; margin-top:4px; margin-bottom:28px;
+      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+      border-bottom:1px solid var(--ink); padding-bottom:2px; transition:opacity .2s;
+    }
+    .product-card:hover .card-cta { opacity:.5; }
+    /* modal */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5);
+      backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s;
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
     .modal-overlay.open { opacity:1; pointer-events:all; }
-    .modal { background:var(--bg); width:100%; max-width:880px; max-height:90vh; overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94); position:relative; }
+    .modal {
+      background:var(--bg); width:100%; max-width:900px; max-height:90vh;
+      overflow-y:auto; display:grid; grid-template-columns:1fr 1fr;
+      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+      position:relative;
+    }
     .modal-overlay.open .modal { transform:translateY(0); }
-    .modal-close { position:absolute; top:20px; right:20px; z-index:10; width:36px; height:36px; display:flex; align-items:center; justify-content:center; background:white; border:1px solid var(--border); cursor:pointer; font-size:16px; }
-    .modal-gallery { position:sticky; top:0; height:100%; min-height:400px; background:var(--soft); overflow:hidden; }
-    .modal-gallery .ph { width:100%; height:100%; min-height:500px; }
-    .modal-body { padding:40px 36px 40px; }
+    .modal-close {
+      position:absolute; top:20px; right:20px; z-index:10;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      background:white; border:1px solid var(--border); cursor:pointer; font-size:16px;
+    }
+    .modal-left { position:sticky; top:0; min-height:400px; background:var(--soft); overflow:hidden; }
+    .modal-gallery {
+      display:flex; height:100%; min-height:540px;
+      overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    }
+    .modal-gallery::-webkit-scrollbar { display:none; }
+    .modal-gallery .mslide { flex:0 0 100%; scroll-snap-align:start; }
+    .modal-gallery .mslide img,
+    .modal-gallery .mslide .ph { width:100%; height:100%; min-height:540px; object-fit:cover; display:block; }
+    .modal-dots { display:flex; gap:6px; justify-content:center; padding:10px 0 6px; background:var(--soft); }
+    .modal-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; cursor:pointer; }
+    .modal-dot.active { background:var(--ink); }
+    .modal-body { padding:40px 36px; overflow-y:auto; }
     .modal-tag { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-    .modal-name { font-family:var(--serif); font-size:28px; font-weight:400; margin-bottom:8px; }
-    .modal-price { font-size:20px; margin-bottom:16px; }
-    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; margin-bottom:32px; padding-bottom:32px; border-bottom:1px solid var(--border); }
-    .modal-field { margin-bottom:24px; }
-    .modal-field label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-    .size-grid { display:flex; flex-wrap:wrap; gap:6px; }
-    .size-btn { padding:7px 14px; border:1px solid var(--border); font-family:var(--sans); font-size:11px; letter-spacing:0.06em; cursor:pointer; background:transparent; transition:all .2s; }
-    .size-btn:hover { border-color:var(--ink); }
-    .size-btn.active { background:var(--ink); color:white; border-color:var(--ink); }
-    .modal-field input, .modal-field textarea { width:100%; padding:11px 0; border:none; border-bottom:1px solid var(--border); background:transparent; font-family:var(--sans); font-size:13px; outline:none; transition:border-color .3s; }
-    .modal-field input:focus, .modal-field textarea:focus { border-bottom-color:var(--ink); }
-    .modal-field textarea { resize:none; line-height:1.6; }
-    .qty-row { display:flex; align-items:center; gap:0; margin-bottom:24px; }
+    .modal-name { font-family:var(--serif); font-size:26px; font-weight:400; margin-bottom:6px; }
+    .modal-price { font-size:18px; margin-bottom:3px; }
+    .modal-price-usd { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .modal-specs { font-size:12px; color:var(--muted); line-height:1.8; margin-bottom:20px; }
+    .modal-divider { height:1px; background:var(--border); margin-bottom:24px; }
+    .mfield { margin-bottom:22px; }
+    .mfield label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .mfield input, .mfield textarea {
+      width:100%; padding:11px 0; border:none; border-bottom:1px solid var(--border);
+      background:transparent; font-family:var(--sans); font-size:13px; outline:none; transition:border-color .3s;
+    }
+    .mfield input:focus, .mfield textarea:focus { border-bottom-color:var(--ink); }
+    .mfield textarea { resize:none; line-height:1.6; }
+    .qty-row { display:flex; align-items:center; margin-bottom:20px; }
     .qty-btn { width:36px; height:36px; border:1px solid var(--border); background:transparent; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
     .qty-btn:hover { background:var(--soft); }
-    .qty-val { width:44px; text-align:center; font-size:14px; border:1px solid var(--border); border-left:0; border-right:0; height:36px; line-height:36px; }
-    .btn-add-cart { width:100%; padding:16px; background:var(--ink); color:white; border:none; font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase; cursor:pointer; transition:opacity .3s; }
-    .btn-add-cart:hover { opacity:.75; }
+    .qty-val { width:44px; text-align:center; font-size:14px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); height:36px; line-height:36px; }
+    .btn-cart { width:100%; padding:16px; background:var(--ink); color:white; border:none; font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase; cursor:pointer; transition:opacity .3s; }
+    .btn-cart:hover { opacity:.75; }
+    .modal-note { font-size:10px; color:var(--muted); text-align:center; margin-top:10px; }
     footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
     .footer-logo { font-family:var(--serif); font-style:italic; font-size:14px; }
     .footer-links { display:flex; gap:24px; }
     .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .footer-links a:hover { color:var(--ink); }
-    .reveal { opacity:0; transform:translateY(20px); }
+    .reveal { opacity:0; transform:translateY(24px); }
+    @media(max-width:1100px) { .products-grid { grid-template-columns:repeat(3,1fr); } }
     @media(max-width:900px) {
       nav { padding:16px 20px; }
       .nav-center { display:none; }
-      .collection-hero { padding:60px 20px 40px; flex-direction:column; gap:16px; }
-      .products-section { padding:40px 20px 80px; }
+      .hero { padding:60px 20px 40px; flex-direction:column; gap:20px; }
+      .hero-right { text-align:left; }
+      .products { padding:2px 20px 80px; }
       .products-grid { grid-template-columns:repeat(2,1fr); }
       .modal { grid-template-columns:1fr; }
-      .modal-gallery { min-height:260px; position:relative; }
+      .modal-left { min-height:280px; position:relative; }
+      .modal-gallery { min-height:320px; }
+      .modal-gallery .mslide img, .modal-gallery .mslide .ph { min-height:320px; }
       .modal-body { padding:28px 20px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
     }
   </style>
 </head>
 <body>
-
 <div id="cartFeedback">Добавлено в корзину ✓</div>
-
 <nav>
   <a href="index.html" class="nav-logo">accinthecloud</a>
   <ul class="nav-center">
@@ -130,56 +182,61 @@
     <li><a href="collection-a3.html" class="active">a3</a></li>
   </ul>
   <div class="nav-right">
-    <a href="cart.html" class="cart-link">Корзина<span class="cart-badge"></span></a>
+    <a href="cart.html" class="cart-link">Корзина <span class="cart-badge"></span></a>
   </div>
 </nav>
-
-<div class="collection-hero">
-  <div class="hero-left">
+<div class="hero reveal">
+  <div>
     <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a3</p>
-    <h1 class="collection-title">Capsule a3</h1>
-    <p class="collection-subtitle">Весенний дроп. Accent pants трёх моделей, BOLT — широкие джинсы из японского денима с контрастной синей клеткой и металлической фурнитурой.</p>
+    <h1 class="hero-title">Capsule a3</h1>
+    <p class="hero-sub">Jeans &amp; Workpants &mdash; под заказ</p>
   </div>
-  <div class="hero-right"><p class="item-count">5 позиций</p></div>
+  <div class="hero-right">
+    <div class="hero-info">
+      <strong>Available to order</strong><br>
+      Только под заказ<br>
+      Free shipping &middot; Russia
+    </div>
+  </div>
 </div>
-
-<div class="products-section">
-  <div class="products-grid" id="productsGrid"></div>
+<div class="products">
+  <div class="products-grid" id="grid"></div>
 </div>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose">✕</button>
-    <div class="modal-gallery">
-      <div class="ph" id="modalImg" style="background:var(--soft);"></div>
+<!-- MODAL -->
+<div class="modal-overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="mClose">&#10005;</button>
+    <div class="modal-left">
+      <div class="modal-gallery" id="mGallery"></div>
+      <div class="modal-dots" id="mDots"></div>
     </div>
     <div class="modal-body">
-      <p class="modal-tag" id="modalTag"></p>
-      <h2 class="modal-name" id="modalName"></h2>
-      <p class="modal-price" id="modalPrice"></p>
-      <p class="modal-desc" id="modalDesc"></p>
-      <div class="modal-field">
-        <label>Размер</label>
-        <div class="size-grid" id="sizeGrid"></div>
+      <p class="modal-tag" id="mTag"></p>
+      <h2 class="modal-name" id="mName"></h2>
+      <p class="modal-price" id="mPrice"></p>
+      <p class="modal-price-usd" id="mPriceUsd"></p>
+      <p class="modal-specs" id="mSpecs"></p>
+      <div class="modal-divider"></div>
+      <div id="secUnique" style="display:none;">
+        <div class="mfield">
+          <label>Опиши свою идею</label>
+          <textarea id="inputUnique" rows="3" placeholder="Материал, крой, детали, референсы..."></textarea>
+        </div>
       </div>
-      <div class="modal-field">
-        <label>Пожелания по цвету / ткани</label>
-        <input type="text" id="inputColor" placeholder="Например: без кислотной стирки, оригинальный деним" />
-      </div>
-      <div class="modal-field">
-        <label>Дополнительные пожелания</label>
-        <textarea id="inputNotes" rows="3" placeholder="Параметры тела, подгонка по длине, любые детали..."></textarea>
+      <div class="mfield">
+        <label>Параметры и пожелания</label>
+        <textarea id="inputNotes" rows="3" placeholder="Рост, обхват талии, бёдер, длина по шагу — или любые детали..."></textarea>
       </div>
       <div class="qty-row">
-        <button class="qty-btn" id="qtyMinus">−</button>
-        <div class="qty-val" id="qtyVal">1</div>
-        <button class="qty-btn" id="qtyPlus">+</button>
+        <button class="qty-btn" id="qMinus">&#8722;</button>
+        <div class="qty-val" id="qVal">1</div>
+        <button class="qty-btn" id="qPlus">+</button>
       </div>
-      <button class="btn-add-cart" id="btnAddCart">Добавить в корзину</button>
+      <button class="btn-cart" id="btnCart">Добавить в корзину</button>
+      <p class="modal-note">Бесплатная доставка по России</p>
     </div>
   </div>
 </div>
-
 <footer>
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
@@ -188,120 +245,198 @@
     <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
   </div>
 </footer>
-
 <script>
-const CAPSULE = 'Capsule a3';
+const CAPSULE = "Capsule a3";
+
+function imgs(folder, n){
+  return Array.from({length:n}, (_,i) => `images/a3/${folder}/${String(i+1).padStart(2,'0')}.jpeg`);
+}
+
 const PRODUCTS = [
   {
-    id: 'a3-01',
-    name: 'Accent Pants Model 1',
-    tag: 'Брюки',
-    price: 'от 9 500 ₽',
-    priceNum: 9500,
-    desc: 'Первая модель accent pants — прямой крой с акцентными деталями. Двойные карманы спереди, уплотнение на коленях, резинки внизу. Японский деним.',
-    sizes: ['XS','S','M','L','XL','Custom'],
-    bg: 'linear-gradient(160deg,#2a2520,#1a1714)'
+    id:'a3-rivet', type:'jeans',
+    name:'RIVET jeans',
+    typeLabel:'Jeans · Under order',
+    price:'12 790 &#8381;', priceUsd:'170$', priceNum:12790,
+    specs:'Японский raw деним · Bootcut крой',
+    images: imgs('RIVET', 6),
   },
   {
-    id: 'a3-02',
-    name: 'Accent Pants Model 2',
-    tag: 'Брюки',
-    price: 'от 9 500 ₽',
-    priceNum: 9500,
-    desc: 'Вторая модель — расширенный силуэт, другая посадка. Канвасные вставки на коленях. Металлические хольнитены. Ткань случайно постирана с кислородом — интересная фактура.',
-    sizes: ['XS','S','M','L','XL','Custom'],
-    bg: 'linear-gradient(160deg,#3a3530,#252220)'
+    id:'a3-classic', type:'jeans',
+    name:'CLASSIC jeans',
+    typeLabel:'Jeans · Under order',
+    price:'11 390 &#8381;', priceUsd:'150$', priceNum:11390,
+    specs:'Итальянский деним натурального окрашивания · Wide leg крой',
+    images: imgs('CLASSIC', 6),
   },
   {
-    id: 'a3-03',
-    name: 'BOLT Jeans',
-    tag: 'Джинсы',
-    price: 'от 13 500 ₽',
-    priceNum: 13500,
-    desc: 'По-настоящему широкие джинсы из японского денима с контрастной синей клеткой и металлической фурнитурой. Свободный крой, низкая посадка.',
-    sizes: ['XS','S','M','L','XL','Custom'],
-    bg: 'linear-gradient(160deg,#1c2535,#0e1520)'
+    id:'a3-utility', type:'workpants',
+    name:'UTILITY workpants',
+    typeLabel:'Workpants · Under order',
+    price:'15 790 &#8381;', priceUsd:'210$', priceNum:15790,
+    specs:'Extra wide · Canvas 12/14/16 oz · Only for work',
+    images: imgs('UTILITY', 6),
   },
   {
-    id: 'a3-04',
-    name: 'Muslin Pants',
-    tag: 'Брюки',
-    price: 'от 7 500 ₽',
-    priceNum: 7500,
-    desc: 'Лёгкие широкие штаны из муслина — идеальны для жаркого лета. Свободный крой, эластичный пояс. Приятная фактура ткани, дышат.',
-    sizes: ['XS','S','M','L','XL','Custom'],
-    bg: 'linear-gradient(160deg,#d4cfc8,#b0aaa0)'
+    id:'a3-herdsman', type:'jeans',
+    name:'HERDSMAN jeans',
+    typeLabel:'Jeans · Under order',
+    price:'12 790 &#8381;', priceUsd:'170$', priceNum:12790,
+    specs:'Wide straight · Raw-washed denim · Italian denim',
+    images: imgs('HERDSMAN', 6),
   },
   {
-    id: 'a3-05',
-    name: 'Canvas Jacket',
-    tag: 'Куртка',
-    price: 'от 16 000 ₽',
-    priceNum: 16000,
-    desc: 'Куртка из плотного канваса с металлической фурнитурой. Объёмный силуэт, большие накладные карманы. Подходит для весны и осени.',
-    sizes: ['S','M','L','XL','Custom'],
-    bg: 'linear-gradient(160deg,#4a4540,#302c28)'
-  }
+    id:'a3-bolt', type:'jeans',
+    name:'BOLT jeans',
+    typeLabel:'Jeans · Under order',
+    price:'12 790 &#8381;', priceUsd:'170$', priceNum:12790,
+    specs:'Baggy · Raw-washed denim · Italian fittings',
+    images: imgs('BOLT', 4),
+  },
+  {
+    id:'a3-tube', type:'jeans',
+    name:'TUBE jeans',
+    typeLabel:'Jeans · Under order',
+    price:'11 890 &#8381;', priceUsd:'150$', priceNum:11890,
+    specs:'Huge cut · Italian denim · One-piece trousers',
+    images: imgs('TUBE', 6),
+  },
+  {
+    id:'a3-builder', type:'workpants',
+    name:'BUILDER workpants',
+    typeLabel:'Workpants · Under order',
+    price:'15 790 &#8381;', priceUsd:'210$', priceNum:15790,
+    specs:'Extra wide · Canvas · A lot of rivets · Only for work',
+    images: imgs('BUILDER', 5),
+  },
+  {
+    id:'a3-unique', type:'unique',
+    name:'Unique / Уникальные',
+    typeLabel:'Unique · Ваш дизайн',
+    price:'По запросу', priceUsd:'Price on request', priceNum:0,
+    specs:'Ваш дизайн · Ваши параметры · Изготавливается индивидуально',
+    images: [],
+  },
 ];
 
-const grid = document.getElementById('productsGrid');
+function makeSlide(src, cls){
+  return `<div class="${cls}"><img src="${src}" loading="lazy" alt=""></div>`;
+}
+function makePlaceholder(cls){
+  return `<div class="${cls}"><div class="ph" style="background:linear-gradient(160deg,#e8e4e0,#d0ccc8);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;">a3</div></div>`;
+}
+
+const grid = document.getElementById('grid');
 PRODUCTS.forEach(p => {
   const card = document.createElement('div');
   card.className = 'product-card reveal';
+
+  const slides = p.images.length
+    ? p.images.map(s => makeSlide(s,'slide')).join('')
+    : makePlaceholder('slide');
+  const count = p.images.length || 1;
+  const dotsHtml = count > 1
+    ? `<div class="card-dots">${Array.from({length:count},(_,i)=>`<div class="card-dot${i===0?' active':''}"></div>`).join('')}</div>`
+    : '';
+
   card.innerHTML = `
-    <div class="product-thumb">
-      <div class="ph" style="background:${p.bg};"></div>
-      <div class="product-thumb-overlay"><span class="quick-add">Подробнее</span></div>
+    <div style="position:relative;">
+      <div class="card-gallery" data-gallery>${slides}</div>
+      <div class="avail-tag">Order</div>
     </div>
-    <div class="product-info">
-      <p class="product-tag">${p.tag}</p>
-      <p class="product-name">${p.name}</p>
-      <p class="product-desc">${p.desc.slice(0,80)}…</p>
-      <p class="product-price">${p.price}</p>
+    ${dotsHtml}
+    <div class="card-info">
+      <p class="card-type">${p.typeLabel}</p>
+      <p class="card-name">${p.name}</p>
+      <p class="card-price">${p.price} / ${p.priceUsd}</p>
+      <p class="card-specs">${p.specs}</p>
+      <span class="card-cta">Подробнее &#8594;</span>
     </div>`;
-  card.addEventListener('click', () => openModal(p));
+
+  const gallery = card.querySelector('[data-gallery]');
+  const dots = card.querySelectorAll('.card-dot');
+  if(dots.length){
+    gallery.addEventListener('scroll',()=>{
+      const idx=Math.round(gallery.scrollLeft/gallery.offsetWidth);
+      dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+    },{passive:true});
+  }
+  let isDown=false, startX, sl;
+  gallery.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX;sl=gallery.scrollLeft;gallery.style.cursor='grabbing';});
+  window.addEventListener('mouseup',()=>{isDown=false;gallery.style.cursor='grab';});
+  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();gallery.scrollLeft=sl-(e.pageX-startX);});
+
+  card.addEventListener('click',e=>{
+    if(e.target.closest('[data-gallery]')){
+      const rect=gallery.getBoundingClientRect();
+      if(e.clientX-rect.left>rect.width/2) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
+      else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
+    } else { openModal(p); }
+  });
+
   grid.appendChild(card);
 });
 
-gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.create({
-  trigger:'#productsGrid', start:'top 85%',
-  onEnter:() => gsap.to('.reveal',{opacity:1,y:0,duration:.75,stagger:.08,ease:'power2.out'})
+document.addEventListener('DOMContentLoaded',()=>{
+  gsap.to('.reveal',{opacity:1,y:0,duration:.8,stagger:.08,ease:'power2.out',delay:.1});
 });
 
-let currentProduct=null, currentQty=1, selectedSize='';
-function openModal(p) {
-  currentProduct=p; currentQty=1; selectedSize='';
-  document.getElementById('modalImg').style.background=p.bg;
-  document.getElementById('modalTag').textContent=p.tag+' · '+CAPSULE;
-  document.getElementById('modalName').textContent=p.name;
-  document.getElementById('modalPrice').textContent=p.price;
-  document.getElementById('modalDesc').textContent=p.desc;
-  document.getElementById('inputColor').value='';
-  document.getElementById('inputNotes').value='';
-  document.getElementById('qtyVal').textContent=1;
-  const sg=document.getElementById('sizeGrid');
-  sg.innerHTML='';
-  p.sizes.forEach(s=>{
-    const btn=document.createElement('button');
-    btn.className='size-btn'; btn.textContent=s;
-    btn.addEventListener('click',()=>{
-      sg.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active'); selectedSize=s;
+let cur=null, qty=1;
+
+function openModal(p){
+  cur=p; qty=1;
+
+  const mg=document.getElementById('mGallery');
+  const md=document.getElementById('mDots');
+
+  if(p.images.length){
+    mg.innerHTML=p.images.map(s=>makeSlide(s,'mslide')).join('');
+    md.innerHTML=p.images.map((_,i)=>`<div class="modal-dot${i===0?' active':''}" data-i="${i}"></div>`).join('');
+    mg.scrollLeft=0;
+    mg.addEventListener('scroll',()=>{
+      const idx=Math.round(mg.scrollLeft/mg.offsetWidth);
+      document.querySelectorAll('.modal-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+    },{passive:true});
+    document.querySelectorAll('.modal-dot').forEach(d=>{
+      d.addEventListener('click',()=>mg.scrollTo({left:+d.dataset.i*mg.offsetWidth,behavior:'smooth'}));
     });
-    sg.appendChild(btn);
-  });
-  document.getElementById('modalOverlay').classList.add('open');
+  } else {
+    mg.innerHTML=makePlaceholder('mslide');
+    md.innerHTML='';
+  }
+
+  document.getElementById('mTag').textContent=CAPSULE;
+  document.getElementById('mName').innerHTML=p.name;
+  document.getElementById('mPrice').innerHTML=p.price;
+  document.getElementById('mPriceUsd').textContent=p.priceUsd;
+  document.getElementById('mSpecs').textContent=p.specs;
+  document.getElementById('qVal').textContent=1;
+  document.getElementById('inputNotes').value='';
+  document.getElementById('secUnique').style.display = p.type==='unique' ? 'block' : 'none';
+  if(p.type==='unique') document.getElementById('inputUnique').value='';
+
+  document.getElementById('overlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
-function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
-document.getElementById('modalClose').addEventListener('click',closeModal);
-document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('mClose').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-document.getElementById('qtyMinus').addEventListener('click',()=>{if(currentQty>1){currentQty--;document.getElementById('qtyVal').textContent=currentQty;}});
-document.getElementById('qtyPlus').addEventListener('click',()=>{if(currentQty<9){currentQty++;document.getElementById('qtyVal').textContent=currentQty;}});
-document.getElementById('btnAddCart').addEventListener('click',()=>{
-  ACC.add({id:currentProduct.id,capsule:CAPSULE,name:currentProduct.name,price:currentProduct.price,priceNum:currentProduct.priceNum,size:selectedSize,color:document.getElementById('inputColor').value.trim(),notes:document.getElementById('inputNotes').value.trim(),qty:currentQty,bg:currentProduct.bg});
+document.getElementById('qMinus').addEventListener('click',()=>{if(qty>1){qty--;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('qPlus').addEventListener('click',()=>{if(qty<9){qty++;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('btnCart').addEventListener('click',()=>{
+  const notes=document.getElementById('inputNotes').value.trim();
+  const unique=cur.type==='unique'?document.getElementById('inputUnique').value.trim():'';
+  ACC.add({
+    id:cur.id, capsule:CAPSULE, name:cur.name,
+    price:cur.price, priceNum:cur.priceNum,
+    size:'', color:unique, notes, qty,
+    bg:cur.images[0]||''
+  });
   closeModal();
 });
 </script>
