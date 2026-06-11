@@ -88,7 +88,8 @@
     .card-type { font-size:9px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
     .card-name { font-size:15px; font-weight:400; margin-bottom:4px; }
     .card-price { font-size:13px; margin-bottom:6px; }
-    .card-specs { font-size:11px; color:var(--muted); line-height:1.7; margin-bottom:10px; }
+    .card-specs { font-size:11px; color:var(--muted); line-height:1.7; margin-bottom:6px; }
+    .card-made { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
     .card-cta {
       display:inline-block; margin-top:4px; margin-bottom:28px;
       font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
@@ -350,6 +351,7 @@ PRODUCTS.forEach(p => {
       <p class="card-name">${p.name}</p>
       <p class="card-price">${p.price} / ${p.priceUsd}</p>
       <p class="card-specs">${p.specs}</p>
+      <p class="card-made">Индивидуальный пошив</p>
       <span class="card-cta">Подробнее &#8594;</span>
     </div>`;
 
