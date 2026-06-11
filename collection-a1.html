@@ -115,7 +115,16 @@
       background:white; border:1px solid var(--border); cursor:pointer; font-size:16px;
     }
     .modal-img { position:sticky; top:0; min-height:400px; background:var(--soft); overflow:hidden; }
-    .modal-img img, .modal-img .ph { width:100%; height:100%; min-height:500px; object-fit:cover; }
+    .modal-gallery {
+      display:flex; overflow-x:auto; height:100%; min-height:500px;
+      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    }
+    .modal-gallery::-webkit-scrollbar { display:none; }
+    .modal-gallery .mslide {
+      flex:0 0 100%; scroll-snap-align:start; overflow:hidden;
+    }
+    .modal-gallery .mslide img,
+    .modal-gallery .mslide .ph { width:100%; height:100%; min-height:500px; object-fit:cover; display:block; }
     .modal-body { padding:40px 36px; }
     .modal-tag { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
     .modal-name { font-family:var(--serif); font-size:26px; font-weight:400; margin-bottom:6px; }
@@ -205,9 +214,7 @@
     </div>
   </div>
 </div>
-<div class="capsule-cover">
-  <img src="images/a1/bunch.jpeg" alt="ACCESS Capsule a1" />
-</div>
+
 <div class="products">
   <div class="products-grid" id="grid"></div>
 </div>
@@ -215,7 +222,7 @@
   <div class="modal">
     <button class="modal-close" id="mClose">&#10005;</button>
     <div class="modal-img">
-      <div class="ph" id="mImg" style="background:var(--soft);"></div>
+      <div class="modal-gallery" id="mGallery"></div>
     </div>
     <div class="modal-body">
       <p class="modal-tag" id="mTag"></p>
@@ -312,21 +319,27 @@ const PRODUCTS = [
   },
 ];
 
+// helper: extract src from "url(...) center/cover" or return null if gradient
+function extractSrc(s) {
+  const m = s.match(/url\(["']?([^"')]+)["']?\)/);
+  return m ? m[1] : null;
+}
+
+function makeSlide(src, cls) {
+  const path = extractSrc(src);
+  const inner = path
+    ? `<img src="${path}" loading="lazy" alt="">`
+    : `<div class="ph" style="background:${src};width:100%;height:100%;"></div>`;
+  return `<div class="${cls}">${inner}</div>`;
+}
+
 const grid = document.getElementById('grid');
 PRODUCTS.forEach(p => {
   const card = document.createElement('div');
   card.className = 'product-card reveal';
 
-  // all images: main + thumbs
   const allImgs = [p.bg, ...(p.thumbs||[])];
-  const slidesHtml = allImgs.map(src => {
-    const isUrl = src.startsWith('url(');
-    return `<div class="slide">${isUrl
-      ? `<img src="${src.replace(/url\(["']?|["']?\)/g,'')}" loading="lazy" alt="">`
-      : `<div class="ph" style="background:${src};"></div>`
-    }</div>`;
-  }).join('');
-
+  const slidesHtml = allImgs.map(s => makeSlide(s, 'slide')).join('');
   const dotsHtml = allImgs.length > 1
     ? `<div class="card-dots">${allImgs.map((_,i)=>`<div class="card-dot${i===0?' active':''}"></div>`).join('')}</div>`
     : '';
@@ -342,7 +355,6 @@ PRODUCTS.forEach(p => {
       <span class="card-cta">${p.cta}</span>
     </div>`;
 
-  // sync dots on scroll
   const gallery = card.querySelector('[data-gallery]');
   const dots = card.querySelectorAll('.card-dot');
   if (dots.length) {
@@ -352,22 +364,22 @@ PRODUCTS.forEach(p => {
     }, {passive:true});
   }
 
-  // drag to scroll
-  let isDown=false, startX, scrollLeft;
-  gallery.addEventListener('mousedown', e=>{isDown=true;startX=e.pageX-gallery.offsetLeft;scrollLeft=gallery.scrollLeft;});
-  gallery.addEventListener('mouseleave',()=>isDown=false);
-  gallery.addEventListener('mouseup',()=>isDown=false);
-  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-gallery.offsetLeft;gallery.scrollLeft=scrollLeft-(x-startX)*1.5;});
+  // drag scroll
+  let isDown=false, startX, sl;
+  gallery.addEventListener('mousedown', e=>{isDown=true;startX=e.pageX;sl=gallery.scrollLeft;gallery.style.cursor='grabbing';});
+  window.addEventListener('mouseup', ()=>{isDown=false;gallery.style.cursor='grab';});
+  gallery.addEventListener('mousemove', e=>{if(!isDown)return;e.preventDefault();gallery.scrollLeft=sl-(e.pageX-startX);});
 
+  // click: right half → next, left half → prev; outside gallery → open modal
   card.addEventListener('click', e=>{
-    if(!e.target.closest('[data-gallery]')) openModal(p);
-    else {
-      // tap to advance slide
-      const rect=gallery.getBoundingClientRect();
-      const half=rect.width/2;
-      const clickX=e.clientX-rect.left;
-      if(clickX>half) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
-      else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
+    if (e.target.closest('[data-gallery]')) {
+      const rect = gallery.getBoundingClientRect();
+      if (e.clientX - rect.left > rect.width/2)
+        gallery.scrollBy({left:gallery.offsetWidth, behavior:'smooth'});
+      else
+        gallery.scrollBy({left:-gallery.offsetWidth, behavior:'smooth'});
+    } else {
+      openModal(p);
     }
   });
 
@@ -382,7 +394,13 @@ let cur=null, qty=1, selColor=null, selVariant='';
 
 function openModal(p){
   cur=p; qty=1; selColor=null; selVariant='';
-  document.getElementById('mImg').style.background=p.bg;
+
+  // fill modal gallery
+  const allImgs = [p.bg, ...(p.thumbs||[])];
+  const mg = document.getElementById('mGallery');
+  mg.innerHTML = allImgs.map(s => makeSlide(s, 'mslide')).join('');
+  mg.scrollLeft = 0;
+
   document.getElementById('mTag').textContent=CAPSULE;
   document.getElementById('mName').innerHTML=p.name;
   document.getElementById('mPrice').innerHTML=p.price;
