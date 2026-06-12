@@ -54,7 +54,7 @@
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       padding: 28px 48px;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; flex-wrap:wrap; justify-content: space-between; align-items: center;
     }
     .nav-logo {
       display: flex; align-items: center; opacity: 0;
@@ -273,7 +273,7 @@
     .faq-item:last-child { border-bottom: 1px solid var(--border); }
     .faq-q {
       width: 100%; background: none; border: none; padding: 24px 0;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; flex-wrap:wrap; justify-content: space-between; align-items: center;
       font-family: var(--sans); font-size: 15px; font-weight: 400;
       text-align: left; cursor: pointer; gap: 24px; color: var(--ink);
     }
@@ -307,7 +307,7 @@
     /* ─── Footer ─────────────────────────────────────────── */
     footer {
       padding: 48px; border-top: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; flex-wrap:wrap; justify-content: space-between; align-items: center;
     }
     .footer-logo {
       font-family: var(--serif); font-style: italic; font-size: 15px; font-weight: 300;
@@ -374,11 +374,12 @@
       .order-right { padding: 48px 28px; }
       .order-facts { gap: 24px; }
       .faq-section { padding: 72px 24px; }
-      footer { flex-direction: column; gap: 20px; text-align: center; }
+      footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
       body { cursor: auto; }
       #cursor, #cursor-ring { display: none; }
     }
+    .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
   </style>
 </head>
 <body>
@@ -394,7 +395,7 @@
   <a href="#order" onclick="closeMobileMenu()">Order</a>
   <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-  <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+  <a href="https://instagram.com/accinthecloud" target="_blank">Instagram*</a>
 </div>
 
 <!-- ─── NAV ─────────────────────────────────────────────── -->
@@ -406,7 +407,7 @@
     <li><a href="#order">Order</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="https://t.me/accinthecloud1" target="_blank">Telegram</a></li>
-    <li><a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a></li>
+    <li><a href="https://instagram.com/accinthecloud" target="_blank">Instagram*</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:20px;">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
@@ -614,11 +615,12 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram*</a>
     <a href="https://t.me/cloudbyaccin" target="_blank">Chat</a>
     <a href="admin.html">Admin</a>
   </div>
   <span class="footer-copy">© 2025 accinthecloud</span>
+  <p class="insta-note">* Instagram — проект компании Meta Platforms Inc., признанной экстремистской организацией на территории Российской Федерации.</p>
 </footer>
 
 

@@ -21,7 +21,7 @@
     nav {
       position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.95);
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
-      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+      padding:20px 48px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
     }
     .nav-logo { display:flex; align-items:center; }
     .nav-logo img { height:28px; width:auto; }
@@ -153,6 +153,8 @@
     .btn-order:disabled { opacity:.35; cursor:not-allowed; }
 
     .checkout-note { font-size:11px; color:var(--muted); line-height:1.6; margin-top:16px; text-align:center; }
+    .offer-note { font-size:10px; color:var(--muted); line-height:1.7; margin-bottom:14px; }
+    .offer-note a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
 
     /* ── Success ── */
     #successScreen {
@@ -181,6 +183,7 @@
       .cart-checkout { padding:32px 20px; position:static; }
       footer { flex-direction:column; gap:16px; text-align:center; }
     }
+    .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
   </style>
 </head>
 <body>
@@ -191,7 +194,7 @@
   <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
   <a href="index.html#order" onclick="closeMobileMenu()">Order</a>
   <a href="https://t.me/accinthecloud1" target="_blank" onclick="closeMobileMenu()">Telegram</a>
-  <a href="https://instagram.com/accinthecloud" target="_blank" onclick="closeMobileMenu()">Instagram</a>
+  <a href="https://instagram.com/accinthecloud" target="_blank" onclick="closeMobileMenu()">Instagram*</a>
 </div>
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
@@ -253,6 +256,7 @@
       <textarea id="checkComment" rows="3" placeholder="Параметры тела, срочность, любые вопросы..."></textarea>
     </div>
 
+    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button class="btn-order" id="btnOrder">Отправить запрос на пошив</button>
     <p class="checkout-note">Я свяжусь с тобой в Telegram, уточню детали и подтвержу заказ.</p>
 
@@ -271,8 +275,9 @@
   <div class="footer-links">
     <a href="index.html">Главная</a>
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram*</a>
   </div>
+  <p class="insta-note">* Instagram — проект компании Meta Platforms Inc., признанной экстремистской организацией на территории Российской Федерации.</p>
 </footer>
 
 <script>

@@ -22,7 +22,7 @@
     nav {
       position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
-      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+      padding:20px 48px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
     }
     .nav-logo { display:flex; align-items:center; }
     .nav-logo img { height:28px; width:auto; }
@@ -168,6 +168,7 @@
       .modal-body { padding:28px 20px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
     }
+    .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
   </style>
 </head>
 <body>
@@ -179,7 +180,7 @@
   <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
   <a href="index.html#order" onclick="closeMobileMenu()">Order</a>
   <a href="https://t.me/accinthecloud1" target="_blank" onclick="closeMobileMenu()">Telegram</a>
-  <a href="https://instagram.com/accinthecloud" target="_blank" onclick="closeMobileMenu()">Instagram</a>
+  <a href="https://instagram.com/accinthecloud" target="_blank" onclick="closeMobileMenu()">Instagram*</a>
 </div>
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
@@ -253,8 +254,9 @@
   <div class="footer-links">
     <a href="index.html">Главная</a>
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram</a>
+    <a href="https://instagram.com/accinthecloud" target="_blank">Instagram*</a>
   </div>
+  <p class="insta-note">* Instagram — проект компании Meta Platforms Inc., признанной экстремистской организацией на территории Российской Федерации.</p>
 </footer>
 
 <script>
