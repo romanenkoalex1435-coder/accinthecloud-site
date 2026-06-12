@@ -67,11 +67,57 @@
     }
     .nav-links a:hover { opacity: 1; }
 
-    /* ─── Page curtain ──────────────────────────────────── */
-    #page-curtain {
-      position: fixed; inset: 0; z-index: 9999;
-      background: var(--bg);
-      transform-origin: top center;
+    /* ─── Sewing Preloader ───────────────────────────────── */
+    #sew-pin { height: 100vh; }
+    #sew-overlay {
+      position: fixed; inset: 0; z-index: 600;
+      background: #0b0b0b;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #sew-overlay::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 32px, rgba(255,255,255,0.018) 32px, rgba(255,255,255,0.018) 33px),
+        repeating-linear-gradient(90deg, transparent, transparent 32px, rgba(255,255,255,0.018) 32px, rgba(255,255,255,0.018) 33px);
+      pointer-events: none;
+    }
+    .sew-brand {
+      text-align: center; position: relative; z-index: 2; pointer-events: none;
+    }
+    .sew-eyebrow {
+      font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25); margin-bottom: 18px; font-family: var(--sans);
+    }
+    .sew-title {
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(44px, 8vw, 100px); font-weight: 400;
+      color: rgba(255,255,255,0.88); line-height: 1; letter-spacing: -0.01em;
+    }
+    #sew-svg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      overflow: visible; pointer-events: none; z-index: 3;
+    }
+    .sew-hint {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      z-index: 4; pointer-events: none;
+    }
+    .sew-hint-txt {
+      font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: rgba(255,255,255,0.18); font-family: var(--sans);
+    }
+    .sew-hint-line {
+      width: 1px; height: 38px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.18), transparent);
+      animation: sewHintAnim 1.8s ease-in-out infinite;
+    }
+    @keyframes sewHintAnim {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      49%  { transform: scaleY(1); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
     }
 
     /* ─── Hero ───────────────────────────────────────────── */
@@ -328,7 +374,7 @@
     /* ─── Burger & mobile menu ───────────────────────────── */
     .burger {
       display: flex; flex-direction: column; gap: 5px; cursor: pointer;
-      padding: 4px; background: none; border: none;
+      padding: 4px; background: none; border: none; opacity: 0;
     }
     .burger span {
       display: block; width: 24px; height: 1.5px; background: var(--ink);
@@ -337,7 +383,7 @@
     .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
     .burger.open span:nth-child(2) { opacity: 0; }
     .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); opacity:0; }
     .cbadge {
       position:absolute; top:-5px; right:-6px;
       min-width:15px; height:15px; background:var(--ink); color:white;
@@ -387,6 +433,47 @@
 <div id="cursor-ring"></div>
 
 <!-- ─── MOBILE MENU ───────────────────────────────────────── -->
+<!-- ─── SEWING PRELOADER ──────────────────────────────────── -->
+<div id="sew-pin"></div>
+<div id="sew-overlay" aria-hidden="true">
+  <svg id="sew-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="ndGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#555"/>
+        <stop offset="28%"  stop-color="#dcdcdc"/>
+        <stop offset="60%"  stop-color="#b4b4b4"/>
+        <stop offset="100%" stop-color="#555"/>
+      </linearGradient>
+      <filter id="ndGlow" x="-20%" y="-200%" width="140%" height="500%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+        <feColorMatrix in="blur" values="0 0 0 0 0.85  0 0 0 0 0.85  0 0 0 0 0.85  0 0 0 0.5 0" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <!-- Golden thread: wavy horizontal path drawn as needle moves -->
+    <path id="sew-thread" fill="none" stroke="rgba(196,158,76,0.6)" stroke-width="1.4" stroke-linecap="round"/>
+    <!-- Needle: moves left→right via GSAP -->
+    <g id="sew-needle" filter="url(#ndGlow)">
+      <!-- Main body -->
+      <ellipse rx="30" ry="3.4" fill="url(#ndGrad)"/>
+      <!-- Eye hole at left end -->
+      <ellipse cx="-22" ry="3.4" rx="3.2" fill="none" stroke="#111" stroke-width="1"/>
+      <!-- Sheen highlight -->
+      <ellipse rx="26" ry="1.1" cy="-1.2" fill="rgba(255,255,255,0.2)"/>
+      <!-- Golden thread loop through eye -->
+      <path d="M -22 -4 Q -30 -16 -40 -10 Q -50 -4 -48 5 Q -46 14 -36 12 Q -27 10 -22 4" fill="none" stroke="rgba(196,158,76,0.9)" stroke-width="1.5"/>
+    </g>
+  </svg>
+  <div class="sew-brand" id="sewBrand">
+    <p class="sew-eyebrow">Handmade · Moscow</p>
+    <h1 class="sew-title">accinthecloud</h1>
+  </div>
+  <div class="sew-hint" id="sewHint">
+    <span class="sew-hint-txt">scroll</span>
+    <div class="sew-hint-line"></div>
+  </div>
+</div>
+
 <div class="mobile-menu" id="mobileMenu">
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
   <a href="#capsules" onclick="closeMobileMenu()">Capsules</a>
@@ -419,9 +506,6 @@
     </button>
   </div>
 </nav>
-
-<!-- ─── PAGE CURTAIN ──────────────────────────────────────── -->
-<div id="page-curtain"></div>
 
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
@@ -656,32 +740,115 @@ document.querySelectorAll('a,button,.work-item,.capsule-card').forEach(el => {
   el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
 });
 
-// ── Page curtain reveal ──
-gsap.to('#page-curtain', {
-  scaleY: 0,
-  duration: 1.1,
-  ease: 'power4.inOut',
-  delay: 0.2,
-  transformOrigin: 'top center',
-  onComplete: () => {
-    const c = document.getElementById('page-curtain');
-    if (c) c.remove();
-  }
-});
+// ══════════════════════════════════════════════════════
+//  SEWING PRELOADER
+// ══════════════════════════════════════════════════════
+(function() {
+  const overlay = document.getElementById('sew-overlay');
+  const needle  = document.getElementById('sew-needle');
+  const thread  = document.getElementById('sew-thread');
+  const brand   = document.getElementById('sewBrand');
+  const hint    = document.getElementById('sewHint');
 
-// ── Hero entrance (fires after curtain lifts) ──
-const tl = gsap.timeline({ delay: 0.6 });
-tl.fromTo('.hero-logo-video',
-    { opacity:0, scale:0.94 },
-    { opacity:1, scale:1, duration:1.3, ease:'power3.out',
-      onComplete: () => document.querySelector('.hero-logo-video').classList.add('breathing')
-    })
-  .fromTo('.hero-brand',
-    { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
-  .fromTo('.hero-eyebrow',
-    { opacity:0 }, { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
-  .fromTo('.nav-logo', { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
-  .fromTo('.burger',  { opacity:0 }, { opacity:1, duration:0.6 }, 1.0);
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const ty = vh * 0.53; // thread + needle Y position (slightly below vertical centre)
+
+  // Build a wavy sine-like path across the viewport
+  function buildWavePath(w, y) {
+    const segs = 12;
+    const segW = (w + 220) / segs;
+    let d = `M -110 ${y}`;
+    for (let i = 0; i < segs; i++) {
+      const x0  = -110 + i * segW;
+      const x1  = x0 + segW;
+      const amp = i % 2 === 0 ? -20 : 20;
+      d += ` C ${x0 + segW*0.28} ${y + amp} ${x0 + segW*0.72} ${y + amp} ${x1} ${y}`;
+    }
+    return d;
+  }
+
+  thread.setAttribute('d', buildWavePath(vw, ty));
+  const tLen = thread.getTotalLength ? thread.getTotalLength() : 3200;
+  gsap.set(thread, { strokeDasharray: tLen, strokeDashoffset: tLen });
+
+  // Needle starts off-screen left at thread Y
+  gsap.set(needle, { x: -90, y: ty });
+
+  // ── Hero entrance — called when sewing animation completes ──
+  function heroEnter() {
+    gsap.timeline({ delay: 0.05 })
+      .fromTo('.hero-logo-video',
+        { opacity:0, scale:0.94 },
+        { opacity:1, scale:1, duration:1.3, ease:'power3.out',
+          onComplete: () => {
+            const v = document.querySelector('.hero-logo-video');
+            if (v) v.classList.add('breathing');
+          }
+        })
+      .fromTo('.hero-brand',
+        { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
+      .fromTo('.hero-eyebrow',
+        { opacity:0 }, { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
+      .fromTo('.nav-logo',      { opacity:0 }, { opacity:1, duration:0.5 }, 0)
+      .fromTo('.cart-icon-btn', { opacity:0 }, { opacity:1, duration:0.5 }, 0.15)
+      .fromTo('.burger',        { opacity:0 }, { opacity:1, duration:0.5 }, 0.25);
+  }
+
+  // ── Brand text fades in on load ──
+  gsap.fromTo(brand,
+    { opacity:0, y:12 },
+    { opacity:1, y:0, duration:1.6, ease:'power3.out', delay:0.35 }
+  );
+
+  // ── Scroll-driven needle + wipe animation ──
+  const sewTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '#sew-pin',
+      pin: true,
+      scrub: 1.1,
+      start: 'top top',
+      end: '+=120%',
+      onLeave: () => {
+        overlay.style.display = 'none';
+        overlay.style.pointerEvents = 'none';
+        heroEnter();
+      },
+      onEnterBack: () => {
+        overlay.style.display = 'flex';
+        overlay.style.pointerEvents = 'all';
+        // Hide hero elements so they can re-animate if user scrolls back
+        gsap.set(['.hero-logo-video','.hero-brand','.hero-eyebrow',
+                  '.nav-logo','.cart-icon-btn','.burger'], { opacity:0 });
+        const v = document.querySelector('.hero-logo-video');
+        if (v) v.classList.remove('breathing');
+      }
+    }
+  });
+
+  sewTl
+    // Hint fades quickly
+    .to(hint,  { opacity:0, duration:0.07 }, 0)
+    // Brand lifts and fades as needle appears
+    .to(brand, { opacity:0, y:-16, duration:0.14 }, 0.03)
+    // Thread draws from left to right in sync with needle
+    .fromTo(thread,
+      { strokeDashoffset: tLen },
+      { strokeDashoffset: 0, ease:'none', duration:0.7 }, 0.1)
+    // Needle sweeps across (slightly ahead of thread)
+    .fromTo(needle,
+      { x: -90 },
+      { x: vw + 90, ease:'none', duration:0.7 }, 0.1)
+    // Overlay clips away from left → right (needle pierces the darkness)
+    // inset(top right bottom LEFT): as left inset grows 0→100%, overlay shrinks from left
+    .fromTo(overlay,
+      { clipPath:'inset(0 0% 0 0%)' },
+      { clipPath:'inset(0 0% 0 100%)', ease:'none', duration:0.7 }, 0.1)
+    // Thread fades at end
+    .to(thread, { opacity:0, duration:0.06 }, 0.8);
+
+})();
+// ══════════════════════════════════════════════════════
 
 // ── Scroll reveals ──
 gsap.utils.toArray('.reveal').forEach(el => {
