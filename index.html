@@ -216,19 +216,6 @@
     .order-right { padding: 80px 64px; background: var(--soft); }
 
     /* Tabs */
-    .form-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
-    .tab-btn {
-      padding: 12px 0; margin-right: 28px; font-size: 11px;
-      letter-spacing: 0.14em; text-transform: uppercase; cursor: none;
-      border-bottom: 1px solid transparent; margin-bottom: -1px;
-      color: var(--muted); transition: all 0.3s; background: none; border-top: none;
-      border-left: none; border-right: none; font-family: var(--sans);
-    }
-    .tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
-
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
     /* Form fields */
     .field { margin-bottom: 28px; }
     .field label {
@@ -247,16 +234,6 @@
     }
     .field textarea { resize: none; line-height: 1.6; }
     .field select { appearance: none; cursor: none; }
-
-    .check-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-    .check-pill {
-      padding: 9px 20px; border: 1px solid var(--border); font-size: 11px;
-      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
-      transition: all 0.2s; user-select: none; background: white;
-    }
-    .check-pill:hover { border-color: var(--ink); }
-    .check-pill input[type=checkbox] { display: none; }
-    .check-pill.checked { background: var(--ink); color: white; border-color: var(--ink); }
 
     .btn-submit {
       width: 100%; padding: 18px; margin-top: 8px;
@@ -555,46 +532,12 @@
     </div>
 
     <div class="order-right reveal">
-      <div class="form-tabs">
-        <button class="tab-btn active" data-tab="capsule">Из капсулы</button>
-        <button class="tab-btn" data-tab="custom">Своя идея</button>
-      </div>
 
       <form id="orderForm">
-
-        <!-- Capsule tab -->
-        <div class="tab-panel active" id="panel-capsule">
-          <div class="field">
-            <label>Что хочешь заказать?</label>
-            <div class="check-grid">
-              <label class="check-pill"><input type="checkbox" value="Куртка">Куртка</label>
-              <label class="check-pill"><input type="checkbox" value="Джинсы">Джинсы</label>
-              <label class="check-pill"><input type="checkbox" value="Сумка">Сумка</label>
-              <label class="check-pill"><input type="checkbox" value="Штаны">Штаны</label>
-              <label class="check-pill"><input type="checkbox" value="Другое">Другое</label>
-            </div>
-          </div>
-          <div class="field">
-            <label>Капсула</label>
-            <select name="capsule">
-              <option value="">— выбери —</option>
-              <option value="a1">a1</option>
-              <option value="a2">a2</option>
-              <option value="a3">a3</option>
-              <option value="any">Не важно</option>
-            </select>
-          </div>
+        <div class="field">
+          <label>Своя идея</label>
+          <textarea name="idea" rows="5" placeholder="Что хочешь сшить? Материал, фасон, референсы — всё пригодится."></textarea>
         </div>
-
-        <!-- Custom tab -->
-        <div class="tab-panel" id="panel-custom">
-          <div class="field">
-            <label>Опиши свою идею</label>
-            <textarea name="idea" rows="5" placeholder="Что хочешь сшить? Материал, фасон, референсы — всё пригодится. Картинки можно скинуть в телеге."></textarea>
-          </div>
-        </div>
-
-        <!-- Common -->
         <div class="field">
           <label>Имя</label>
           <input type="text" name="name" placeholder="Как тебя зовут?" required />
@@ -607,7 +550,6 @@
           <label>Комментарий</label>
           <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
         </div>
-
         <div class="field">
           <label>Фото / референсы</label>
           <div class="file-upload" id="fileUploadArea">
@@ -709,7 +651,7 @@ document.addEventListener('mousemove', e => {
   cur.style.top  = e.clientY + 'px';
   gsap.to(ring, { left: e.clientX, top: e.clientY, duration: 0.18, ease:'power2.out' });
 });
-document.querySelectorAll('a,button,.work-item,.capsule-card,.check-pill').forEach(el => {
+document.querySelectorAll('a,button,.work-item,.capsule-card').forEach(el => {
   el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
   el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
 });
@@ -772,66 +714,18 @@ ScrollTrigger.create({
   })
 });
 
-// ── Tabs ──
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ── Checkbox pills ──
-document.querySelectorAll('.check-pill').forEach(pill => {
-  pill.addEventListener('click', () => {
-    pill.classList.toggle('checked');
-    pill.querySelector('input').checked = pill.classList.contains('checked');
-  });
-});
-
-// ── Pre-fill from lookbook ref ──
-(function(){
-  const hash = window.location.hash; // #order?ref=...
-  if (hash.startsWith('#order')) {
-    const qs = hash.split('?')[1] || '';
-    const params = new URLSearchParams(qs);
-    const ref = params.get('ref');
-    if (ref) {
-      const commentField = document.getElementById('comment');
-      if (commentField) {
-        commentField.value = 'Хочу похожее: ' + decodeURIComponent(ref) + '\n\nИндивидуальный пошив — прошу учесть мои параметры.';
-      }
-      // scroll to form
-      setTimeout(() => document.getElementById('order')?.scrollIntoView({behavior:'smooth'}), 300);
-    }
-  }
-})();
-
 // ── Form submit → Cart ──
 document.getElementById('orderForm').addEventListener('submit', e => {
   e.preventDefault();
-  const form = e.target;
-  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  const form     = e.target;
+  const idea     = form.idea.value.trim();
   const name     = form.name.value.trim();
   const telegram = form.telegram.value.trim();
   const comment  = form.comment.value.trim();
 
-  let itemName = 'Индивидуальный пошив';
-  let details  = '';
-  if (activeTab === 'capsule') {
-    const items   = [...document.querySelectorAll('.check-pill.checked')].map(p => p.querySelector('input').value);
-    const capsule = form.capsule.value;
-    itemName = items.length ? items.slice(0,2).join(', ') : 'Из капсулы';
-    details  = `Из капсулы: ${items.join(', ') || '—'} / ${capsule || '—'}`;
-  } else {
-    const idea = (form.idea ? form.idea.value.trim() : '');
-    itemName = idea ? idea.slice(0, 40) : 'Своя идея';
-    details  = idea || 'Своя идея';
-  }
-  const notes = [details, comment].filter(Boolean).join('\n');
+  const itemName = idea ? idea.slice(0, 48) : 'Своя идея';
+  const notes    = [idea, comment].filter(Boolean).join('\n');
 
-  // Сохранить имя/тг для предзаполнения в cart.html
   localStorage.setItem('acc_prefill', JSON.stringify({ name, telegram }));
 
   ACC.add({
