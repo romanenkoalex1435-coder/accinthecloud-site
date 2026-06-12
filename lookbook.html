@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lookbook — accinthecloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <script src="cart.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -170,10 +171,10 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="collection-a1.html" onclick="closeMobileMenu()">a1 — ACCESS</a>
-  <a href="collection-a2.html" onclick="closeMobileMenu()">a2 — ACCORD</a>
-  <a href="collection-a3.html" onclick="closeMobileMenu()">a3 — Jeans</a>
-  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="index.html#order" onclick="closeMobileMenu()">Order</a>
+  <a href="https://t.me/accinthecloud1" target="_blank" onclick="closeMobileMenu()">Telegram</a>
+  <a href="https://instagram.com/accinthecloud" target="_blank" onclick="closeMobileMenu()">Instagram</a>
 </div>
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
@@ -376,7 +377,18 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 
 document.getElementById('mOrderBtn').addEventListener('click', () => {
   if (!cur) return;
-  window.location.href = `index.html#order?ref=${encodeURIComponent(cur.name)}`;
+  ACC.add({
+    id: 'lb-' + Date.now(),
+    capsule: 'Lookbook',
+    name: cur.name,
+    price: 'По запросу',
+    priceNum: 0,
+    size: '', color: '',
+    notes: 'Похожее изделие — индивидуальный пошив',
+    qty: 1,
+    bg: cur.photos && cur.photos[0] ? cur.photos[0] : ''
+  });
+  window.location.href = 'cart.html';
 });
 
 (function(){
