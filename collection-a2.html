@@ -25,7 +25,7 @@
     }
     .nav-logo { display:flex; align-items:center; }
     .nav-logo img { height:28px; width:auto; }
-    .nav-right { display:flex; align-items:center; gap:16px; }
+    .nav-right { display:flex; align-items:center; gap:20px; }
     .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
     .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
     .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
@@ -40,18 +40,9 @@
     .mobile-menu.visible { opacity:1; }
     .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
     .mobile-menu a:hover { color:var(--ink); }
-    .nav-right { display:flex; align-items:center; }
-    .cart-link {
-      position:relative; display:flex; align-items:center; gap:8px;
-      font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
-      padding:8px 16px; border:1px solid var(--border); transition:all .2s;
-    }
-    .cart-link:hover { border-color:var(--ink); }
-    .cart-badge {
-      display:none; position:absolute; top:-6px; right:-6px;
-      width:18px; height:18px; background:var(--ink); color:white;
-      font-size:10px; border-radius:50%; align-items:center; justify-content:center;
-    }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
+    .cbadge.show { display:flex; }
     #cartFeedback {
       position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
       background:var(--ink); color:white; padding:12px 28px;
@@ -213,7 +204,12 @@
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div class="nav-right">
-    <a href="cart.html" class="cart-link">Корзина <span class="cart-badge"></span></a>
+    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
     <button class="burger" id="burgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -530,6 +526,16 @@ document.getElementById('btnCart').addEventListener('click',()=>{
   closeModal();
 });
 
+(function(){
+  function refreshBadge(){
+    const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
+    const n=c.reduce((s,i)=>s+(i.qty||1),0);
+    const b=document.getElementById('cartBadge');
+    if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+  }
+  refreshBadge();
+  document.addEventListener('acc:update',refreshBadge);
+})();
 const burgerBtn = document.getElementById('burgerBtn');
 const mobileMenu = document.getElementById('mobileMenu');
 function closeMobileMenu() {

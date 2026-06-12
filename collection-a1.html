@@ -26,7 +26,10 @@
     }
     .nav-logo { display:flex; align-items:center; }
     .nav-logo img { height:28px; width:auto; }
-    .nav-right { display:flex; align-items:center; gap:16px; }
+    .nav-right { display:flex; align-items:center; gap:20px; }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
+    .cbadge.show { display:flex; }
     .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
     .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
     .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
@@ -181,7 +184,12 @@
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div class="nav-right">
-    <a href="cart.html" class="cart-link">Корзина <span class="cart-badge"></span></a>
+    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
     <button class="burger" id="burgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -353,10 +361,9 @@ document.getElementById('btnCart').addEventListener('click', () => {
 });
 
 function updateBadge() {
-  const badge = document.querySelector('.cart-badge');
+  const badge = document.getElementById('cartBadge');
   const n = ACC.count();
-  badge.style.display = n > 0 ? 'flex' : 'none';
-  badge.textContent = n;
+  if(badge){ badge.textContent=n; badge.classList.toggle('show',n>0); }
 }
 if (typeof ACC !== 'undefined') {
   updateBadge();
