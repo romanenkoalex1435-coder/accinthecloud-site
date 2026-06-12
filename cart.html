@@ -187,7 +187,7 @@
       .cart-layout { grid-template-columns:1fr; }
       .cart-items { padding:32px 20px; border-right:none; border-bottom:1px solid var(--border); }
       .cart-checkout { padding:32px 20px; position:static; }
-      footer { flex-direction:column; gap:16px; text-align:center; }
+      footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
     .section-label, .capsule-items, .capsule-tag,
@@ -202,7 +202,8 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="order.html" onclick="closeMobileMenu()">Пошив</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
@@ -234,7 +235,7 @@
     <div class="empty-cart" id="emptyCart">
       <div class="empty-icon">○</div>
       <p>Корзина пустая</p>
-      <a href="collection-a1.html" class="btn-browse">Смотреть коллекции</a>
+      <a href="index.html#capsules" class="btn-browse">Смотреть капсулы</a>
     </div>
   </div>
 

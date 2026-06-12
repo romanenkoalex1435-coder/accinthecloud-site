@@ -174,8 +174,7 @@
       #arrPrev, #arrNext { display:none; }
       .modal-info { flex:1; width:100%; min-height:0; overflow-y:auto; padding:20px 20px 32px; }
       .modal-close { top:12px; right:12px; }
-
-      footer { flex-direction:column; gap:16px; text-align:center; }
+      footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
     }
     @media(max-width:500px) {
       .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
@@ -193,7 +192,8 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="order.html" onclick="closeMobileMenu()">Пошив</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
