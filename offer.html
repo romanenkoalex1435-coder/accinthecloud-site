@@ -7,11 +7,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
     :root {
       --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
+      --pixel:'PixelImpacted',monospace;
     }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); line-height:1.8; }
     a { text-decoration:none; color:inherit; }
@@ -58,6 +64,11 @@
       .offer-wrap { padding:48px 24px 80px; }
       footer { flex-direction:column; gap:16px; text-align:center; }
       .footer-links { flex-wrap:wrap; justify-content:center; }
+    }
+    .section-label, .capsule-items, .capsule-tag,
+    .modal-num, .modal-made, .items-label,
+    .checkout-label, .breadcrumb, .offer-wrap h2 {
+      font-family: var(--pixel);
     }
   </style>
 </head>

@@ -13,6 +13,11 @@
   <style>
     /* ─── Reset ─────────────────────────────────────────── */
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
     :root {
       --bg: #ffffff;
       --ink: #0d0d0d;
@@ -380,6 +385,11 @@
       #cursor, #cursor-ring { display: none; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
+    .section-label, .capsule-items, .capsule-tag,
+    .modal-num, .modal-made, .items-label,
+    .checkout-label, .breadcrumb, .offer-wrap h2 {
+      font-family: var(--pixel);
+    }
   </style>
 </head>
 <body>

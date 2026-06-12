@@ -8,11 +8,17 @@
   <script src="cart.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
     :root {
       --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
+      --pixel:'PixelImpacted',monospace;
     }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); min-height:100vh; }
     a { text-decoration:none; color:inherit; }
@@ -184,6 +190,11 @@
       footer { flex-direction:column; gap:16px; text-align:center; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
+    .section-label, .capsule-items, .capsule-tag,
+    .modal-num, .modal-made, .items-label,
+    .checkout-label, .breadcrumb, .offer-wrap h2 {
+      font-family: var(--pixel);
+    }
   </style>
 </head>
 <body>
