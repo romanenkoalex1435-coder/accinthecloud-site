@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Индивидуальный пошив — accinthecloud</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <script src="cart.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
+    :root {
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
+      --border:#ebebeb; --soft:#f5f5f5;
+      --serif:'Playfair Display',Georgia,serif;
+      --sans:'Inter',-apple-system,sans-serif;
+      --pixel:'PixelImpacted',monospace;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
+    a { text-decoration:none; color:inherit; }
+
+    /* ── Nav ── */
+    nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+    }
+    .nav-logo { display:flex; align-items:center; }
+    .nav-logo img { height:28px; width:auto; }
+    .nav-right { display:flex; align-items:center; gap:20px; }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
+    .cbadge.show { display:flex; }
+    .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+    .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu {
+      display:none; position:fixed; inset:0; z-index:300;
+      background:#fff; flex-direction:column; align-items:center; justify-content:center;
+      gap:32px; opacity:0; transition:opacity .3s;
+    }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu.visible { opacity:1; }
+    .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
+    .mobile-menu a:hover { color:var(--ink); }
+    .mobile-menu-close { position:absolute; top:24px; right:24px; background:none; border:none; cursor:pointer; font-size:20px; color:var(--muted); }
+
+    /* ── Page header ── */
+    .page-hero {
+      padding:80px 48px 64px;
+      border-bottom:1px solid var(--border);
+    }
+    .page-hero h1 {
+      font-family:var(--pixel); font-size:clamp(28px,4vw,56px); font-weight:normal;
+      letter-spacing:0.06em; line-height:1.1;
+    }
+    .page-hero p {
+      margin-top:16px; font-size:13px; color:var(--muted); max-width:480px; line-height:1.8;
+    }
+
+    /* ── Order layout ── */
+    .order-layout {
+      display:grid; grid-template-columns:1fr 1fr; min-height:72vh;
+    }
+    .order-left {
+      background:var(--ink); color:white;
+      padding:80px 64px;
+      display:flex; flex-direction:column; justify-content:center;
+      position:relative; overflow:hidden;
+    }
+    .order-left::before {
+      content:'acc'; position:absolute;
+      font-family:var(--serif); font-style:italic;
+      font-size:28vw; font-weight:400; color:rgba(255,255,255,0.04);
+      bottom:-8vw; right:-4vw; line-height:1; pointer-events:none; white-space:nowrap;
+    }
+    .order-left h2 {
+      font-family:var(--serif); font-size:clamp(32px,4vw,58px); font-weight:400;
+      line-height:1.15; margin-bottom:20px; color:white; position:relative;
+    }
+    .order-left p { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.9; position:relative; }
+    .order-facts { display:flex; gap:40px; margin-top:52px; position:relative; }
+    .order-fact-num {
+      font-family:var(--serif); font-style:italic;
+      font-size:38px; font-weight:400; color:white; display:block; line-height:1;
+    }
+    .order-fact-label {
+      font-size:9px; letter-spacing:0.22em; text-transform:uppercase;
+      color:rgba(255,255,255,0.4); margin-top:6px; display:block;
+    }
+    .order-right { padding:80px 64px; background:var(--soft); }
+
+    /* ── Form ── */
+    .field { margin-bottom:28px; }
+    .field label {
+      display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:10px;
+    }
+    .field input, .field textarea, .field select {
+      width:100%; padding:12px 0;
+      border:none; border-bottom:1px solid var(--border);
+      background:transparent; font-family:var(--sans); font-size:14px;
+      color:var(--ink); outline:none; transition:border-color .3s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-bottom-color:var(--ink); }
+    .field textarea { resize:none; line-height:1.6; }
+    .field select { appearance:none; }
+
+    .file-upload { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+    .file-btn {
+      padding:9px 20px; border:1px dashed var(--border); background:none;
+      font-family:var(--sans); font-size:11px; letter-spacing:0.12em;
+      text-transform:uppercase; cursor:pointer; transition:border-color .2s, color .2s; color:var(--muted);
+    }
+    .file-btn:hover { border-color:var(--ink); color:var(--ink); }
+    .file-names { font-size:11px; color:var(--muted); }
+
+    .btn-submit {
+      width:100%; padding:18px; margin-top:8px;
+      background:var(--ink); color:white; border:none;
+      font-family:var(--pixel); font-size:14px; letter-spacing:0.15em;
+      text-transform:uppercase; cursor:pointer; transition:opacity .3s;
+    }
+    .btn-submit:hover { opacity:.75; }
+    .btn-submit:disabled { opacity:.35; }
+
+    .offer-note { font-size:10px; color:var(--muted); line-height:1.7; margin-bottom:14px; }
+    .offer-note a { color:var(--ink); text-decoration:underline; }
+
+    .form-success { display:none; padding:40px 0; text-align:center; }
+    .form-success.show { display:block; }
+    .success-icon { font-size:32px; margin-bottom:16px; }
+    .form-success h3 { font-family:var(--serif); font-size:22px; font-weight:400; margin-bottom:8px; }
+    .form-success p { font-size:13px; color:var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      padding:36px 48px; border-top:1px solid var(--border);
+      display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;
+    }
+    .footer-logo { font-family:var(--pixel); font-size:26px; letter-spacing:0.1em; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .footer-links a:hover { color:var(--ink); }
+    .footer-copy { font-size:10px; color:var(--muted); }
+
+    /* ── Mobile ── */
+    @media(max-width:900px) {
+      nav { padding:16px 20px; }
+      .page-hero { padding:48px 24px 40px; }
+      .order-layout { grid-template-columns:1fr; }
+      .order-left { padding:52px 24px; }
+      .order-left::before { font-size:50vw; }
+      .order-right { padding:40px 24px; }
+      .order-facts { gap:24px; }
+      footer { flex-direction:column; gap:16px; text-align:center; }
+      .footer-links { flex-wrap:wrap; justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="menuClose">✕</button>
+  <a href="index.html">Главная</a>
+  <a href="lookbook.html">Lookbook</a>
+  <a href="order.html">Пошив</a>
+  <a href="faq.html">FAQ</a>
+  <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <div class="nav-right">
+    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
+    <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <h1>Индивидуальный<br>пошив</h1>
+  <p>Опиши свою идею — свяжусь в телеграме и обсудим детали. Любой фасон, любой материал.</p>
+</div>
+
+<div class="order-layout">
+  <div class="order-left">
+    <h2>Давай<br>сошьём<br><em>что-нибудь</em></h2>
+    <p>Выбери вещь из капсулы или опиши свою идею — свяжусь в телеграме и обсудим детали.</p>
+    <div class="order-facts">
+      <div>
+        <span class="order-fact-num">1000+</span>
+        <span class="order-fact-label">изделий</span>
+      </div>
+      <div>
+        <span class="order-fact-num">100%</span>
+        <span class="order-fact-label">ручная работа</span>
+      </div>
+      <div>
+        <span class="order-fact-num">a1–a3</span>
+        <span class="order-fact-label">капсулы</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-right">
+    <form id="orderForm">
+      <div class="field">
+        <label>Своя идея</label>
+        <textarea name="idea" rows="5" placeholder="Что хочешь сшить? Материал, фасон, референсы — всё пригодится."></textarea>
+      </div>
+      <div class="field">
+        <label>Имя</label>
+        <input type="text" name="name" placeholder="Как тебя зовут?" required />
+      </div>
+      <div class="field">
+        <label>Telegram</label>
+        <input type="text" name="telegram" placeholder="@username" required />
+      </div>
+      <div class="field">
+        <label>Комментарий</label>
+        <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
+      </div>
+      <div class="field">
+        <label>Фото / референсы</label>
+        <div class="file-upload">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+          <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
+          <span class="file-names" id="fileNames"></span>
+        </div>
+      </div>
+      <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
+      <button type="submit" class="btn-submit" id="submitBtn">Добавить в корзину →</button>
+    </form>
+    <div class="form-success" id="formSuccess">
+      <div class="success-icon">✓</div>
+      <h3>Запрос добавлен</h3>
+      <p>Перейди в корзину для оформления заказа.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="offer.html">Публичная оферта</a>
+    <a href="privacy.html">Политика конфиденциальности</a>
+  </div>
+  <span class="footer-copy">© 2026 accinthecloud</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+const CONFIG = {
+  BOT_TOKEN: 'YOUR_BOT_TOKEN_HERE',
+  CHAT_ID: 'YOUR_CHAT_ID_HERE',
+  ADMIN_PASS: 'accin2025'
+};
+
+// Cart badge
+(function(){
+  const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
+  const n=c.reduce((s,i)=>s+(i.qty||1),0);
+  const b=document.getElementById('cartBadge');
+  if(b&&n>0){b.textContent=n;b.classList.add('show');}
+})();
+
+// Burger
+const burgerBtn = document.getElementById('burgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+const menuClose = document.getElementById('menuClose');
+function closeMobileMenu(){
+  burgerBtn.classList.remove('open');
+  mobileMenu.classList.remove('visible');
+  setTimeout(()=>mobileMenu.classList.remove('open'),300);
+  document.body.style.overflow='';
+}
+burgerBtn.addEventListener('click',()=>{
+  const isOpen=mobileMenu.classList.contains('open');
+  if(isOpen){closeMobileMenu();}
+  else{
+    burgerBtn.classList.add('open');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow='hidden';
+    requestAnimationFrame(()=>mobileMenu.classList.add('visible'));
+  }
+});
+menuClose.addEventListener('click', closeMobileMenu);
+
+// File upload
+const fileInput = document.getElementById('fileInput');
+if(fileInput){
+  fileInput.addEventListener('change',()=>{
+    const names=Array.from(fileInput.files).map(f=>f.name).join(', ');
+    document.getElementById('fileNames').textContent=names||'';
+  });
+}
+
+// Form submit
+document.getElementById('orderForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const form=e.target;
+  const idea=form.idea.value.trim();
+  const name=form.name.value.trim();
+  const telegram=form.telegram.value.trim();
+  const comment=form.comment.value.trim();
+  const itemName=idea?idea.slice(0,48):'Своя идея';
+  const notes=[idea,comment].filter(Boolean).join('\n');
+  localStorage.setItem('acc_prefill',JSON.stringify({name,telegram}));
+  ACC.add({
+    id:'custom-'+Date.now(),
+    capsule:'Индивидуальный пошив',
+    name:itemName,
+    price:'По запросу',
+    priceNum:0,
+    size:'',color:'',notes,qty:1,bg:''
+  });
+  window.location.href='cart.html';
+});
+</script>
+</body>
+</html>
