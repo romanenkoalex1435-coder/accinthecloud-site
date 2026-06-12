@@ -274,8 +274,8 @@
     /* ─── FAQ ───────────────────────────────────────────── */
     .faq-section { padding: 100px 48px; border-top: 1px solid var(--border); }
     .faq-header { margin-bottom: 56px; }
-    .faq-label { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
-    .faq-title { font-family: var(--serif); font-size: clamp(32px,4vw,52px); font-weight: 400; }
+    .faq-label { font-family: var(--pixel); font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .faq-title { font-family: var(--pixel); font-size: clamp(32px,4vw,52px); font-weight: normal; }
     .faq-list { max-width: 760px; }
     .faq-item { border-top: 1px solid var(--border); }
     .faq-item:last-child { border-bottom: 1px solid var(--border); }
@@ -318,7 +318,7 @@
       display: flex; flex-wrap:wrap; justify-content: space-between; align-items: center;
     }
     .footer-logo {
-      font-family: var(--pixel); font-size: 18px; letter-spacing: 0.1em;
+      font-family: var(--pixel); font-size: 26px; letter-spacing: 0.1em;
     }
     .footer-links { display: flex; gap: 28px; }
     .footer-links a {
@@ -467,7 +467,6 @@
 
 <!-- ─── CAPSULES ─────────────────────────────────────────── -->
 <section id="capsules" class="section">
-  <div class="section-label reveal">Capsule Collections</div>
   <div class="capsules-header">
     <h2 class="reveal">Capsule Collections</h2>
   </div>
@@ -521,7 +520,9 @@
 
 <!-- ─── ORDER ─────────────────────────────────────────────── -->
 <section id="order" class="section">
-  <div class="section-label reveal">Order</div>
+  <div class="capsules-header">
+    <h2 class="reveal">Order</h2>
+  </div>
   <div class="order-layout">
 
     <div class="order-left reveal">
@@ -589,6 +590,7 @@
     <p class="faq-label">Частые вопросы</p>
     <h2 class="faq-title">FAQ</h2>
   </div>
+
   <div class="faq-list reveal">
     <div class="faq-item">
       <button class="faq-q">Кто я?<span class="faq-icon">+</span></button>
