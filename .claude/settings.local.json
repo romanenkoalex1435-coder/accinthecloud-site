@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Bash(sed -n '1,20p')",
+      "Bash(sed -n '1,20p' index.html)",
+      "Bash(git reset *)",
+      "Bash(git revert *)"
+    ]
+  }
+}
