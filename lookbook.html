@@ -173,7 +173,23 @@
 
     @media(max-width:900px) {
       nav { padding:16px 20px; }
-      .lb-grid { grid-template-columns:repeat(2,1fr); }
+
+      /* ── Masonry grid ── */
+      .lb-grid {
+        display: block;
+        columns: 2;
+        column-gap: 3px;
+        padding: 3px;
+      }
+      .lb-card {
+        break-inside: avoid;
+        margin-bottom: 3px;
+        display: block;
+      }
+      /* Alternating heights for masonry rhythm */
+      .lb-card[data-size="tall"]   .lb-card-slide { aspect-ratio: 3/4; }
+      .lb-card[data-size="square"] .lb-card-slide { aspect-ratio: 1/1; }
+      .lb-card[data-size="short"]  .lb-card-slide { aspect-ratio: 4/5; }
 
       /* Modal: галерея сверху на 58% экрана, инфо снизу */
       .modal { flex-direction:column; height:100dvh; margin:0; }
@@ -186,9 +202,6 @@
       .modal-info { flex:1; width:100%; min-height:0; overflow-y:auto; padding:20px 20px 32px; }
       .modal-close { top:12px; right:12px; }
       footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
-    }
-    @media(max-width:500px) {
-      .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
 
@@ -391,11 +404,13 @@ document.querySelectorAll('.lb-filter').forEach(btn => {
   });
 });
 
-ITEMS.forEach(item => {
+const SIZES = ['tall','tall','short','tall','square','tall','short','tall','tall','square','tall','short','tall','tall','square','tall','short','tall'];
+ITEMS.forEach((item, idx) => {
   const card = document.createElement('div');
   card.className = 'lb-card';
   card.dataset.cat = item.cat;
   card.dataset.special = item.special ? 'true' : 'false';
+  card.dataset.size = SIZES[idx % SIZES.length];
 
   // slides
   const slidesEl = document.createElement('div');
