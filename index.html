@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>accinthecloud</title>
+  <title>accinthecloud — handmade clothing</title>
+  <meta name="description" content="Бренд ручного пошива из Москвы. Капсульные коллекции, сумки, куртки, джинсы. Индивидуальный пошив по меркам." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="accinthecloud" />
+  <meta property="og:description" content="Handmade clothing brand from Moscow. Capsule collections, bespoke tailoring." />
+  <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
+  <meta property="og:url" content="https://accinthecloud.ru/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="accinthecloud" />
+  <meta name="twitter:description" content="Handmade clothing brand from Moscow. Capsule collections, bespoke tailoring." />
+  <meta name="twitter:image" content="https://accinthecloud.ru/images/og-image.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <script src="cart.js"></script>
@@ -389,7 +399,13 @@
     .checkout-label, .breadcrumb, .offer-wrap h2 {
       font-family: var(--pixel);
     }
+  
+  /* Page transition */
+  body { animation: _pgIn .25s ease both; }
+  @keyframes _pgIn { from { opacity:0; translate:0 6px; } to { opacity:1; translate:0 0; } }
+  body.page-out { opacity:0 !important; translate:0 -4px !important; transition:opacity .18s ease, translate .18s ease; }
   </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -769,6 +785,21 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 
   // Prevent link navigation on swipe
   featured.addEventListener('click', e => { if (didSwipe) { e.preventDefault(); didSwipe = false; } });
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var href = a.getAttribute('href');
+    if(!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || href.startsWith('//')) return;
+    a.addEventListener('click', function(e){
+      if(e.defaultPrevented) return;
+      e.preventDefault();
+      var target = href;
+      document.body.classList.add('page-out');
+      setTimeout(function(){ window.location.href = target; }, 200);
+    });
+  });
 })();
 </script>
 </body>

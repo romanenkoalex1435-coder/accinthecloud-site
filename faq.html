@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FAQ — accinthecloud</title>
+  <meta name="description" content="Частые вопросы о пошиве, материалах, доставке и оплате. accinthecloud." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FAQ — accinthecloud" />
+  <meta property="og:description" content="Frequently asked questions about handmade clothing and ordering." />
+  <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
+  <meta property="og:url" content="https://accinthecloud.ru/faq.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FAQ — accinthecloud" />
+  <meta name="twitter:description" content="Frequently asked questions about handmade clothing and ordering." />
+  <meta name="twitter:image" content="https://accinthecloud.ru/images/og-image.jpg" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -118,7 +128,13 @@
       footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
       .footer-links { flex-wrap:wrap; justify-content:center; gap:16px; }
     }
+  
+  /* Page transition */
+  body { animation: _pgIn .25s ease both; }
+  @keyframes _pgIn { from { opacity:0; translate:0 6px; } to { opacity:1; translate:0 0; } }
+  body.page-out { opacity:0 !important; translate:0 -4px !important; transition:opacity .18s ease, translate .18s ease; }
   </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -228,6 +244,21 @@ document.querySelectorAll('.faq-q').forEach(btn=>{
     if(!isOpen) item.classList.add('open');
   });
 });
+</script>
+<script>
+(function(){
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var href = a.getAttribute('href');
+    if(!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || href.startsWith('//')) return;
+    a.addEventListener('click', function(e){
+      if(e.defaultPrevented) return;
+      e.preventDefault();
+      var target = href;
+      document.body.classList.add('page-out');
+      setTimeout(function(){ window.location.href = target; }, 200);
+    });
+  });
+})();
 </script>
 </body>
 </html>

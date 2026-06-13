@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>a1 — accinthecloud</title>
+  <title>ACCESS — Shoulder Bags | accinthecloud</title>
+  <meta name="description" content="Капсула a1 — сумки ручной работы из парусины и денима. accinthecloud." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ACCESS — Shoulder Bags | accinthecloud" />
+  <meta property="og:description" content="Handmade canvas and denim shoulder bags. Capsule a1." />
+  <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
+  <meta property="og:url" content="https://accinthecloud.ru/collection-a1.html" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ACCESS — Shoulder Bags | accinthecloud" />
+  <meta name="twitter:description" content="Handmade canvas and denim shoulder bags. Capsule a1." />
+  <meta name="twitter:image" content="https://accinthecloud.ru/images/og-image.jpg" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="cart.js"></script>
@@ -180,7 +190,13 @@
     .checkout-label, .breadcrumb, .offer-wrap h2 {
       font-family: var(--pixel);
     }
+  
+  /* Page transition */
+  body { animation: _pgIn .25s ease both; }
+  @keyframes _pgIn { from { opacity:0; translate:0 6px; } to { opacity:1; translate:0 0; } }
+  body.page-out { opacity:0 !important; translate:0 -4px !important; transition:opacity .18s ease, translate .18s ease; }
   </style>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div id="cartFeedback">Добавлено в корзину ✓</div>
@@ -401,6 +417,21 @@ burgerBtn.addEventListener('click', () => {
     requestAnimationFrame(() => mobileMenu.classList.add('visible'));
   }
 });
+</script>
+<script>
+(function(){
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var href = a.getAttribute('href');
+    if(!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || href.startsWith('//')) return;
+    a.addEventListener('click', function(e){
+      if(e.defaultPrevented) return;
+      e.preventDefault();
+      var target = href;
+      document.body.classList.add('page-out');
+      setTimeout(function(){ window.location.href = target; }, 200);
+    });
+  });
+})();
 </script>
 </body>
 </html>
