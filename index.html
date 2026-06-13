@@ -227,8 +227,62 @@
     .footer-links a:hover { color: var(--ink); }
     .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
 
-    /* ─── Mobile Capsule Carousel ─────────────────────────── */
-    .capsule-carousel { display: none; }
+    /* ─── Capsule Carousel (all screens) ─────────────────── */
+    .capsules-grid { display: none; }
+    .capsule-carousel { display: block; }
+
+    .carousel-featured {
+      display: block; position: relative;
+      max-width: 560px; margin: 0 auto;
+      aspect-ratio: 3/4; overflow: hidden;
+      text-decoration: none; color: white;
+      transition: opacity .3s ease;
+    }
+    .carousel-featured.fading { opacity: 0; }
+    .carousel-bg { position: absolute; inset: 0; }
+    .carousel-featured::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 55%; background: linear-gradient(transparent, rgba(0,0,0,0.72));
+      pointer-events: none;
+    }
+    .carousel-tag {
+      position: absolute; top: 20px; left: 20px; z-index: 2;
+      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      background: rgba(0,0,0,0.4); padding: 5px 10px; backdrop-filter: blur(4px);
+    }
+    .carousel-info {
+      position: absolute; bottom: 32px; left: 28px; right: 28px; z-index: 2;
+    }
+    .carousel-name {
+      font-family: var(--serif); font-size: 30px; font-weight: 400;
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    .carousel-cta {
+      display: inline-block; margin-top: 14px;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding-bottom: 2px;
+    }
+    .carousel-arc {
+      position: relative; height: 108px;
+    }
+    .arc-btn {
+      position: absolute; left: 50%; bottom: 12px;
+      transform: translateX(-50%);
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: none;
+      font-family: var(--pixel); font-size: 17px; letter-spacing: 0.04em;
+      color: var(--muted); cursor: pointer;
+      transition: transform .42s cubic-bezier(.25,.46,.45,.94),
+                  width .42s cubic-bezier(.25,.46,.45,.94),
+                  height .42s cubic-bezier(.25,.46,.45,.94),
+                  font-size .42s, background .3s, color .3s,
+                  border-color .3s, opacity .42s;
+    }
+    .arc-btn.active {
+      background: var(--ink); color: white; border-color: var(--ink);
+      width: 70px; height: 70px; font-size: 22px;
+    }
 
     /* ─── Animated reveal base ───────────────────────────── */
     .reveal { opacity: 0; }
@@ -276,70 +330,12 @@
       .burger { display: flex; }
       .section { padding: 72px 24px; }
       .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      /* Hide grid, show carousel */
-      .capsules-grid { display: none; }
-      .capsule-carousel { display: block; }
-
-      /* Featured card */
-      .carousel-featured {
-        display: block; position: relative; width: 100%;
-        aspect-ratio: 3/4; overflow: hidden;
-        text-decoration: none; color: white;
-        transition: opacity .3s ease;
-      }
-      .carousel-featured.fading { opacity: 0; }
-      .carousel-bg {
-        position: absolute; inset: 0;
-      }
-      .carousel-featured::after {
-        content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-        height: 55%; background: linear-gradient(transparent, rgba(0,0,0,0.72));
-        pointer-events: none;
-      }
-      .carousel-tag {
-        position: absolute; top: 20px; left: 20px; z-index: 2;
-        font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-        background: rgba(0,0,0,0.4); padding: 5px 10px; backdrop-filter: blur(4px);
-      }
-      .carousel-info {
-        position: absolute; bottom: 28px; left: 24px; right: 24px; z-index: 2;
-      }
-      .carousel-name {
-        font-family: var(--serif); font-size: 22px; font-weight: 400;
-        margin-bottom: 6px; line-height: 1.2;
-      }
-      .carousel-items {
-        font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
-        color: rgba(255,255,255,0.55);
-      }
-      .carousel-cta {
-        display: inline-block; margin-top: 12px;
-        font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-        color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.3);
-        padding-bottom: 2px;
-      }
-
-      /* Arc selector */
-      .carousel-arc {
-        position: relative; height: 88px;
-      }
-      .arc-btn {
-        position: absolute; left: 50%; bottom: 12px;
-        transform: translateX(-50%);
-        width: 48px; height: 48px; border-radius: 50%;
-        border: 1.5px solid var(--border); background: none;
-        font-family: var(--pixel); font-size: 16px; letter-spacing: 0.04em;
-        color: var(--muted); cursor: pointer;
-        transition: transform .42s cubic-bezier(.25,.46,.45,.94),
-                    width .42s cubic-bezier(.25,.46,.45,.94),
-                    height .42s cubic-bezier(.25,.46,.45,.94),
-                    font-size .42s, background .3s, color .3s,
-                    border-color .3s, opacity .42s;
-      }
-      .arc-btn.active {
-        background: var(--ink); color: white; border-color: var(--ink);
-        width: 60px; height: 60px; font-size: 20px;
-      }
+      /* Mobile carousel overrides */
+      .carousel-featured { max-width: 100%; }
+      .carousel-name { font-size: 22px; }
+      .arc-btn { width: 48px; height: 48px; font-size: 16px; }
+      .arc-btn.active { width: 60px; height: 60px; font-size: 20px; }
+      .carousel-arc { height: 88px; }
       .capsules-header h2 { font-size: 32px; }
       .order-cta { margin: 0 24px 56px; padding: 32px 28px; flex-direction: column; align-items: flex-start; }
       .order-cta-text h2 { font-size: 28px; }
