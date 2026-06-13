@@ -348,6 +348,12 @@ const ITEMS = [
   },
 ];
 
+// Shuffle
+for (let i = ITEMS.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [ITEMS[i], ITEMS[j]] = [ITEMS[j], ITEMS[i]];
+}
+
 const grid = document.getElementById('grid');
 
 // ── Filter logic ──
