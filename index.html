@@ -227,6 +227,9 @@
     .footer-links a:hover { color: var(--ink); }
     .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
 
+    /* ─── Mobile Capsule Carousel ─────────────────────────── */
+    .capsule-carousel { display: none; }
+
     /* ─── Animated reveal base ───────────────────────────── */
     .reveal { opacity: 0; }
     .reveal-left { opacity: 0; }
@@ -273,14 +276,69 @@
       .burger { display: flex; }
       .section { padding: 72px 24px; }
       .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      /* Compact mini-cards: 3 in a row */
-      .capsules-grid { grid-template-columns: repeat(3,1fr); gap: 10px; }
-      .capsule-thumb { aspect-ratio: 3/4; }
-      .capsule-body { padding: 10px 0 16px; }
-      .capsule-name { font-size: 13px; margin-bottom: 4px; }
-      .capsule-desc { display: none; }
-      .capsule-items { font-size: 9px; }
-      .capsule-view { display: none; }
+      /* Hide grid, show carousel */
+      .capsules-grid { display: none; }
+      .capsule-carousel { display: block; }
+
+      /* Featured card */
+      .carousel-featured {
+        display: block; position: relative; width: 100%;
+        aspect-ratio: 3/4; overflow: hidden;
+        text-decoration: none; color: white;
+        transition: opacity .3s ease;
+      }
+      .carousel-featured.fading { opacity: 0; }
+      .carousel-bg {
+        position: absolute; inset: 0;
+      }
+      .carousel-featured::after {
+        content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+        height: 55%; background: linear-gradient(transparent, rgba(0,0,0,0.72));
+        pointer-events: none;
+      }
+      .carousel-tag {
+        position: absolute; top: 20px; left: 20px; z-index: 2;
+        font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+        background: rgba(0,0,0,0.4); padding: 5px 10px; backdrop-filter: blur(4px);
+      }
+      .carousel-info {
+        position: absolute; bottom: 28px; left: 24px; right: 24px; z-index: 2;
+      }
+      .carousel-name {
+        font-family: var(--serif); font-size: 22px; font-weight: 400;
+        margin-bottom: 6px; line-height: 1.2;
+      }
+      .carousel-items {
+        font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+      }
+      .carousel-cta {
+        display: inline-block; margin-top: 12px;
+        font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.3);
+        padding-bottom: 2px;
+      }
+
+      /* Arc selector */
+      .carousel-arc {
+        display: flex; justify-content: center; align-items: flex-end;
+        gap: 20px; padding: 28px 0 8px;
+      }
+      .arc-btn {
+        width: 52px; height: 52px; border-radius: 50%;
+        border: 1.5px solid var(--border); background: none;
+        font-family: var(--pixel); font-size: 11px; letter-spacing: 0.06em;
+        color: var(--muted); cursor: pointer;
+        transition: all .35s cubic-bezier(.25,.46,.45,.94);
+        flex-shrink: 0;
+      }
+      .arc-center {
+        width: 66px; height: 66px; font-size: 13px;
+        transform: translateY(-16px);
+      }
+      .arc-btn.active {
+        background: var(--ink); color: white; border-color: var(--ink);
+      }
       .order-cta { margin: 0 24px 56px; padding: 32px 28px; flex-direction: column; align-items: flex-start; }
       footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
@@ -415,6 +473,25 @@
     </a>
 
   </div>
+
+  <!-- Mobile Carousel -->
+  <div class="capsule-carousel" id="capsuleCarousel">
+    <a class="carousel-featured" id="carouselFeatured" href="collection-a1.html">
+      <div class="carousel-bg" id="carouselBg" style="background:linear-gradient(170deg,#1a1814,#2e2a24);"></div>
+      <div class="carousel-tag" id="carouselTag">a1</div>
+      <div class="carousel-info">
+        <p class="carousel-name" id="carouselName">Capsule a1</p>
+        <p class="carousel-items" id="carouselItems">Bags · Canvas · Handstitched</p>
+        <span class="carousel-cta">Смотреть →</span>
+      </div>
+    </a>
+    <div class="carousel-arc">
+      <button class="arc-btn arc-side active" data-idx="0">a1</button>
+      <button class="arc-btn arc-center" data-idx="1">a2</button>
+      <button class="arc-btn arc-side" data-idx="2">a3</button>
+    </div>
+  </div>
+
 </section>
 
 <!-- ─── ORDER CTA ──────────────────────────────────────────── -->
@@ -581,6 +658,52 @@ document.querySelectorAll('.faq-q').forEach(btn => {
     if (!isOpen) item.classList.add('open');
   });
 });
+
+// ── Mobile Capsule Carousel ─────────────────────────────────
+(function(){
+  const capsules = [
+    { tag:'a1', name:'Capsule a1', items:'Bags · Canvas · Handstitched',
+      bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
+    { tag:'a2', name:'Capsule a2', items:'Jackets · Canvas · Raw Denim',
+      bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
+    { tag:'a3', name:'Capsule a3', items:'Jeans · Workpants · Japanese Denim',
+      bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
+  ];
+  let current = 0;
+  const featured = document.getElementById('carouselFeatured');
+  if (!featured) return;
+  const bgEl    = document.getElementById('carouselBg');
+  const tagEl   = document.getElementById('carouselTag');
+  const nameEl  = document.getElementById('carouselName');
+  const itemsEl = document.getElementById('carouselItems');
+  const arcBtns = document.querySelectorAll('.arc-btn');
+
+  function goTo(idx) {
+    if (idx === current || idx < 0 || idx >= capsules.length) return;
+    current = idx;
+    featured.classList.add('fading');
+    setTimeout(() => {
+      const c = capsules[idx];
+      bgEl.style.background = c.bg;
+      tagEl.textContent = c.tag;
+      nameEl.textContent = c.name;
+      itemsEl.textContent = c.items;
+      featured.href = c.href;
+      arcBtns.forEach((b, i) => b.classList.toggle('active', i === idx));
+      featured.classList.remove('fading');
+    }, 200);
+  }
+
+  arcBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
+
+  // Swipe support
+  let tx = 0;
+  featured.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  featured.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 48) goTo(dx < 0 ? current + 1 : current - 1);
+  });
+})();
 </script>
 </body>
 </html>
