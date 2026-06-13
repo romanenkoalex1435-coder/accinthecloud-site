@@ -179,8 +179,13 @@
       padding: 0; z-index: 2;
     }
     .capsule-name {
-      font-family: var(--serif); font-size: 22px; font-weight: 400;
-      color: white; letter-spacing: 0.02em; margin-bottom: 10px;
+      font-family: var(--sans); font-size: 28px; font-weight: 700;
+      color: white; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .capsule-sub {
+      font-family: var(--serif); font-size: 15px; font-weight: 400;
+      color: rgba(255,255,255,0.75); margin-bottom: 10px; letter-spacing: 0.02em;
     }
     .capsule-desc { display: none; }
     .capsule-items { display: none; }
@@ -264,8 +269,13 @@
       position: absolute; bottom: 32px; left: 28px; right: 28px; z-index: 2;
     }
     .carousel-name {
-      font-family: var(--serif); font-size: 30px; font-weight: 400;
-      margin-bottom: 6px; line-height: 1.2;
+      font-family: var(--sans); font-size: 32px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .carousel-sub {
+      font-family: var(--serif); font-size: 16px; font-weight: 400;
+      color: rgba(255,255,255,0.75); margin-bottom: 6px;
     }
     .carousel-cta {
       display: inline-block; margin-top: 14px;
@@ -446,7 +456,8 @@
         <div class="capsule-tag">a1</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Access Shoulder Bags</p>
+        <p class="capsule-name">Access</p>
+        <p class="capsule-sub">Shoulder Bags</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -458,7 +469,8 @@
         <div class="capsule-tag">a2</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Accept Jackets</p>
+        <p class="capsule-name">Accept</p>
+        <p class="capsule-sub">Jackets</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -470,7 +482,8 @@
         <div class="capsule-tag">a3</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Accent Pants</p>
+        <p class="capsule-name">Accent</p>
+        <p class="capsule-sub">Pants</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -483,7 +496,8 @@
       <div class="carousel-bg" id="carouselBg" style="background:linear-gradient(170deg,#1a1814,#2e2a24);"></div>
       <div class="carousel-tag" id="carouselTag">a1</div>
       <div class="carousel-info">
-        <p class="carousel-name" id="carouselName">Access Shoulder Bags</p>
+        <p class="carousel-name" id="carouselName">Access</p>
+        <p class="carousel-sub" id="carouselSub">Shoulder Bags</p>
         <span class="carousel-cta">Смотреть →</span>
       </div>
     </a>
@@ -664,9 +678,9 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // ── Mobile Capsule Carousel ─────────────────────────────────
 (function(){
   const capsules = [
-    { tag:'a1', name:'Access Shoulder Bags', bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
-    { tag:'a2', name:'Accept Jackets',       bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
-    { tag:'a3', name:'Accent Pants',         bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
+    { tag:'a1', name:'Access', sub:'Shoulder Bags', bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
+    { tag:'a2', name:'Accept', sub:'Jackets',       bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
+    { tag:'a3', name:'Accent', sub:'Pants',         bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
   ];
   let current = 0;
   const featured = document.getElementById('carouselFeatured');
@@ -674,6 +688,7 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   const bgEl    = document.getElementById('carouselBg');
   const tagEl   = document.getElementById('carouselTag');
   const nameEl  = document.getElementById('carouselName');
+  const subEl   = document.getElementById('carouselSub');
   const arcBtns = document.querySelectorAll('.arc-btn');
 
   const SPACING = 76; // px between button centers
@@ -697,6 +712,7 @@ document.querySelectorAll('.faq-q').forEach(btn => {
       bgEl.style.background = c.bg;
       tagEl.textContent = c.tag;
       nameEl.textContent = c.name;
+      if (subEl) subEl.textContent = c.sub;
       featured.href = c.href;
       featured.classList.remove('fading');
     }, 200);
