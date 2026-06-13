@@ -180,6 +180,22 @@
       .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
+
+    /* ── Filter bar ── */
+    .lb-filters {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-filter {
+      padding: 7px 16px; border: 1px solid var(--border);
+      background: none; font-family: var(--sans); font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+      cursor: pointer; transition: all .2s;
+    }
+    .lb-filter:hover { border-color: var(--ink); color: var(--ink); }
+    .lb-filter.active { background: var(--ink); color: white; border-color: var(--ink); }
+    .lb-count { font-size: 9px; color: var(--muted); margin-left: 4px; opacity: .6; }
     .section-label, .capsule-items, .capsule-tag,
     .modal-num, .modal-made, .items-label,
     .checkout-label, .breadcrumb, .offer-wrap h2 {
@@ -212,6 +228,14 @@
   </div>
 </nav>
 
+<div class="lb-filters" id="filters">
+  <button class="lb-filter active" data-cat="all">Все</button>
+  <button class="lb-filter" data-cat="tops">Верх</button>
+  <button class="lb-filter" data-cat="bottoms">Низ</button>
+  <button class="lb-filter" data-cat="bags">Сумки</button>
+  <button class="lb-filter" data-cat="accessories">Аксессуары</button>
+  <button class="lb-filter" data-cat="special">Special</button>
+</div>
 <div class="lb-grid" id="grid"></div>
 
 <footer>
@@ -251,36 +275,104 @@
 <script>
 const ITEMS = [
   {
-    id: 'raspberry-orbit',
-    num: 'no. 17',
-    name: "'raspberry orbit' work jacket",
-    desc: `Укороченная куртка из плотного канваса с объёмной простёжкой в форме кругов. Материал держит форму и придаёт изделию скульптурный силуэт. Металлическая фурнитура и контрастная отделка добавляют индустриальный характер.`,
-    photos: 3,
-    folder: 'raspberry-orbit',
+    id: 'jeans-n01', num: 'n01', name: '«plaid» jeans', cat: 'bottoms', photos: 8, folder: 'jeans-n01',
+    desc: `Рваные синие джинсы с вставками из клетчатой ткани.\n\nКлассический винтажный силуэт дополнен декоративными вставками на коленях и задних карманах. Брюки сшиты по выкройке прямых джинсов, после чего расширены внутренними вставками.`,
   },
   {
-    id: 'indigo-line',
-    num: 'no. 14 · sample 1',
-    name: '«Indigo Line» selvedge denim',
-    desc: `Винтаж в чистом виде, переосмысленный с уважением к деталям. Эти джинсы сшиты из японского селвидж денима с характерной красно-белой кромкой и дополнены поясом из плотного канваса, как дань рабочей одежде 1940–50-х годов. Контраст фактур и оттенков отсылает к эпохе, когда каждая вещь служила годами и несла в себе следы истории.\n\nПрямой крой, высокая посадка, классические заклёпки и задний регулировочный ремешок в стиле cinch back. Это выбор тех, кто чувствует связь с прошлым, но живёт в настоящем.`,
-    photos: 9,
-    folder: 'indigo-line',
+    id: 'tie-n02', num: 'n02', name: '«pocket» tie', cat: 'accessories', photos: 2, folder: 'tie-n02',
+    desc: `Галстук из денима апсайкл с карманами.\n\nСделан из винтажных джинсов, чтобы показать, что все достойны второй жизни.`,
   },
   {
-    id: 'olive-maverick',
-    num: 'no. 18',
-    name: "'OLIVE MAVERICK' work jacket",
+    id: 'bag-n03', num: 'n03', name: '«patch» bag', cat: 'bags', photos: 5, folder: 'bag-n03',
+    desc: `Сумка-шоппер из денима с заплатками.\n\nСшита из денима с множеством заплаток. Долго вынашивал эту идею и наконец-то воплотил её в жизнь. Было использовано более 30 уникальных винтажных брендовых бирок.`,
+  },
+  {
+    id: 'pants-n04', num: 'n04', name: '«burning» pants', cat: 'bottoms', photos: 6, folder: 'pants-n04',
+    desc: `Брюки оливкового цвета из плотного хлопка с дополнительными большими карманами в области колен и декоративными молниями на передних карманах.\n\nПосле пошива брюки были подожжены в области выхода с помощью очистителя на основе ацетона. Доделаны вставками, закрывающими отверстия.`,
+  },
+  {
+    id: 'jeans-n05', num: 'n05', name: '«grayness» jeans', cat: 'bottoms', photos: 5, folder: 'jeans-n05',
+    desc: `Рваные чёрные джинсы с карманами и двойными слоями ткани.`,
+  },
+  {
+    id: 'bomber-n06', num: 'n06', name: '«army» bomber jacket', cat: 'tops', photos: 6, folder: 'bomber-n06',
     desc: ``,
-    photos: 6,
-    folder: 'olive-maverick',
+  },
+  {
+    id: 'jeans-n07', num: 'n07', name: '«BOLSHIE JEANSI» grey jeans', cat: 'bottoms', special: true, photos: 7, folder: 'jeans-n07',
+    desc: `Special for SALUKI.\n\n«Bol— », «Bo— », «bo— » («—shie— »)\n«Bolshie kurtki»\n«Bolshie— », «—Shie— »\n«Bol— », «bol— », «—shie— »`,
+  },
+  {
+    id: 'jeans-n08', num: 'n08', name: '«dead tissue» black jeans', cat: 'bottoms', photos: 7, folder: 'jeans-n08',
+    desc: ``,
+  },
+  {
+    id: 'mask-n09', num: 'n09', name: '«hello from 2021» patchwork mask', cat: 'accessories', photos: 6, folder: 'mask-n09',
+    desc: ``,
+  },
+  {
+    id: 'jacket-n10', num: 'n10', name: '«DOOR HINGES» jacket', cat: 'tops', photos: 7, folder: 'jacket-n10',
+    desc: `Дизайн корейской армейской куртки на основе рабочей куртки Carhartt.\n\nКанвас плотностью 450 гр. Металлическая фурнитура.\n\nРазмер: M (по бирке)`,
+  },
+  {
+    id: 'jeans-n11', num: 'n11', name: '«flower» black flared jeans', cat: 'bottoms', photos: 7, folder: 'jeans-n11',
+    desc: ``,
+  },
+  {
+    id: 'bag-n12', num: 'n12', name: '«G» crossbody bag', cat: 'bags', photos: 6, folder: 'bag-n12',
+    desc: `Канвас 420 гр, вощёный.`,
+  },
+  {
+    id: 'jacket-n13', num: 'n13', name: '«barley wax» canvas jacket', cat: 'tops', photos: 8, folder: 'jacket-n13',
+    desc: `Укороченная куртка из плотного вощёного канваса, сочетающая в себе утилитарность и выразительный силуэт. Стиль отсылает к классическим рабочим курткам, но переосмыслен в современной форме с акцентом на детали.\n\nКачественная бронзовая фурнитура — массивные застёжки с крюками — придаёт изделию характер и подчёркивает надёжность конструкции. Вощёный канвас защищает от ветра и влаги, а со временем покрывается благородной патиной, делая куртку уникальной.`,
+  },
+  {
+    id: 'indigo-line', num: 'n14', name: '«Indigo Line» selvedge denim', cat: 'bottoms', photos: 9, folder: 'indigo-line',
+    desc: `Винтаж в чистом виде, переосмысленный с уважением к деталям. Эти джинсы сшиты из японского селвидж денима с характерной красно-белой кромкой и дополнены поясом из плотного канваса, как дань рабочей одежде 1940–50-х годов.\n\nПрямой крой, высокая посадка, классические заклёпки и задний регулировочный ремешок в стиле cinch back.`,
+  },
+  {
+    id: 'bag-n15', num: 'n15', name: '«a» shoulder bag', cat: 'bags', photos: 4, folder: 'bag-n15',
+    desc: ``,
+  },
+  {
+    id: 'jacket-n16', num: 'n16', name: '«tie» black canvas jacket', cat: 'tops', photos: 4, folder: 'jacket-n16',
+    desc: ``,
+  },
+  {
+    id: 'raspberry-orbit', num: 'n17', name: '«raspberry orbit» work jacket', cat: 'tops', photos: 3, folder: 'raspberry-orbit',
+    desc: `Укороченная куртка из плотного канваса с объёмной простёжкой в форме кругов. Материал держит форму и придаёт изделию скульптурный силуэт. Металлическая фурнитура и контрастная отделка добавляют индустриальный характер.`,
+  },
+  {
+    id: 'olive-maverick', num: 'n18', name: '«OLIVE MAVERICK» work jacket', cat: 'tops', photos: 6, folder: 'olive-maverick',
+    desc: ``,
   },
 ];
 
 const grid = document.getElementById('grid');
 
+// ── Filter logic ──
+let activeFilter = 'all';
+document.querySelectorAll('.lb-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.cat;
+    document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.lb-card').forEach(card => {
+      const cat = card.dataset.cat;
+      const isSpecial = card.dataset.special === 'true';
+      const show = activeFilter === 'all'
+        || cat === activeFilter
+        || (activeFilter === 'special' && isSpecial);
+      card.style.display = show ? '' : 'none';
+    });
+  });
+});
+
 ITEMS.forEach(item => {
   const card = document.createElement('div');
   card.className = 'lb-card';
+  card.dataset.cat = item.cat;
+  card.dataset.special = item.special ? 'true' : 'false';
 
   // slides
   const slidesEl = document.createElement('div');
