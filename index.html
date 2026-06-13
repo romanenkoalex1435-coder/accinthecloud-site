@@ -142,6 +142,8 @@
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
     }
     .capsule-card { position: relative; overflow: hidden; cursor: none; display:block; }
+    .capsule-view { color: rgba(255,255,255,0.7) !important; }
+    .capsule-card:hover .capsule-view { color: white !important; }
     .capsule-card-link { display:block; }
     .capsule-view {
       display:inline-flex; align-items:center; gap:10px; margin-top:14px;
@@ -166,13 +168,22 @@
       color: white; background: rgba(0,0,0,0.5);
       padding: 5px 10px; backdrop-filter: blur(4px);
     }
-    .capsule-body { padding: 22px 0 40px; }
-    .capsule-name {
-      font-family: var(--serif); font-size: 26px; font-weight: 400;
-      letter-spacing: 0.02em; margin-bottom: 8px;
+    /* Body overlaid on image */
+    .capsule-thumb::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 50%; background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      pointer-events: none;
     }
-    .capsule-desc { font-size: 12px; color: var(--muted); line-height: 1.75; margin-bottom: 12px; }
-    .capsule-items { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .capsule-body {
+      position: absolute; bottom: 24px; left: 20px; right: 20px;
+      padding: 0; z-index: 2;
+    }
+    .capsule-name {
+      font-family: var(--serif); font-size: 22px; font-weight: 400;
+      color: white; letter-spacing: 0.02em; margin-bottom: 10px;
+    }
+    .capsule-desc { display: none; }
+    .capsule-items { display: none; }
 
     /* ─── Marquee ────────────────────────────────────────── */
     .marquee-section {
