@@ -52,50 +52,17 @@
     .mobile-menu a:hover { color:var(--ink); }
     .mobile-menu-close { position:absolute; top:24px; right:24px; background:none; border:none; cursor:pointer; font-size:20px; color:var(--muted); }
 
-    /* ── Page header ── */
-    .page-hero {
-      padding:80px 48px 64px;
-      border-bottom:1px solid var(--border);
+    /* ── Page layout ── */
+    .order-wrap {
+      max-width:680px; margin:0 auto; padding:80px 48px 120px;
     }
-    .page-hero h1 {
-      font-family:var(--pixel); font-size:clamp(28px,4vw,56px); font-weight:normal;
-      letter-spacing:0.06em; line-height:1.1;
+    .order-wrap h1 {
+      font-family:var(--pixel); font-size:clamp(32px,4vw,56px); font-weight:normal;
+      letter-spacing:0.06em; line-height:1.1; margin-bottom:12px;
     }
-    .page-hero p {
-      margin-top:16px; font-size:13px; color:var(--muted); max-width:480px; line-height:1.8;
+    .order-wrap .order-sub {
+      font-size:13px; color:var(--muted); line-height:1.8; margin-bottom:56px;
     }
-
-    /* ── Order layout ── */
-    .order-layout {
-      display:grid; grid-template-columns:1fr 1fr; min-height:72vh;
-    }
-    .order-left {
-      background:var(--ink); color:white;
-      padding:80px 64px;
-      display:flex; flex-direction:column; justify-content:center;
-      position:relative; overflow:hidden;
-    }
-    .order-left::before {
-      content:'acc'; position:absolute;
-      font-family:var(--serif); font-style:italic;
-      font-size:28vw; font-weight:400; color:rgba(255,255,255,0.04);
-      bottom:-8vw; right:-4vw; line-height:1; pointer-events:none; white-space:nowrap;
-    }
-    .order-left h2 {
-      font-family:var(--serif); font-size:clamp(32px,4vw,58px); font-weight:400;
-      line-height:1.15; margin-bottom:20px; color:white; position:relative;
-    }
-    .order-left p { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.9; position:relative; }
-    .order-facts { display:flex; gap:40px; margin-top:52px; position:relative; }
-    .order-fact-num {
-      font-family:var(--serif); font-style:italic;
-      font-size:38px; font-weight:400; color:white; display:block; line-height:1;
-    }
-    .order-fact-label {
-      font-size:9px; letter-spacing:0.22em; text-transform:uppercase;
-      color:rgba(255,255,255,0.4); margin-top:6px; display:block;
-    }
-    .order-right { padding:80px 64px; background:var(--soft); }
 
     /* ── Form ── */
     .field { margin-bottom:28px; }
@@ -154,12 +121,7 @@
     /* ── Mobile ── */
     @media(max-width:900px) {
       nav { padding:16px 20px; }
-      .page-hero { padding:48px 24px 40px; }
-      .order-layout { grid-template-columns:1fr; }
-      .order-left { padding:52px 24px; }
-      .order-left::before { font-size:50vw; }
-      .order-right { padding:40px 24px; }
-      .order-facts { gap:24px; }
+      .order-wrap { padding:48px 24px 80px; }
       footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
       .footer-links { flex-wrap:wrap; justify-content:center; gap:16px; }
     }
@@ -191,65 +153,42 @@
   </div>
 </nav>
 
-<div class="page-hero">
+<div class="order-wrap">
   <h1>Индивидуальный<br>пошив</h1>
-  <p>Опиши свою идею — свяжусь в телеграме и обсудим детали. Любой фасон, любой материал.</p>
-</div>
+  <p class="order-sub">Опиши свою идею — свяжусь в телеграме и обсудим детали. Любой фасон, любой материал.</p>
 
-<div class="order-layout">
-  <div class="order-left">
-    <h2>Давай<br>сошьём<br><em>что-нибудь</em></h2>
-    <p>Выбери вещь из капсулы или опиши свою идею — свяжусь в телеграме и обсудим детали.</p>
-    <div class="order-facts">
-      <div>
-        <span class="order-fact-num">1000+</span>
-        <span class="order-fact-label">изделий</span>
-      </div>
-      <div>
-        <span class="order-fact-num">100%</span>
-        <span class="order-fact-label">ручная работа</span>
-      </div>
-      <div>
-        <span class="order-fact-num">a1–a3</span>
-        <span class="order-fact-label">капсулы</span>
+  <form id="orderForm">
+    <div class="field">
+      <label>Что хочешь сшить?</label>
+      <textarea name="idea" rows="5" placeholder="Материал, фасон, референсы — всё пригодится."></textarea>
+    </div>
+    <div class="field">
+      <label>Имя</label>
+      <input type="text" name="name" placeholder="Как тебя зовут?" required />
+    </div>
+    <div class="field">
+      <label>Telegram</label>
+      <input type="text" name="telegram" placeholder="@username" required />
+    </div>
+    <div class="field">
+      <label>Комментарий</label>
+      <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
+    </div>
+    <div class="field">
+      <label>Фото / референсы</label>
+      <div class="file-upload">
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+        <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
+        <span class="file-names" id="fileNames"></span>
       </div>
     </div>
-  </div>
-
-  <div class="order-right">
-    <form id="orderForm">
-      <div class="field">
-        <label>Своя идея</label>
-        <textarea name="idea" rows="5" placeholder="Что хочешь сшить? Материал, фасон, референсы — всё пригодится."></textarea>
-      </div>
-      <div class="field">
-        <label>Имя</label>
-        <input type="text" name="name" placeholder="Как тебя зовут?" required />
-      </div>
-      <div class="field">
-        <label>Telegram</label>
-        <input type="text" name="telegram" placeholder="@username" required />
-      </div>
-      <div class="field">
-        <label>Комментарий</label>
-        <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
-      </div>
-      <div class="field">
-        <label>Фото / референсы</label>
-        <div class="file-upload">
-          <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-          <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
-          <span class="file-names" id="fileNames"></span>
-        </div>
-      </div>
-      <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
-      <button type="submit" class="btn-submit" id="submitBtn">Добавить в корзину →</button>
-    </form>
-    <div class="form-success" id="formSuccess">
-      <div class="success-icon">✓</div>
-      <h3>Запрос добавлен</h3>
-      <p>Перейди в корзину для оформления заказа.</p>
-    </div>
+    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
+    <button type="submit" class="btn-submit" id="submitBtn">Добавить в корзину →</button>
+  </form>
+  <div class="form-success" id="formSuccess">
+    <div class="success-icon">✓</div>
+    <h3>Запрос добавлен</h3>
+    <p>Перейди в корзину для оформления заказа.</p>
   </div>
 </div>
 
