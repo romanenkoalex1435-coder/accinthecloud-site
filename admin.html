@@ -294,7 +294,7 @@ async function loadOrders() {
           <div style="padding:8px 0;border-bottom:1px solid var(--border);">
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
               <span style="font-size:13px;font-weight:500;">${escHtml(item.name)}</span>
-              <span style="font-size:13px;white-space:nowrap;margin-left:16px;">${escHtml(item.price)}${qty > 1 ? ' × ' + qty : ''}</span>
+              <span style="font-size:13px;white-space:nowrap;margin-left:16px;">${item.price}${qty > 1 ? ' × ' + qty : ''}</span>
             </div>
             <div style="font-size:11px;color:var(--muted);">${escHtml(item.capsule)}${meta.length ? ' · ' + meta.join(' · ') : ''}</div>
           </div>`;
