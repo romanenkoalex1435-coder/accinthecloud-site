@@ -91,7 +91,11 @@
       width: clamp(240px, 44vw, 560px); margin: 0 auto;
       opacity: 0;
     }
-    .hero-logo-video video { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
+    .hero-logo-video video,
+    .hero-logo-video img { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
+    .hero-logo-video img { display: none; }
+    .hero-logo-video.video-failed video { display: none; }
+    .hero-logo-video.video-failed img { display: block; }
     @keyframes logoBreathe {
       0%,100% { transform: scale(1); }
       50% { transform: scale(1.022); }
@@ -173,10 +177,21 @@
       content: ''; position: absolute; bottom: 0; left: 0; right: 0;
       height: 50%; background: linear-gradient(transparent, rgba(0,0,0,0.7));
       pointer-events: none;
+      opacity: 0; transition: opacity 0.45s ease;
+    }
+    .capsule-card:hover .capsule-thumb::after,
+    .capsule-card:focus-within .capsule-thumb::after {
+      opacity: 1;
     }
     .capsule-body {
       position: absolute; bottom: 24px; left: 20px; right: 20px;
       padding: 0; z-index: 2;
+      opacity: 0; transform: translateY(14px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .capsule-card:hover .capsule-body,
+    .capsule-card:focus-within .capsule-body {
+      opacity: 1; transform: translateY(0);
     }
     .capsule-name {
       font-family: var(--sans); font-size: 28px; font-weight: 700;
@@ -419,8 +434,9 @@
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
   <div class="hero-content">
-    <div class="hero-logo-video">
-      <video src="LogoPolyacc.MOV" autoplay loop muted playsinline></video>
+    <div class="hero-logo-video" id="heroLogoVideo">
+      <video src="LogoPolyacc.MOV" autoplay loop muted playsinline onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')"></video>
+      <img src="images/logo.png" alt="accinthecloud">
     </div>
     <p class="hero-brand">accinthecloud</p>
     <p class="hero-eyebrow">Handmade · Moscow</p>
