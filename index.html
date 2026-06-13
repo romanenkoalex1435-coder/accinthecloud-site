@@ -410,18 +410,16 @@
 <!-- ─── MARQUEE ───────────────────────────────────────────── -->
 <div class="marquee-section">
   <div class="marquee-track">
-    <span class="marquee-item">Japanese denim</span>
+    <span class="marquee-item">Bespoke tailoring</span>
+    <span class="marquee-item">Custom-made</span>
     <span class="marquee-item">Handcrafted</span>
+    <span class="marquee-item">Attention to detail</span>
     <span class="marquee-item">accinthecloud</span>
-    <span class="marquee-item">Capsule collections</span>
-    <span class="marquee-item">Made to order</span>
-    <span class="marquee-item">4.4K followers</span>
-    <span class="marquee-item">Japanese denim</span>
+    <span class="marquee-item">Bespoke tailoring</span>
+    <span class="marquee-item">Custom-made</span>
     <span class="marquee-item">Handcrafted</span>
+    <span class="marquee-item">Attention to detail</span>
     <span class="marquee-item">accinthecloud</span>
-    <span class="marquee-item">Capsule collections</span>
-    <span class="marquee-item">Made to order</span>
-    <span class="marquee-item">4.4K followers</span>
   </div>
 </div>
 
@@ -440,9 +438,7 @@
         <div class="capsule-tag">a1</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Capsule a1</p>
-        <p class="capsule-desc">ACCESS shoulder bag — сумка ручного пошива из канваса и денима. Каждый стежок в ручную.</p>
-        <p class="capsule-items">Bags · Canvas · Handstitched</p>
+        <p class="capsule-name">Access Shoulder Bags</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -454,9 +450,7 @@
         <div class="capsule-tag">a2</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Capsule a2</p>
-        <p class="capsule-desc">ACCORD — куртки из плотного канваса и сырого денима. Металлическая фурнитура, работа на годы.</p>
-        <p class="capsule-items">Jackets · Canvas · Raw Denim</p>
+        <p class="capsule-name">Accept Jackets</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -468,9 +462,7 @@
         <div class="capsule-tag">a3</div>
       </div>
       <div class="capsule-body">
-        <p class="capsule-name">Capsule a3</p>
-        <p class="capsule-desc">Джинсы и рабочие штаны из японского сырого денима и плотного канваса. Широкий крой, долгая жизнь.</p>
-        <p class="capsule-items">Jeans · Workpants · Japanese Denim</p>
+        <p class="capsule-name">Accent Pants</p>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
@@ -483,8 +475,7 @@
       <div class="carousel-bg" id="carouselBg" style="background:linear-gradient(170deg,#1a1814,#2e2a24);"></div>
       <div class="carousel-tag" id="carouselTag">a1</div>
       <div class="carousel-info">
-        <p class="carousel-name" id="carouselName">Capsule a1</p>
-        <p class="carousel-items" id="carouselItems">Bags · Canvas · Handstitched</p>
+        <p class="carousel-name" id="carouselName">Access Shoulder Bags</p>
         <span class="carousel-cta">Смотреть →</span>
       </div>
     </a>
@@ -665,12 +656,9 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // ── Mobile Capsule Carousel ─────────────────────────────────
 (function(){
   const capsules = [
-    { tag:'a1', name:'Capsule a1', items:'Bags · Canvas · Handstitched',
-      bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
-    { tag:'a2', name:'Capsule a2', items:'Jackets · Canvas · Raw Denim',
-      bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
-    { tag:'a3', name:'Capsule a3', items:'Jeans · Workpants · Japanese Denim',
-      bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
+    { tag:'a1', name:'Access Shoulder Bags', bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
+    { tag:'a2', name:'Accept Jackets',       bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
+    { tag:'a3', name:'Accent Pants',         bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
   ];
   let current = 0;
   const featured = document.getElementById('carouselFeatured');
@@ -678,7 +666,6 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   const bgEl    = document.getElementById('carouselBg');
   const tagEl   = document.getElementById('carouselTag');
   const nameEl  = document.getElementById('carouselName');
-  const itemsEl = document.getElementById('carouselItems');
   const arcBtns = document.querySelectorAll('.arc-btn');
 
   const SPACING = 76; // px between button centers
@@ -702,7 +689,6 @@ document.querySelectorAll('.faq-q').forEach(btn => {
       bgEl.style.background = c.bg;
       tagEl.textContent = c.tag;
       nameEl.textContent = c.name;
-      itemsEl.textContent = c.items;
       featured.href = c.href;
       featured.classList.remove('fading');
     }, 200);
