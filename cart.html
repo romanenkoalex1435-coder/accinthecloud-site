@@ -185,11 +185,12 @@
     .btn-back:hover { background:var(--ink); color:white; }
 
     /* ── Footer ── */
-    footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer { padding:48px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; }
     .footer-logo { font-family:var(--pixel); font-size:26px; letter-spacing:0.1em; }
     .footer-links { display:flex; gap:24px; }
     .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .footer-links a:hover { color:var(--ink); }
+    .footer-copy { font-size:10px; color:var(--muted); letter-spacing:0.05em; }
 
     @media(max-width:900px) {
       nav { padding:16px 20px; }
