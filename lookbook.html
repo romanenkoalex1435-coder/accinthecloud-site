@@ -440,18 +440,14 @@ ITEMS.forEach(item => {
   slidesEl.addEventListener('mousemove', () => moved = true);
   card.addEventListener('click', e => {
     if (moved) return;
-    const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-    openModal(item, idx);
+    openModal(item);
   });
 
   // touch tap
   let touchStart = 0;
   card.addEventListener('touchstart', e => { touchStart = e.touches[0].clientX; }, {passive:true});
   card.addEventListener('touchend', e => {
-    if (Math.abs(e.changedTouches[0].clientX - touchStart) < 10) {
-      const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-      openModal(item, idx);
-    }
+    if (Math.abs(e.changedTouches[0].clientX - touchStart) < 10) openModal(item);
   });
 
   grid.appendChild(card);
@@ -462,8 +458,8 @@ let cur = null, curSlide = 0;
 const mSlides = document.getElementById('mSlides');
 const mDots   = document.getElementById('mDots');
 
-function openModal(item, startIndex) {
-  cur = item; curSlide = startIndex || 0;
+function openModal(item) {
+  cur = item; curSlide = 0;
 
   mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
     const src = `images/lookbook/${item.folder}/${String(i+1).padStart(2,'0')}.jpeg`;
@@ -471,13 +467,14 @@ function openModal(item, startIndex) {
   }).join('');
 
   mDots.innerHTML = Array.from({length: item.photos}, (_, i) =>
-    `<div class="mdot${i===curSlide?' active':''}" data-i="${i}"></div>`
+    `<div class="mdot${i===0?' active':''}" data-i="${i}"></div>`
   ).join('');
 
   mDots.querySelectorAll('.mdot').forEach(d =>
     d.addEventListener('click', () => goSlide(+d.dataset.i))
   );
 
+  mSlides.scrollLeft = 0;
   mSlides.addEventListener('scroll', onScroll, {passive:true});
 
   document.getElementById('mNum').textContent = item.num;
@@ -486,12 +483,6 @@ function openModal(item, startIndex) {
 
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  if (curSlide > 0) {
-    requestAnimationFrame(() => { mSlides.scrollLeft = curSlide * mSlides.offsetWidth; });
-  } else {
-    mSlides.scrollLeft = 0;
-  }
 }
 
 function onScroll() {
