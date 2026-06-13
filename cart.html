@@ -213,6 +213,7 @@
   body.page-out { opacity:0 !important; transition:opacity .18s ease; }
   </style>
   <script defer src="/_vercel/insights/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -309,9 +310,12 @@
 </footer>
 
 <script>
-// ── Telegram config (должен совпадать с index.html) ──
-const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
-const CHAT_ID   = 'YOUR_CHAT_ID_HERE';
+// ── Supabase ──
+const { createClient } = supabase;
+const _sb = createClient(
+  'https://tllrnkcmjvfspwrlcvbg.supabase.co',
+  'sb_publishable_B7l8wH4rW7Wllj9ueEKOQg_Hxk3JKGS'
+);
 
 // ── Render cart ──
 function renderCart() {
@@ -398,29 +402,17 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Отправляем...';
 
-  const text = ACC.formatTelegramMessage(name, telegram, comment);
-
-  // Save to localStorage for admin
-  ACC.saveOrder({
-    type: 'cart',
-    name, telegram, comment,
-    details: text,
-    items: ACC.get()
-  });
-
-  // Send to Telegram
   try {
-    if (BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
-      const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' })
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error('API error');
-    }
+    await _sb.from('orders').insert([{
+      type: 'cart',
+      name: name,
+      contact: telegram,
+      items: ACC.get(),
+      notes: comment,
+      status: 'new'
+    }]);
   } catch(err) {
-    console.warn('Telegram error:', err.message);
+    console.warn('Supabase error:', err.message);
   }
 
   ACC.clear();

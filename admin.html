@@ -105,6 +105,12 @@
       padding: 4px 0;
     }
     .clear-btn:hover { color: var(--red); }
+    .refresh-btn {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      padding: 4px 8px; transition: color .2s;
+    }
+    .refresh-btn:hover { color: var(--ink); }
 
     .orders-list { display: flex; flex-direction: column; gap: 8px; }
     .order-card {
@@ -164,7 +170,7 @@
     <div class="top-bar-right">
       <div class="tg-status">
         <div class="dot" id="tgDot"></div>
-        <span id="tgLabel">Telegram</span>
+        <span id="tgLabel">Supabase</span>
       </div>
       <button class="logout-btn" onclick="logout()">Выйти</button>
     </div>
@@ -188,25 +194,32 @@
 
     <div class="section-head">
       <h2>Заявки</h2>
-      <button class="clear-btn" onclick="clearOrders()">Очистить всё</button>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <button class="refresh-btn" onclick="loadOrders()">↻ Обновить</button>
+        <button class="clear-btn" onclick="clearOrders()">Очистить всё</button>
+      </div>
     </div>
 
     <div class="orders-list" id="ordersList"></div>
 
     <div class="tg-notice">
-      <strong>Telegram-уведомления</strong>
-      Заявки также отправляются тебе в Telegram при корректно заполненных BOT_TOKEN и CHAT_ID в <code>index.html</code>.
-      Как настроить: создай бота через <a href="https://t.me/BotFather" target="_blank">@BotFather</a>,
-      получи токен, напиши боту /start, перейди по
-      <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> и найди свой <code>chat_id</code>.
-      Вставь оба значения в <code>CONFIG</code> в index.html.
+      <strong>База данных</strong>
+      Все заявки хранятся в Supabase. Для доступа к таблице напрямую:
+      <a href="https://supabase.com/dashboard/project/tllrnkcmjvfspwrlcvbg/editor" target="_blank">открыть Table Editor</a>.
     </div>
   </div>
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── Пароль — должен совпадать с CONFIG.ADMIN_PASS в index.html ──
+// ── Supabase ──
+const { createClient } = supabase;
+const _sb = createClient(
+  'https://tllrnkcmjvfspwrlcvbg.supabase.co',
+  'sb_publishable_B7l8wH4rW7Wllj9ueEKOQg_Hxk3JKGS'
+);
+
 const ADMIN_PASS = 'accin2025';
 
 function tryLogin() {
@@ -227,30 +240,40 @@ function logout() {
   location.reload();
 }
 
-function showDashboard() {
+async function showDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-  loadOrders();
-  checkTelegram();
+  await loadOrders();
+  checkSupabase();
 }
 
-// Auto-login if session alive
 if (sessionStorage.getItem('acc_admin') === '1') showDashboard();
 
-// ── Load orders from localStorage ──
-function loadOrders() {
-  const orders = JSON.parse(localStorage.getItem('acc_orders') || '[]');
-  const list = document.getElementById('ordersList');
+const STATUS_COLOR = { new: '#f59e0b', 'in-progress': '#3b82f6', done: '#22c55e' };
 
-  document.getElementById('statTotal').textContent   = orders.length;
-  document.getElementById('statCart').textContent    = orders.filter(o => o.type === 'cart').length;
-  document.getElementById('statCustom').textContent  = orders.filter(o => o.type !== 'cart').length;
+async function loadOrders() {
+  const list = document.getElementById('ordersList');
+  list.innerHTML = '<div class="empty-state"><p style="opacity:.4">Загрузка...</p></div>';
+
+  const { data: orders, error } = await _sb
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="empty-state"><p>Ошибка загрузки</p><small>${escHtml(error.message)}</small></div>`;
+    return;
+  }
+
+  document.getElementById('statTotal').textContent  = orders.length;
+  document.getElementById('statCart').textContent   = orders.filter(o => o.type === 'cart').length;
+  document.getElementById('statCustom').textContent = orders.filter(o => o.type !== 'cart').length;
 
   if (orders.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
         <p>Заявок пока нет</p>
-        <small>Появятся здесь после заполнения формы или оформления корзины</small>
+        <small>Появятся здесь после оформления заказа на сайте</small>
       </div>`;
     return;
   }
@@ -263,35 +286,61 @@ function loadOrders() {
     if (isCart && o.items && o.items.length) {
       detailsHtml = o.items.map(item => {
         const parts = [item.capsule, item.name, item.price];
-        if (item.size) parts.push('Р: ' + item.size);
+        if (item.size)  parts.push('Р: ' + item.size);
         if (item.color) parts.push(item.color);
         if (item.notes) parts.push(item.notes);
         return `<div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">${parts.join(' · ')}</div>`;
       }).join('');
-    } else if (o.details) {
-      detailsHtml = `<div style="font-size:12px;color:var(--muted);line-height:1.6;">${escHtml(o.details.replace(/\n/g,'<br>'))}</div>`;
+    } else if (o.notes) {
+      detailsHtml = `<div style="font-size:12px;color:var(--muted);line-height:1.6;">${escHtml(o.notes).replace(/\n/g,'<br>')}</div>`;
     }
 
+    const status = o.status || 'new';
+    const color  = STATUS_COLOR[status] || STATUS_COLOR.new;
+    const ts = new Date(o.created_at).toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+
     return `
-    <div class="order-card">
+    <div class="order-card" id="oc-${o.id}">
       <div class="order-num">#${orders.length - i}</div>
       <div class="order-body">
-        <div class="order-type">${typeLabel}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <div class="order-type">${typeLabel}</div>
+          <select class="status-sel" data-id="${o.id}"
+            style="border:1px solid ${color};color:${color};background:transparent;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;outline:none;cursor:pointer;font-family:inherit;border-radius:0;">
+            <option value="new"         ${status==='new'         ?'selected':''}>Новая</option>
+            <option value="in-progress" ${status==='in-progress' ?'selected':''}>В работе</option>
+            <option value="done"        ${status==='done'        ?'selected':''}>Готово</option>
+          </select>
+        </div>
         <div style="margin:8px 0;">${detailsHtml}</div>
         <div class="order-meta">
           <span>👤 ${escHtml(o.name || '')}</span>
-          <span>✈️ <a href="https://t.me/${(o.telegram||'').replace('@','')}" target="_blank" style="color:var(--ink)">${escHtml(o.telegram || '')}</a></span>
-          ${o.comment ? `<span>💬 ${escHtml(o.comment)}</span>` : ''}
+          <span>✈️ <a href="https://t.me/${(o.contact||'').replace('@','')}" target="_blank" style="color:var(--ink)">${escHtml(o.contact || '')}</a></span>
+          ${o.notes && isCart ? `<span>💬 ${escHtml(o.notes)}</span>` : ''}
         </div>
       </div>
-      <div class="order-time">${o.ts}</div>
+      <div class="order-time">${ts}</div>
     </div>`;
   }).join('');
+
+  document.querySelectorAll('.status-sel').forEach(sel => {
+    sel.addEventListener('change', async function() {
+      const id = this.dataset.id;
+      const s  = this.value;
+      const c  = STATUS_COLOR[s] || STATUS_COLOR.new;
+      this.style.borderColor = c;
+      this.style.color = c;
+      await _sb.from('orders').update({ status: s }).eq('id', id);
+    });
+  });
 }
 
-function clearOrders() {
-  if (!confirm('Удалить все заявки?')) return;
-  localStorage.removeItem('acc_orders');
+async function clearOrders() {
+  if (!confirm('Удалить все заявки? Это нельзя отменить.')) return;
+  const { error } = await _sb.from('orders').delete().neq('id', 0);
+  if (error) { alert('Ошибка: ' + error.message); return; }
   loadOrders();
 }
 
@@ -299,34 +348,22 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Check Telegram bot status ──
-async function checkTelegram() {
-  // Read BOT_TOKEN from localStorage if set (set it once by running setToken() in console)
-  const token = localStorage.getItem('acc_bot_token');
+async function checkSupabase() {
   const dot   = document.getElementById('tgDot');
   const label = document.getElementById('tgLabel');
-  if (!token) {
-    dot.classList.add('offline');
-    label.textContent = 'Telegram (не настроен)';
-    return;
-  }
   try {
-    const res  = await fetch(`https://api.telegram.org/bot${token}/getMe`);
-    const data = await res.json();
-    if (data.ok) {
-      label.textContent = `Telegram @${data.result.username}`;
+    const { error } = await _sb.from('orders').select('id').limit(1);
+    if (!error) {
+      label.textContent = 'Supabase online';
     } else {
       dot.classList.add('offline');
-      label.textContent = 'Telegram (ошибка токена)';
+      label.textContent = 'Supabase (ошибка)';
     }
   } catch {
     dot.classList.add('offline');
+    label.textContent = 'Supabase (недоступен)';
   }
 }
-
-// Вспомогательная функция: запусти в консоли браузера для сохранения токена
-// setAdminToken('ВАШ_BOT_TOKEN');
-window.setAdminToken = t => { localStorage.setItem('acc_bot_token', t); location.reload(); };
 </script>
 </body>
 </html>
