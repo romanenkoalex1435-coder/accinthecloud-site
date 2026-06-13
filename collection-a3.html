@@ -73,8 +73,11 @@
     .breadcrumb { font-family:var(--pixel); font-size:13px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
     .breadcrumb a { color:var(--muted); }
     .breadcrumb a:hover { color:var(--ink); }
-    .hero-title { font-family:var(--serif); font-size:clamp(44px,7vw,84px); font-weight:400; line-height:1; }
-    .hero-sub { font-size:13px; color:var(--muted); margin-top:10px; font-style:italic; }
+    .back-link { display:inline-flex; align-items:center; gap:6px; font-family:var(--sans); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); text-decoration:none; margin-bottom:28px; transition:color .2s; }
+    .back-link:hover { color:var(--ink); }
+    .back-link::before { content:'←'; font-size:14px; }
+    .hero-title { font-family:var(--sans); font-size:clamp(40px,6vw,76px); font-weight:700; line-height:1; letter-spacing:0.06em; text-transform:uppercase; }
+    .hero-sub { font-family:var(--sans); font-size:11px; color:var(--muted); margin-top:8px; letter-spacing:0.18em; text-transform:uppercase; font-style:normal; }
     .hero-right { text-align:right; flex-shrink:0; }
     .hero-info { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); line-height:2; }
     .hero-info strong { color:var(--ink); }
@@ -229,9 +232,9 @@
 </nav>
 <div class="hero reveal">
   <div>
-    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a3</p>
-    <h1 class="hero-title">Capsule a3</h1>
-    <p class="hero-sub">Jeans &amp; Workpants &mdash; под заказ</p>
+    <a href="index.html#capsules" class="back-link">Все капсулы</a>
+    <h1 class="hero-title">Accent</h1>
+    <p class="hero-sub">Pants</p>
   </div>
   <div class="hero-right">
     <div class="hero-info">
