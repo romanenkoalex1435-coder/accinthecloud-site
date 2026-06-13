@@ -321,23 +321,24 @@
 
       /* Arc selector */
       .carousel-arc {
-        display: flex; justify-content: center; align-items: flex-end;
-        gap: 20px; padding: 28px 0 8px;
+        position: relative; height: 88px; overflow: hidden;
       }
       .arc-btn {
+        position: absolute; left: 50%; bottom: 12px;
+        transform: translateX(-50%);
         width: 52px; height: 52px; border-radius: 50%;
         border: 1.5px solid var(--border); background: none;
         font-family: var(--pixel); font-size: 11px; letter-spacing: 0.06em;
         color: var(--muted); cursor: pointer;
-        transition: all .35s cubic-bezier(.25,.46,.45,.94);
-        flex-shrink: 0;
-      }
-      .arc-center {
-        width: 66px; height: 66px; font-size: 13px;
-        transform: translateY(-16px);
+        transition: transform .42s cubic-bezier(.25,.46,.45,.94),
+                    width .42s cubic-bezier(.25,.46,.45,.94),
+                    height .42s cubic-bezier(.25,.46,.45,.94),
+                    font-size .42s, background .3s, color .3s,
+                    border-color .3s, opacity .42s;
       }
       .arc-btn.active {
         background: var(--ink); color: white; border-color: var(--ink);
+        width: 66px; height: 66px; font-size: 14px;
       }
       .order-cta { margin: 0 24px 56px; padding: 32px 28px; flex-direction: column; align-items: flex-start; }
       footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
@@ -486,9 +487,9 @@
       </div>
     </a>
     <div class="carousel-arc">
-      <button class="arc-btn arc-side active" data-idx="0">a1</button>
-      <button class="arc-btn arc-center" data-idx="1">a2</button>
-      <button class="arc-btn arc-side" data-idx="2">a3</button>
+      <button class="arc-btn active" data-idx="0">a1</button>
+      <button class="arc-btn" data-idx="1">a2</button>
+      <button class="arc-btn" data-idx="2">a3</button>
     </div>
   </div>
 
@@ -678,6 +679,18 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   const itemsEl = document.getElementById('carouselItems');
   const arcBtns = document.querySelectorAll('.arc-btn');
 
+  const SPACING = 84; // px between button centers
+
+  function updateArc(idx) {
+    arcBtns.forEach((btn, i) => {
+      const offset = (i - idx) * SPACING;
+      const dist = Math.abs(i - idx);
+      btn.classList.toggle('active', i === idx);
+      btn.style.transform = `translateX(calc(-50% + ${offset}px)) translateY(${dist > 0 ? 10 : 0}px)`;
+      btn.style.opacity = dist > 1 ? '0' : '1';
+    });
+  }
+
   function goTo(idx) {
     if (idx === current || idx < 0 || idx >= capsules.length) return;
     current = idx;
@@ -689,11 +702,12 @@ document.querySelectorAll('.faq-q').forEach(btn => {
       nameEl.textContent = c.name;
       itemsEl.textContent = c.items;
       featured.href = c.href;
-      arcBtns.forEach((b, i) => b.classList.toggle('active', i === idx));
       featured.classList.remove('fading');
     }, 200);
+    updateArc(idx);
   }
 
+  updateArc(0); // init positions
   arcBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
 
   // Swipe support
