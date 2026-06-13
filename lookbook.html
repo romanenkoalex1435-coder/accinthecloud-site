@@ -174,23 +174,7 @@
     @media(max-width:900px) {
       nav { padding:16px 20px; }
 
-      /* ── Masonry grid ── */
-      .lb-grid {
-        display: block;
-        columns: 2;
-        column-gap: 3px;
-        padding: 3px;
-      }
-      .lb-card {
-        break-inside: avoid;
-        margin-bottom: 3px;
-        display: block;
-      }
-      /* Alternating heights for masonry rhythm */
-      .lb-card[data-size="tall"]   .lb-card-slide { aspect-ratio: 3/4; }
-      .lb-card[data-size="square"] .lb-card-slide { aspect-ratio: 1/1; }
-      .lb-card[data-size="short"]  .lb-card-slide { aspect-ratio: 4/5; }
-      .lb-card .lb-card-dots { display: none; }
+      .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
 
       /* Modal: галерея сверху на 58% экрана, инфо снизу */
       .modal { flex-direction:column; height:100dvh; margin:0; }
@@ -405,13 +389,11 @@ document.querySelectorAll('.lb-filter').forEach(btn => {
   });
 });
 
-const SIZES = ['tall','tall','short','tall','square','tall','short','tall','tall','square','tall','short','tall','tall','square','tall','short','tall'];
-ITEMS.forEach((item, idx) => {
+ITEMS.forEach(item => {
   const card = document.createElement('div');
   card.className = 'lb-card';
   card.dataset.cat = item.cat;
   card.dataset.special = item.special ? 'true' : 'false';
-  card.dataset.size = SIZES[idx % SIZES.length];
 
   // slides
   const slidesEl = document.createElement('div');
