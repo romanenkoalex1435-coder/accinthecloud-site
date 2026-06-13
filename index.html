@@ -227,9 +227,8 @@
     .footer-links a:hover { color: var(--ink); }
     .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
 
-    /* ─── Capsule Carousel (all screens) ─────────────────── */
-    .capsules-grid { display: none; }
-    .capsule-carousel { display: block; }
+    /* ─── Capsule Carousel (mobile only) ─────────────────── */
+    .capsule-carousel { display: none; }
 
     .carousel-featured {
       display: block; position: relative;
@@ -330,7 +329,9 @@
       .burger { display: flex; }
       .section { padding: 72px 24px; }
       .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      /* Mobile carousel overrides */
+      /* Mobile: hide grid, show carousel */
+      .capsules-grid { display: none; }
+      .capsule-carousel { display: block; }
       .carousel-featured { max-width: 100%; }
       .carousel-name { font-size: 22px; }
       .arc-btn { width: 48px; height: 48px; font-size: 16px; }
