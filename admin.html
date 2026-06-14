@@ -156,9 +156,11 @@
 <div id="loginScreen">
   <div class="login-box">
     <span class="login-logo">accinthecloud · Admin</span>
-    <label>Пароль</label>
-    <input type="password" id="passInput" placeholder="••••••••" />
-    <div class="login-error" id="loginError">Неверный пароль</div>
+    <label>Email</label>
+    <input type="email" id="emailInput" placeholder="admin@accinthecloud.ru" autocomplete="username" />
+    <label style="margin-top:20px;">Пароль</label>
+    <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password" />
+    <div class="login-error" id="loginError">Неверный email или пароль</div>
     <button class="login-btn" onclick="tryLogin()">Войти</button>
   </div>
 </div>
@@ -211,7 +213,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.1"></script>
 <script>
 // ── Supabase ──
 const { createClient } = supabase;
@@ -220,23 +222,25 @@ const _sb = createClient(
   'sb_publishable_B7l8wH4rW7Wllj9ueEKOQg_Hxk3JKGS'
 );
 
-const ADMIN_PASS = 'accin2025';
-
-function tryLogin() {
-  const val = document.getElementById('passInput').value;
-  if (val === ADMIN_PASS) {
-    sessionStorage.setItem('acc_admin', '1');
-    showDashboard();
-  } else {
+async function tryLogin() {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+  const { error } = await _sb.auth.signInWithPassword({ email, password });
+  if (error) {
     document.getElementById('loginError').classList.add('show');
+  } else {
+    document.getElementById('loginError').classList.remove('show');
+    showDashboard();
   }
 }
-document.getElementById('passInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') tryLogin();
+['emailInput','passInput'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') tryLogin();
+  });
 });
 
-function logout() {
-  sessionStorage.removeItem('acc_admin');
+async function logout() {
+  await _sb.auth.signOut();
   location.reload();
 }
 
@@ -247,7 +251,10 @@ async function showDashboard() {
   checkSupabase();
 }
 
-if (sessionStorage.getItem('acc_admin') === '1') showDashboard();
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session) showDashboard();
+})();
 
 const STATUS_COLOR = { new: '#f59e0b', 'in-progress': '#3b82f6', done: '#22c55e' };
 
@@ -294,7 +301,7 @@ async function loadOrders() {
           <div style="padding:8px 0;border-bottom:1px solid var(--border);">
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
               <span style="font-size:13px;font-weight:500;">${escHtml(item.name)}</span>
-              <span style="font-size:13px;white-space:nowrap;margin-left:16px;">${item.price}${qty > 1 ? ' × ' + qty : ''}</span>
+              <span style="font-size:13px;white-space:nowrap;margin-left:16px;">${escHtml(item.price)}${qty > 1 ? ' × ' + qty : ''}</span>
             </div>
             <div style="font-size:11px;color:var(--muted);">${escHtml(item.capsule)}${meta.length ? ' · ' + meta.join(' · ') : ''}</div>
           </div>`;

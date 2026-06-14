@@ -9,7 +9,7 @@
   <meta property="og:title" content="Корзина — accinthecloud" />
   <meta property="og:description" content="accinthecloud — cart" />
   <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
-  <meta property="og:url" content="https://accinthecloud.ru/cart.html" />
+  <meta property="og:url" content="https://accinthecloud.ru/cart" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Корзина — accinthecloud" />
   <meta name="twitter:description" content="accinthecloud — cart" />
@@ -58,13 +58,6 @@
     .mobile-menu.visible { opacity:1; }
     .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
     .mobile-menu a:hover { color:var(--ink); }
-    .cart-badge-nav {
-      display:inline-flex; align-items:center; justify-content:center;
-      width:18px; height:18px; background:var(--ink); color:white;
-      font-size:10px; border-radius:50%; margin-left:6px;
-    }
-    .cart-badge { display:none; }
-
     /* ── Page ── */
     .page-header {
       padding:64px 48px 40px; border-bottom:1px solid var(--border);
@@ -213,20 +206,20 @@
   body.page-out { opacity:0 !important; transition:opacity .18s ease; }
   </style>
   <script defer src="/_vercel/insights/script.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.1"></script>
 </head>
 <body>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
     <span class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -240,7 +233,7 @@
 </nav>
 
 <div class="page-header">
-  <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Корзина</p>
+  <p class="breadcrumb"><a href="/">accinthecloud</a> / Корзина</p>
   <h1>Корзина</h1>
 </div>
 
@@ -253,7 +246,7 @@
     <div class="empty-cart" id="emptyCart">
       <div class="empty-icon">○</div>
       <p>Корзина пустая</p>
-      <a href="index.html#capsules" class="btn-browse">Смотреть капсулы</a>
+      <a href="/#capsules" class="btn-browse">Смотреть капсулы</a>
     </div>
   </div>
 
@@ -285,7 +278,7 @@
       <textarea id="checkComment" rows="3" placeholder="Параметры тела, срочность, любые вопросы..."></textarea>
     </div>
 
-    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
+    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="/offer" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button class="btn-order" id="btnOrder">Отправить запрос на пошив</button>
     <p class="checkout-note">Я свяжусь с тобой в Telegram, уточню детали и подтвержу заказ.</p>
 
@@ -293,7 +286,7 @@
       <div class="success-icon">✓</div>
       <h2>Запрос отправлен</h2>
       <p>Скоро свяжусь с тобой в Telegram — обсудим детали и согласуем сроки.</p>
-      <a href="index.html" class="btn-back">На главную</a>
+      <a href="/" class="btn-back">На главную</a>
     </div>
   </div>
 
@@ -303,8 +296,8 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
@@ -317,17 +310,26 @@ const _sb = createClient(
   'sb_publishable_B7l8wH4rW7Wllj9ueEKOQg_Hxk3JKGS'
 );
 
+// ── Helpers ──
+function escHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 // ── Render cart ──
 function renderCart() {
   const cart = ACC.get();
   const list = document.getElementById('cartItemsList');
   const empty = document.getElementById('emptyCart');
+  const btnOrder = document.getElementById('btnOrder');
   const count = cart.reduce((s,i) => s + (i.qty||1), 0);
   const total = ACC.total();
 
   document.getElementById('itemsLabel').textContent = count + ' ' + plural(count,'позиция','позиции','позиций');
   document.getElementById('summaryCount').textContent = count;
   document.getElementById('summaryTotal').textContent = total > 0 ? total.toLocaleString('ru-RU') + ' ₽' : '—';
+
+  btnOrder.disabled = cart.length === 0;
+  btnOrder.textContent = cart.length === 0 ? 'Корзина пуста' : 'Отправить запрос на пошив';
 
   if (cart.length === 0) {
     list.innerHTML = '';
@@ -338,21 +340,24 @@ function renderCart() {
 
   list.innerHTML = cart.map(item => {
     const metas = [];
-    if (item.size)  metas.push(`Размер: ${item.size}`);
-    if (item.color) metas.push(`Цвет/ткань: ${item.color}`);
-    if (item.notes) metas.push(`Пожелания: ${item.notes}`);
+    if (item.size)  metas.push(`Размер: ${escHtml(item.size)}`);
+    if (item.color) metas.push(`Цвет/ткань: ${escHtml(item.color)}`);
+    if (item.notes) metas.push(`Пожелания: ${escHtml(item.notes)}`);
+    const thumbStyle = item.bg
+      ? `background-image:url('${escHtml(item.bg)}');background-size:cover;background-position:center;`
+      : `background:#e8e8e8;`;
     return `
       <div class="cart-item" data-uid="${item.uid}">
         <div class="item-thumb">
-          <div class="ph" style="background:${item.bg || '#e8e8e8'};"></div>
+          <div class="ph" style="${thumbStyle}"></div>
         </div>
         <div class="item-body">
-          <p class="item-capsule">${item.capsule}</p>
-          <p class="item-name">${item.name}</p>
+          <p class="item-capsule">${escHtml(item.capsule)}</p>
+          <p class="item-name">${escHtml(item.name)}</p>
           ${metas.length ? `<div class="item-meta">${metas.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
         </div>
         <div class="item-right">
-          <p class="item-price">${item.price}</p>
+          <p class="item-price">${escHtml(item.price)}</p>
           <div class="item-qty">
             <button class="iqty-btn" data-uid="${item.uid}" data-action="minus">−</button>
             <div class="iqty-val">${item.qty||1}</div>
@@ -423,7 +428,6 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   renderCart();
 });
 
-// ── Helpers ──
 function plural(n, one, few, many) {
   const m = Math.abs(n) % 100;
   if (m >= 11 && m <= 19) return many;

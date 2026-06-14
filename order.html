@@ -9,7 +9,7 @@
   <meta property="og:title" content="Индивидуальный пошив — accinthecloud" />
   <meta property="og:description" content="Bespoke tailoring. Order your piece by measurements." />
   <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
-  <meta property="og:url" content="https://accinthecloud.ru/order.html" />
+  <meta property="og:url" content="https://accinthecloud.ru/order" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Индивидуальный пошив — accinthecloud" />
   <meta name="twitter:description" content="Bespoke tailoring. Order your piece by measurements." />
@@ -110,6 +110,7 @@
 
     .offer-note { font-size:10px; color:var(--muted); line-height:1.7; margin-bottom:14px; }
     .offer-note a { color:var(--ink); text-decoration:underline; }
+    .field-hint { font-size:10px; color:var(--muted); line-height:1.6; margin-top:8px; }
 
     .form-success { display:none; padding:40px 0; text-align:center; }
     .form-success.show { display:block; }
@@ -148,18 +149,18 @@
 <!-- Mobile menu -->
 <div class="mobile-menu" id="mobileMenu">
   <button class="mobile-menu-close" id="menuClose">✕</button>
-  <a href="index.html">Главная</a>
-  <a href="lookbook.html">Lookbook</a>
-  <a href="index.html#capsules">Capsules</a>
-  <a href="order.html">Индивидуальный пошив</a>
-  <a href="faq.html">FAQ</a>
+  <a href="/">Главная</a>
+  <a href="/lookbook">Lookbook</a>
+  <a href="/#capsules">Capsules</a>
+  <a href="/order">Индивидуальный пошив</a>
+  <a href="/faq">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div class="nav-right">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -197,8 +198,9 @@
         <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
         <span class="file-names" id="fileNames"></span>
       </div>
+      <p class="field-hint">Названия файлов добавятся к заявке — сами фото пришлите в Telegram при оформлении.</p>
     </div>
-    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
+    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="/offer" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button type="submit" class="btn-submit" id="submitBtn">Добавить в корзину →</button>
   </form>
   <div class="form-success" id="formSuccess">
@@ -212,20 +214,13 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
-const CONFIG = {
-  BOT_TOKEN: 'YOUR_BOT_TOKEN_HERE',
-  CHAT_ID: 'YOUR_CHAT_ID_HERE',
-  ADMIN_PASS: 'accin2025'
-};
-
 // Cart badge
 (function(){
   const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
@@ -274,7 +269,8 @@ document.getElementById('orderForm').addEventListener('submit',e=>{
   const telegram=form.telegram.value.trim();
   const comment=form.comment.value.trim();
   const itemName=idea?idea.slice(0,48):'Своя идея';
-  const notes=[idea,comment].filter(Boolean).join('\n');
+  const fileNames=fileInput&&fileInput.files.length?Array.from(fileInput.files).map(f=>f.name).join(', '):'';
+  const notes=[idea,comment,fileNames?('Фото (см. Telegram): '+fileNames):''].filter(Boolean).join('\n');
   localStorage.setItem('acc_prefill',JSON.stringify({name,telegram}));
   ACC.add({
     id:'custom-'+Date.now(),
@@ -284,7 +280,7 @@ document.getElementById('orderForm').addEventListener('submit',e=>{
     priceNum:0,
     size:'',color:'',notes,qty:1,bg:''
   });
-  window.location.href='cart.html';
+  window.location.href='/cart';
 });
 </script>
 <script>

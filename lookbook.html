@@ -9,7 +9,7 @@
   <meta property="og:title" content="Lookbook — accinthecloud" />
   <meta property="og:description" content="Handmade garments and one-of-a-kind pieces from accinthecloud." />
   <meta property="og:image" content="https://accinthecloud.ru/images/og-image.jpg" />
-  <meta property="og:url" content="https://accinthecloud.ru/lookbook.html" />
+  <meta property="og:url" content="https://accinthecloud.ru/lookbook" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Lookbook — accinthecloud" />
   <meta name="twitter:description" content="Handmade garments and one-of-a-kind pieces from accinthecloud." />
@@ -221,17 +221,17 @@
 <body>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -257,8 +257,8 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
@@ -523,20 +523,8 @@ document.getElementById('mOrderBtn').addEventListener('click', () => {
     qty: 1,
     bg: cur.photos && cur.photos[0] ? cur.photos[0] : ''
   });
-  window.location.href = 'cart.html';
+  window.location.href = '/cart';
 });
-
-(function(){
-  const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
-  const n=c.reduce((s,i)=>s+(i.qty||1),0);
-  const b=document.getElementById('cartBadge');
-  if(b&&n>0){b.textContent=n;b.classList.add('show');}
-  document.addEventListener('acc:update',function(){
-    const c2=JSON.parse(localStorage.getItem('acc_cart')||'[]');
-    const n2=c2.reduce((s,i)=>s+(i.qty||1),0);
-    if(b){b.textContent=n2;b.classList.toggle('show',n2>0);}
-  });
-})();
 const burgerBtn = document.getElementById('burgerBtn');
 const mobileMenu = document.getElementById('mobileMenu');
 function closeMobileMenu() {
