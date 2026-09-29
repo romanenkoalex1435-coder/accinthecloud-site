@@ -5,7 +5,23 @@
       "Bash(sed -n '1,20p')",
       "Bash(sed -n '1,20p' index.html)",
       "Bash(git reset *)",
-      "Bash(git revert *)"
+      "Bash(git revert *)",
+      "Read(//Users/yvn3g/Desktop/10k-tracker/**)",
+      "Bash(vercel --prod --yes)",
+      "Bash(gh auth *)",
+      "Bash(vercel git *)",
+      "Bash(mdls -name kMDItemCodecs -name kMDItemPixelWidth -name kMDItemPixelHeight LogoPolyacc.MOV)",
+      "Bash(git mv *)",
+      "Bash(python3 -c ' *)",
+      "Bash(git rm *)",
+      "Bash(vercel --version)",
+      "Bash(git rev-list *)",
+      "Bash(gh pr *)",
+      "Bash(vercel whoami *)",
+      "Bash(git add *)",
+      "Bash(git restore *)",
+      "Bash(git commit *)",
+      "Bash(vercel ls *)"
     ]
   }
 }
