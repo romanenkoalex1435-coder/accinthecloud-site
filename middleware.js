@@ -1,6 +1,8 @@
 // Превью ссылки на вещь. Telegram, Instagram и мессенджеры не запускают JS страницы,
 // поэтому для ссылок ?item= отдаём ту же страницу, но с названием, ценой и фото вещи в мета-тегах.
-// Данные — js/og-items.json (собирает tools/og-items.py).
+// Данные — js/og-items.json (собирает tools/og-items.py), вшиваются в middleware при сборке.
+import ITEMS from './js/og-items.json' with { type: 'json' };
+
 export const config = {
   matcher: ['/collection-a1.html', '/collection-a2.html', '/collection-a3.html', '/lookbook.html']
 };
@@ -13,10 +15,15 @@ export default async function middleware(req) {
   if (!slug) return;
   const page = url.pathname.slice(1).replace(/\.html$/, '');
   try {
-    const items = await fetch(new URL('/js/og-items.json', url)).then(r => r.json());
-    const it = items[page] && items[page][slug];
+    const it = ITEMS[page] && ITEMS[page][slug];
     if (!it) return;
-    const res = await fetch(new URL(url.pathname, url));
+    // доступ пробных версий (вход Vercel) передаём дальше, на открытом сайте заголовков нет
+    const headers = {};
+    for (const h of ['cookie', 'authorization', 'x-vercel-protection-bypass']) {
+      const v = req.headers.get(h);
+      if (v) headers[h] = v;
+    }
+    const res = await fetch(new URL(url.pathname, url), { headers });
     if (!res.ok) return;
     let html = await res.text();
     const title = `${it.name} — accinthecloud`;
