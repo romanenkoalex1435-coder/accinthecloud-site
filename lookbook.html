@@ -14,7 +14,7 @@
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
-      --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#6b6b6b;
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
@@ -39,7 +39,7 @@
     .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
     .cbadge.show { display:flex; }
     .mobile-menu {
-      display:none; position:fixed; inset:0; z-index:300;
+      display:none; position:fixed; inset:0; z-index:150;
       background:#fff; flex-direction:column; align-items:center; justify-content:center;
       gap:32px; opacity:0; transition:opacity .3s;
     }
@@ -156,7 +156,7 @@
       display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
     }
     .footer-logo { font-family:var(--pixel); font-size:26px; letter-spacing:0.1em; }
-    .footer-links { display:flex; gap:24px; }
+    .footer-links { display:flex; flex-wrap:wrap; gap:24px; }
     .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
     .footer-links a:hover { color:var(--ink); }
 
@@ -202,6 +202,8 @@
       font-family: var(--pixel);
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
 </head>
 <body>
 
@@ -250,15 +252,15 @@
 
 <!-- MODAL -->
 <div class="modal-overlay" id="overlay">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
     <div class="modal-gallery">
-      <button class="marr" id="arrPrev">&#8592;</button>
-      <button class="marr" id="arrNext">&#8594;</button>
+      <button class="marr" id="arrPrev" aria-label="Предыдущее фото">&#8592;</button>
+      <button class="marr" id="arrNext" aria-label="Следующее фото">&#8594;</button>
       <div class="modal-slides" id="mSlides"></div>
       <div class="modal-dots-row" id="mDots"></div>
     </div>
     <div class="modal-info">
-      <button class="modal-close" id="mClose">&#10005;</button>
+      <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
       <p class="modal-num" id="mNum"></p>
       <h2 class="modal-name" id="mName"></h2>
       <div class="modal-divider"></div>
@@ -374,9 +376,12 @@ document.querySelectorAll('.lb-filter').forEach(btn => {
   });
 });
 
-ITEMS.forEach(item => {
+ITEMS.forEach((item, cardIndex) => {
   const card = document.createElement('div');
   card.className = 'lb-card';
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', `${item.name} — открыть`);
   card.dataset.cat = item.cat;
   card.dataset.special = item.special ? 'true' : 'false';
 
@@ -387,9 +392,13 @@ ITEMS.forEach(item => {
     const slide = document.createElement('div');
     slide.className = 'lb-card-slide';
     const img = document.createElement('img');
-    img.src = `images/lookbook/${item.folder}/${String(i).padStart(2,'0')}.jpeg`;
-    img.loading = 'lazy';
+    // loading задаётся до src, иначе браузер начинает качать сразу
+    const eager = cardIndex < 4 && i === 1;
+    img.loading = eager ? 'eager' : 'lazy';
+    img.decoding = 'async';
+    if (eager) img.fetchPriority = 'high';
     img.alt = item.name;
+    img.src = `images/lookbook/${item.folder}/sm/${String(i).padStart(2,'0')}.jpeg`;
     slide.appendChild(img);
     slidesEl.appendChild(slide);
   }
@@ -428,21 +437,29 @@ ITEMS.forEach(item => {
     openModal(item, idx);
   });
 
-  // touch tap
-  let touchStart = 0;
-  card.addEventListener('touchstart', e => { touchStart = e.touches[0].clientX; }, {passive:true});
+  // touch tap: открываем только если палец почти не двигался — свайп по ленте не считается
+  let tx = 0, ty = 0;
+  card.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
   card.addEventListener('touchend', e => {
-    if (Math.abs(e.changedTouches[0].clientX - touchStart) < 10) {
+    const t = e.changedTouches[0];
+    if (Math.abs(t.clientX - tx) < 10 && Math.abs(t.clientY - ty) < 10) {
+      e.preventDefault(); // без двойного открытия от последующего click
       const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
       openModal(item, idx);
     }
+  });
+
+  card.addEventListener('keydown', e => {
+    if (e.target !== card || (e.key !== 'Enter' && e.key !== ' ')) return;
+    e.preventDefault();
+    openModal(item, 0);
   });
 
   grid.appendChild(card);
 });
 
 // Modal
-let cur = null, curSlide = 0;
+let cur = null, curSlide = 0, lastFocus = null;
 const mSlides = document.getElementById('mSlides');
 const mDots   = document.getElementById('mDots');
 
@@ -468,8 +485,10 @@ function openModal(item, startIndex) {
   document.getElementById('mName').textContent = item.name;
   document.getElementById('mText').textContent = item.desc || 'Описание скоро появится...';
 
+  lastFocus = document.activeElement;
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  document.getElementById('mClose').focus({preventScroll:true});
 
   if (curSlide > 0) {
     requestAnimationFrame(() => { mSlides.scrollLeft = curSlide * mSlides.offsetWidth; });
@@ -494,15 +513,23 @@ document.getElementById('arrPrev').addEventListener('click', () => goSlide(Math.
 document.getElementById('arrNext').addEventListener('click', () => { if(cur) goSlide(Math.min(cur.photos-1, curSlide+1)); });
 
 function closeModal() {
-  document.getElementById('overlay').classList.remove('open');
+  const ov = document.getElementById('overlay');
+  if (!ov.classList.contains('open')) return;
+  ov.classList.remove('open');
   document.body.style.overflow = '';
   mSlides.removeEventListener('scroll', onScroll);
+  if (lastFocus) lastFocus.focus({preventScroll:true});
 }
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('overlay')) closeModal();
 });
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('overlay').classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') goSlide(Math.max(0, curSlide-1));
+  if (e.key === 'ArrowRight' && cur) goSlide(Math.min(cur.photos-1, curSlide+1));
+});
 
 document.getElementById('mOrderBtn').addEventListener('click', () => {
   if (!cur) return;
@@ -515,7 +542,7 @@ document.getElementById('mOrderBtn').addEventListener('click', () => {
     size: '', color: '',
     notes: 'Похожее изделие — индивидуальный пошив',
     qty: 1,
-    bg: cur.photos && cur.photos[0] ? cur.photos[0] : ''
+    bg: `url('images/lookbook/${cur.folder}/sm/01.jpeg') center/cover`
   });
   window.location.href = 'cart.html';
 });

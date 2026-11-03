@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <meta name="robots" content="noindex, nofollow">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — accinthecloud</title>
@@ -11,7 +12,7 @@
       --bg: #f5f5f5;
       --card: #ffffff;
       --ink: #0d0d0d;
-      --muted: #909090;
+      --muted: #6b6b6b;
       --border: #e8e8e8;
       --green: #22c55e;
       --red: #ef4444;
@@ -143,6 +144,8 @@
       .order-time { text-align: left; }
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
 </head>
 <body>
 
@@ -195,23 +198,29 @@
 
     <div class="tg-notice">
       <strong>Telegram-уведомления</strong>
-      Заявки также отправляются тебе в Telegram при корректно заполненных BOT_TOKEN и CHAT_ID в <code>index.html</code>.
+      Заявки с сайта приходят в Telegram через серверную функцию <code>/api/order</code>.
       Как настроить: создай бота через <a href="https://t.me/BotFather" target="_blank">@BotFather</a>,
       получи токен, напиши боту /start, перейди по
       <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> и найди свой <code>chat_id</code>.
-      Вставь оба значения в <code>CONFIG</code> в index.html.
+      Добавь их в Vercel → Settings → Environment Variables как <code>TELEGRAM_BOT_TOKEN</code> и <code>TELEGRAM_CHAT_ID</code>.
+      Здесь видны только заявки, сделанные с этого же устройства.
     </div>
   </div>
 </div>
 
 
 <script>
-// ── Пароль — должен совпадать с CONFIG.ADMIN_PASS в index.html ──
-const ADMIN_PASS = 'accin2025';
+// ── Пароль хранится только как SHA-256, открытым текстом его в коде нет ──
+const ADMIN_HASH = '528b05db81d3d9e27c637b28b1e3ac1e881b9fbe6b5c5c72e1af642c4771f822';
 
-function tryLogin() {
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function tryLogin() {
   const val = document.getElementById('passInput').value;
-  if (val === ADMIN_PASS) {
+  if (await sha256(val) === ADMIN_HASH) {
     sessionStorage.setItem('acc_admin', '1');
     showDashboard();
   } else {

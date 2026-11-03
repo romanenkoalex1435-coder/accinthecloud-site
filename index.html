@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
   <script src="cart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="js/gsap.min.js"></script>
+  <script src="js/ScrollTrigger.min.js"></script>
 
   <style>
     /* ─── Reset ─────────────────────────────────────────── */
@@ -21,7 +21,7 @@
     :root {
       --bg: #ffffff;
       --ink: #0d0d0d;
-      --muted: #909090;
+      --muted: #6b6b6b;
       --border: #ebebeb;
       --soft: #f5f5f5;
       --serif: 'Playfair Display', Georgia, serif;
@@ -324,6 +324,9 @@
     }
 
     /* ─── Animated reveal base ───────────────────────────── */
+    .no-gsap .reveal, .no-gsap .reveal-left, .no-gsap .reveal-right,
+    .no-gsap .hero-logo-video, .no-gsap .hero-brand, .no-gsap .nav-logo, .no-gsap .burger { opacity: 1 !important; }
+    .no-gsap body { cursor: auto; }
     .reveal { opacity: 0; }
     .reveal-left { opacity: 0; }
     .reveal-right { opacity: 0; }
@@ -392,6 +395,8 @@
       font-family: var(--pixel);
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
 </head>
 <body>
 
@@ -436,7 +441,10 @@
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
   <div class="hero-logo-video" id="heroLogoVideo">
-    <video src="LogoPolyacc.MOV" autoplay loop muted playsinline onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')"></video>
+    <video autoplay loop muted playsinline preload="auto" poster="images/logo-hero-poster.jpg" aria-hidden="true">
+      <source src="logo-hero.webm" type="video/webm">
+      <source src="logo-hero.mp4" type="video/mp4" onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')">
+    </video>
     <img src="images/logo.png" alt="accinthecloud">
   </div>
   <p class="hero-brand">accinthecloud</p>
@@ -550,22 +558,20 @@
 
 <!-- ─── SCRIPTS ───────────────────────────────────────────── -->
 <script>
-// ══════════════════════════════════════════════
-//  КОНФИГ — заполни перед деплоем
-// ══════════════════════════════════════════════
-const CONFIG = {
-  // 1. Создай бота через @BotFather → получи токен
-  BOT_TOKEN: 'YOUR_BOT_TOKEN_HERE',
+// Если анимации не загрузились — показываем страницу без них, а не белый экран
+if (!window.gsap) {
+  document.documentElement.classList.add('no-gsap');
+  const pc = document.getElementById('page-curtain');
+  if (pc) pc.remove();
+}
 
-  // 2. Напиши боту любое сообщение, потом открой:
-  //    https://api.telegram.org/bot<TOKEN>/getUpdates
-  //    Найди "chat":{"id":XXXXXXX} — это твой chat_id
-  CHAT_ID: 'YOUR_CHAT_ID_HERE',
-
-  // 3. Пароль для admin.html
-  ADMIN_PASS: 'accin2025'
-};
-// ══════════════════════════════════════════════
+// «Уменьшить движение»: анимации GSAP проигрываются мгновенно, ролик стоит на первом кадре
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduceMotion) {
+  gsap.globalTimeline.timeScale(1000);
+  const hv = document.querySelector('#heroLogoVideo video');
+  if (hv) { hv.removeAttribute('autoplay'); hv.pause(); }
+}
 
 gsap.registerPlugin(ScrollTrigger);
 

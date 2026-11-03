@@ -1,0 +1,16 @@
+/* Общие правила доступности для всех страниц */
+
+:focus-visible { outline: 2px solid #0d0d0d; outline-offset: 3px; }
+.product-card:focus-visible, .lb-card:focus-visible { outline-offset: -2px; }
+
+/* «Уменьшить движение» в настройках системы */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  #page-curtain { display: none !important; }
+  .marquee-track { animation: none !important; }
+}

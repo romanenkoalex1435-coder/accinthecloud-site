@@ -61,12 +61,16 @@ const ACC = {
 
   // ── Update nav badge ──
   updateBadge() {
-    const badges = document.querySelectorAll('.cart-badge');
     const count  = ACC.count();
-    badges.forEach(b => {
+    document.querySelectorAll('.cart-badge').forEach(b => {
       b.textContent = count;
       b.style.display = count > 0 ? 'flex' : 'none';
     });
+    document.querySelectorAll('.cbadge').forEach(b => {
+      b.textContent = count;
+      b.classList.toggle('show', count > 0);
+    });
+    document.dispatchEvent(new Event('acc:update'));
   },
 
   // ── Brief "added" feedback animation ──
@@ -88,7 +92,7 @@ const ACC = {
     localStorage.setItem(ACC.ORDERS_KEY, JSON.stringify(orders));
   },
 
-  // ── Format cart items as Telegram message text ──
+  // ── Format cart items as plain-text order message ──
   formatTelegramMessage(name, telegram, comment) {
     const cart = ACC.get();
     const items = cart.map((item, i) => {
@@ -101,10 +105,63 @@ const ACC = {
     }).join('\n\n');
 
     const total = ACC.total();
-    return `🛒 <b>Заказ из корзины — accinthecloud</b>\n\n${items}\n\n` +
-           `${total > 0 ? `💰 Итого: от ${total.toLocaleString('ru-RU')} ₽\n\n` : ''}` +
-           `👤 Имя: ${name}\n✈️ Telegram: ${telegram}` +
-           `${comment ? '\n💬 Комментарий: ' + comment : ''}`;
+    return `Заказ с сайта accinthecloud\n\n${items}\n\n` +
+           `${total > 0 ? `Итого: от ${total.toLocaleString('ru-RU')} ₽\n\n` : ''}` +
+           `Имя: ${name}\nTelegram: ${telegram}` +
+           `${comment ? '\nКомментарий: ' + comment : ''}`;
+  },
+
+  // ── Send order via /api/order; true only if it reached Telegram ──
+  async sendOrder(text, photos) {
+    try {
+      const res = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, photos: photos || [] })
+      });
+      const data = await res.json().catch(() => ({}));
+      return res.ok && data.ok === true;
+    } catch {
+      return false;
+    }
+  },
+
+  // ── Reference photos from order.html (shrunk, kept until the order is sent) ──
+  PHOTOS_KEY: 'acc_photos',
+  getPhotos() {
+    try { return JSON.parse(localStorage.getItem(ACC.PHOTOS_KEY) || '[]'); }
+    catch { return []; }
+  },
+  async savePhotos(files) {
+    const out = [];
+    for (const f of Array.from(files).slice(0, 5)) {
+      try { out.push(await ACC._shrink(f, 1280, 0.8)); } catch {}
+    }
+    try { localStorage.setItem(ACC.PHOTOS_KEY, JSON.stringify(out)); }
+    catch { localStorage.removeItem(ACC.PHOTOS_KEY); return []; }
+    return out;
+  },
+  _shrink(file, max, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k);
+        c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  },
+
+  // ── Fallback when the site can't deliver: open Telegram chat with the text ──
+  CONTACT: 'accinthecloud',
+  telegramLink(text) {
+    return `https://t.me/${ACC.CONTACT}?text=${encodeURIComponent(text.slice(0, 2000))}`;
   },
 
   // ── Init: update badge on page load ──

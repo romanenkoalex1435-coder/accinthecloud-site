@@ -14,7 +14,7 @@
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
-      --bg:#ffffff; --ink:#0d0d0d; --muted:#909090;
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#6b6b6b;
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
@@ -40,7 +40,7 @@
     .burger.open span:nth-child(2) { opacity:0; }
     .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
     .mobile-menu {
-      display:none; position:fixed; inset:0; z-index:300;
+      display:none; position:fixed; inset:0; z-index:150;
       background:#fff; flex-direction:column; align-items:center; justify-content:center;
       gap:32px; opacity:0; transition:opacity .3s;
     }
@@ -149,6 +149,9 @@
     }
     .field input:focus, .field textarea:focus { border-bottom-color:var(--ink); }
     .field textarea { resize:none; line-height:1.6; }
+    .field input[aria-invalid="true"] { border-bottom-color:#b3261e; }
+    .field-error { font-size:12px; color:#b3261e; margin-top:6px; }
+    .field-error[hidden] { display:none; }
 
     .btn-order {
       width:100%; padding:16px; background:var(--ink); color:white; border:none;
@@ -168,6 +171,12 @@
       padding:80px 40px; text-align:center; gap:16px;
     }
     #successScreen.show { display:flex; }
+    #fallbackScreen { display:none; flex-direction:column; gap:14px; padding:24px 0; }
+    #fallbackScreen.show { display:flex; }
+    #fallbackScreen h2 { font-family:var(--serif); font-size:24px; font-weight:400; }
+    #fallbackScreen p { font-size:13px; color:var(--muted); line-height:1.7; }
+    .btn-link { display:block; text-align:center; }
+    #fallbackScreen .btn-back { margin-top:0; background:none; cursor:pointer; font-family:inherit; color:var(--ink); }
     .success-icon { font-size:40px; margin-bottom:8px; }
     #successScreen h2 { font-family:var(--serif); font-size:28px; font-weight:400; }
     #successScreen p { font-size:13px; color:var(--muted); line-height:1.7; max-width:280px; }
@@ -196,6 +205,8 @@
       font-family: var(--pixel);
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
 </head>
 <body>
 
@@ -255,15 +266,17 @@
     <div class="checkout-divider"></div>
 
     <div class="field">
-      <label>Имя</label>
-      <input type="text" id="checkName" placeholder="Как тебя зовут?" required />
+      <label for="checkName">Имя</label>
+      <input type="text" id="checkName" placeholder="Как тебя зовут?" autocomplete="name" required aria-describedby="errName" />
+      <p class="field-error" id="errName" hidden>Напиши, как к тебе обращаться</p>
     </div>
     <div class="field">
-      <label>Telegram</label>
-      <input type="text" id="checkTelegram" placeholder="@username" required />
+      <label for="checkTelegram">Telegram</label>
+      <input type="text" id="checkTelegram" placeholder="@username" autocomplete="off" autocapitalize="off" spellcheck="false" required aria-describedby="errTelegram" />
+      <p class="field-error" id="errTelegram" hidden>Укажи ник в Telegram, например @username</p>
     </div>
     <div class="field">
-      <label>Комментарий</label>
+      <label for="checkComment">Комментарий</label>
       <textarea id="checkComment" rows="3" placeholder="Параметры тела, срочность, любые вопросы..."></textarea>
     </div>
 
@@ -276,6 +289,14 @@
       <h2>Запрос отправлен</h2>
       <p>Скоро свяжусь с тобой в Telegram — обсудим детали и согласуем сроки.</p>
       <a href="index.html" class="btn-back">На главную</a>
+    </div>
+
+    <div id="fallbackScreen" role="alert">
+      <h2>Отправь заказ в Telegram</h2>
+      <p>Сайт не смог передать заявку сам. Текст заказа уже готов — открой чат и нажми «Отправить».</p>
+      <a href="#" class="btn-order btn-link" id="fallbackLink" target="_blank" rel="noopener">Открыть Telegram</a>
+      <button type="button" class="btn-back" id="fallbackCopy">Скопировать текст заказа</button>
+      <p class="fallback-hint" id="fallbackHint" aria-live="polite"></p>
     </div>
   </div>
 
@@ -292,10 +313,6 @@
 </footer>
 
 <script>
-// ── Telegram config (должен совпадать с index.html) ──
-const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
-const CHAT_ID   = 'YOUR_CHAT_ID_HERE';
-
 // ── Render cart ──
 function renderCart() {
   const cart = ACC.get();
@@ -323,7 +340,7 @@ function renderCart() {
     return `
       <div class="cart-item" data-uid="${item.uid}">
         <div class="item-thumb">
-          <div class="ph" style="background:${item.bg || '#e8e8e8'};"></div>
+          <div class="ph" style="background:${thumbBg(item.bg)};"></div>
         </div>
         <div class="item-body">
           <p class="item-capsule">${item.capsule}</p>
@@ -366,13 +383,28 @@ function renderCart() {
 }
 
 // ── Submit order ──
+function setFieldError(input, errEl, bad) {
+  input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  errEl.hidden = !bad;
+}
+['checkName','checkTelegram'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    if (el.value.trim()) setFieldError(el, document.getElementById(id === 'checkName' ? 'errName' : 'errTelegram'), false);
+  });
+});
+
 document.getElementById('btnOrder').addEventListener('click', async () => {
-  const name     = document.getElementById('checkName').value.trim();
-  const telegram = document.getElementById('checkTelegram').value.trim();
+  const nameEl = document.getElementById('checkName');
+  const tgEl   = document.getElementById('checkTelegram');
+  const name     = nameEl.value.trim();
+  const telegram = tgEl.value.trim();
   const comment  = document.getElementById('checkComment').value.trim();
 
+  setFieldError(nameEl, document.getElementById('errName'), !name);
+  setFieldError(tgEl, document.getElementById('errTelegram'), !telegram);
   if (!name || !telegram) {
-    document.getElementById('checkName').focus();
+    (!name ? nameEl : tgEl).focus();
     return;
   }
   if (ACC.get().length === 0) return;
@@ -382,39 +414,51 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   btn.textContent = 'Отправляем...';
 
   const text = ACC.formatTelegramMessage(name, telegram, comment);
+  const sent = await ACC.sendOrder(text, ACC.getPhotos());
 
-  // Save to localStorage for admin
   ACC.saveOrder({
     type: 'cart',
     name, telegram, comment,
     details: text,
-    items: ACC.get()
+    items: ACC.get(),
+    delivered: sent
   });
 
-  // Send to Telegram
-  try {
-    if (BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
-      const res  = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' })
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error('API error');
-    }
-  } catch(err) {
-    console.warn('Telegram error:', err.message);
+  document.getElementById('checkoutPanel').querySelector('.checkout-label').style.display = 'none';
+  document.querySelectorAll('.summary-row, .checkout-divider, .field, .btn-order:not(.btn-link), .checkout-note, .offer-note').forEach(el => el.style.display = 'none');
+
+  if (sent) {
+    ACC.clear();
+    localStorage.removeItem('acc_prefill');
+    localStorage.removeItem(ACC.PHOTOS_KEY);
+    document.getElementById('successScreen').classList.add('show');
+    renderCart();
+    return;
   }
 
-  ACC.clear();
-  localStorage.removeItem('acc_prefill');
-  document.getElementById('checkoutPanel').querySelector('.checkout-label').style.display = 'none';
-  document.querySelectorAll('.summary-row, .checkout-divider, .field, .btn-order, .checkout-note').forEach(el => el.style.display = 'none');
-  document.getElementById('successScreen').classList.add('show');
-  renderCart();
+  // Не доставлено: честно просим отправить текст самому, корзину не трогаем
+  const fb = document.getElementById('fallbackScreen');
+  document.getElementById('fallbackLink').href = ACC.telegramLink(text);
+  if (ACC.getPhotos().length) {
+    fb.querySelector('p').textContent += ' Фото-референсы прикрепи в том же чате.';
+  }
+  document.getElementById('fallbackCopy').onclick = async () => {
+    const hint = document.getElementById('fallbackHint');
+    try { await navigator.clipboard.writeText(text); hint.textContent = 'Скопировано'; }
+    catch { hint.textContent = 'Не получилось скопировать — открой Telegram кнопкой выше'; }
+  };
+  fb.classList.add('show');
+  fb.querySelector('h2').setAttribute('tabindex', '-1');
+  fb.querySelector('h2').focus();
 });
 
 // ── Helpers ──
+// bg бывает голым путём к фото, готовым CSS-значением или пустым
+function thumbBg(bg) {
+  if (!bg) return '#e8e8e8';
+  if (/^(url\(|#|rgb|linear-gradient)/.test(bg)) return bg;
+  return `#e8e8e8 url('${encodeURI(bg)}') center/cover no-repeat`;
+}
 function plural(n, one, few, many) {
   const m = Math.abs(n) % 100;
   if (m >= 11 && m <= 19) return many;
