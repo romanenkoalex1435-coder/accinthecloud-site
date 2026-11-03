@@ -4,13 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Корзина — accinthecloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <meta name="description" content="Корзина accinthecloud.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <script src="cart.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -18,7 +26,7 @@
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
-      --pixel:'PixelImpacted',monospace;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
     }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); min-height:100vh; }
     a { text-decoration:none; color:inherit; }
@@ -31,7 +39,7 @@
     }
     .nav-logo { display:flex; align-items:center; }
     .nav-logo img { height:28px; width:auto; }
-    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); opacity:.4; pointer-events:none; }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
     .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
     .cbadge.show { display:flex; }
     .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
@@ -69,6 +77,8 @@
       display:grid; grid-template-columns:1fr 380px; gap:0;
       min-height:calc(100vh - 200px);
     }
+    .cart-layout.is-empty { grid-template-columns:1fr; }
+    .cart-layout.is-empty .cart-items { border-right:none; }
 
     /* ── Items ── */
     .cart-items { padding:40px 48px; border-right:1px solid var(--border); }
@@ -109,6 +119,9 @@
       transition:color .2s; padding:0;
     }
     .item-remove:hover { color:var(--ink); }
+    /* Зона нажатия ±/− не меньше 44 px, вид прежний */
+    .iqty-btn { position:relative; color:var(--ink); }
+    .iqty-btn::after { content:""; position:absolute; left:50%; top:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
 
     /* Empty state */
     .empty-cart {
@@ -137,6 +150,7 @@
       font-size:16px; font-weight:500; border-bottom:none; margin-top:4px; padding-top:16px;
     }
     .summary-row .label { color:var(--muted); }
+    .summary-row[hidden] { display:none; }
 
     .checkout-divider { height:1px; background:var(--border); margin:28px 0; }
 
@@ -152,6 +166,30 @@
     .field input[aria-invalid="true"] { border-bottom-color:#b3261e; }
     .field-error { font-size:12px; color:#b3261e; margin-top:6px; }
     .field-error[hidden] { display:none; }
+
+    /* Согласие на обработку персональных данных */
+    .consent { margin-bottom:16px; }
+    .consent-label { display:flex; gap:10px; align-items:flex-start; min-height:44px; padding:4px 0; cursor:pointer; font-size:11px; color:var(--muted); line-height:1.6; }
+    .consent-label input { flex:none; width:18px; height:18px; margin-top:1px; accent-color:var(--ink); cursor:pointer; }
+    .consent-label input[aria-invalid="true"] { outline:2px solid #b3261e; outline-offset:2px; }
+    .consent-label a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
+    .consent .field-error { margin-top:0; }
+
+    /* Плашка «Удалено · Вернуть» */
+    .undo-toast {
+      position:fixed; left:50%; bottom:24px; z-index:250;
+      display:flex; align-items:center; gap:12px;
+      padding:6px 8px 6px 20px; background:var(--ink); color:#fff; font-size:12px;
+      transform:translate(-50%, 16px); opacity:0; visibility:hidden;
+      transition:opacity .2s, transform .2s, visibility 0s .2s;
+    }
+    .undo-toast.show { transform:translate(-50%, 0); opacity:1; visibility:visible; transition:opacity .2s, transform .2s; }
+    .undo-toast button {
+      min-height:44px; padding:0 14px; background:none; border:1px solid rgba(255,255,255,.35);
+      color:#fff; font-family:var(--sans); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; cursor:pointer;
+    }
+    .undo-toast button:hover { border-color:#fff; }
+    .undo-toast button:focus-visible { outline-color:#fff; }
 
     .btn-order {
       width:100%; padding:16px; background:var(--ink); color:white; border:none;
@@ -216,32 +254,35 @@
   <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="cart.html" onclick="closeMobileMenu()" aria-current="page">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
-    <span class="cart-icon-btn" aria-label="Корзина">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина" aria-current="page">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
-    </span>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
     <button class="burger" id="burgerBtn" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
+<main>
 <div class="page-header">
   <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Корзина</p>
   <h1>Корзина</h1>
 </div>
 
-<div class="cart-layout">
+<div class="cart-layout" id="cartLayout">
 
   <!-- Items -->
   <div class="cart-items">
-    <p class="items-label" id="itemsLabel">0 позиций</p>
+    <p class="items-label" id="itemsLabel" tabindex="-1">0 позиций</p>
     <div id="cartItemsList"></div>
     <div class="empty-cart" id="emptyCart">
       <div class="empty-icon">○</div>
@@ -252,11 +293,16 @@
 
   <!-- Checkout -->
   <div class="cart-checkout" id="checkoutPanel">
+   <div id="checkoutForm">
     <p class="checkout-label">Оформление</p>
 
     <div class="summary-row">
       <span class="label">Позиций</span>
       <span id="summaryCount">0</span>
+    </div>
+    <div class="summary-row" id="summaryPiecesRow" hidden>
+      <span class="label">Штук</span>
+      <span id="summaryPieces">0</span>
     </div>
     <div class="summary-row total">
       <span class="label">Итого от</span>
@@ -273,16 +319,24 @@
     <div class="field">
       <label for="checkTelegram">Telegram</label>
       <input type="text" id="checkTelegram" placeholder="@username" autocomplete="off" autocapitalize="off" spellcheck="false" required aria-describedby="errTelegram" />
-      <p class="field-error" id="errTelegram" hidden>Укажи ник в Telegram, например @username</p>
+      <p class="field-error" id="errTelegram" hidden aria-live="polite">Укажи ник в Telegram, например @username</p>
     </div>
     <div class="field">
       <label for="checkComment">Комментарий</label>
       <textarea id="checkComment" rows="3" placeholder="Параметры тела, срочность, любые вопросы..."></textarea>
     </div>
 
+    <div class="consent">
+      <label class="consent-label" for="checkConsent">
+        <input type="checkbox" id="checkConsent" required aria-describedby="errConsent" />
+        <span>Даю согласие на обработку персональных данных в соответствии с <a href="privacy.html" target="_blank">политикой конфиденциальности</a></span>
+      </label>
+      <p class="field-error" id="errConsent" hidden>Без согласия на обработку данных заказ не отправить</p>
+    </div>
     <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button class="btn-order" id="btnOrder">Отправить запрос на пошив</button>
     <p class="checkout-note">Я свяжусь с тобой в Telegram, уточню детали и подтвержу заказ.</p>
+   </div>
 
     <div id="successScreen">
       <div class="success-icon">✓</div>
@@ -301,6 +355,12 @@
   </div>
 
 </div>
+</main>
+
+<div class="undo-toast" id="undoToast" role="status" aria-live="polite" aria-atomic="true">
+  <span id="undoText"></span>
+  <button type="button" id="undoBtn" tabindex="-1">Вернуть</button>
+</div>
 
 <footer>
   <span class="footer-logo">accinthecloud</span>
@@ -314,18 +374,28 @@
 
 <script>
 // ── Render cart ──
+let orderSubmitted = false;
 function renderCart() {
   const cart = ACC.get();
   const list = document.getElementById('cartItemsList');
   const empty = document.getElementById('emptyCart');
-  const count = cart.reduce((s,i) => s + (i.qty||1), 0);
+  const lines = cart.length;
+  const pieces = ACC.count();
   const total = ACC.total();
+  const esc = ACC.esc;
 
-  document.getElementById('itemsLabel').textContent = count + ' ' + plural(count,'позиция','позиции','позиций');
-  document.getElementById('summaryCount').textContent = count;
+  document.getElementById('itemsLabel').textContent = lines + ' ' + plural(lines,'позиция','позиции','позиций');
+  document.getElementById('summaryCount').textContent = lines;
+  document.getElementById('summaryPieces').textContent = pieces;
+  document.getElementById('summaryPiecesRow').hidden = pieces === lines;
   document.getElementById('summaryTotal').textContent = total > 0 ? total.toLocaleString('ru-RU') + ' ₽' : '—';
 
-  if (cart.length === 0) {
+  // Пустая корзина: оформлять нечего — прячем форму (экраны успеха/запасной остаются)
+  const hideCheckout = lines === 0 && !orderSubmitted;
+  document.getElementById('checkoutPanel').hidden = hideCheckout;
+  document.getElementById('cartLayout').classList.toggle('is-empty', hideCheckout);
+
+  if (lines === 0) {
     list.innerHTML = '';
     empty.classList.add('show');
     return;
@@ -334,27 +404,29 @@ function renderCart() {
 
   list.innerHTML = cart.map(item => {
     const metas = [];
-    if (item.size)  metas.push(`Размер: ${item.size}`);
-    if (item.color) metas.push(`Цвет/ткань: ${item.color}`);
-    if (item.notes) metas.push(`Пожелания: ${item.notes}`);
+    if (item.size)  metas.push(`Размер: ${esc(item.size)}`);
+    if (item.color) metas.push(`Цвет/ткань: ${esc(item.color)}`);
+    if (item.notes) metas.push(`Пожелания: ${esc(item.notes)}`);
+    const uid = esc(item.uid);
+    const name = esc(item.name);
     return `
-      <div class="cart-item" data-uid="${item.uid}">
+      <div class="cart-item" data-uid="${uid}">
         <div class="item-thumb">
-          <div class="ph" style="background:${thumbBg(item.bg)};"></div>
+          <div class="ph" style="background:${esc(thumbBg(item.bg))};"></div>
         </div>
         <div class="item-body">
-          <p class="item-capsule">${item.capsule}</p>
-          <p class="item-name">${item.name}</p>
+          <p class="item-capsule">${esc(item.capsule)}</p>
+          <p class="item-name">${name}</p>
           ${metas.length ? `<div class="item-meta">${metas.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
         </div>
         <div class="item-right">
-          <p class="item-price">${item.price}</p>
+          <p class="item-price">${esc(String(item.price).replace(/&#8381;/g, "₽"))}</p>
           <div class="item-qty">
-            <button class="iqty-btn" data-uid="${item.uid}" data-action="minus">−</button>
-            <div class="iqty-val">${item.qty||1}</div>
-            <button class="iqty-btn" data-uid="${item.uid}" data-action="plus">+</button>
+            <button class="iqty-btn" data-uid="${uid}" data-action="minus" aria-label="Меньше: ${name}">−</button>
+            <div class="iqty-val" aria-label="Количество">${Number(item.qty) || 1}</div>
+            <button class="iqty-btn" data-uid="${uid}" data-action="plus" aria-label="Больше: ${name}">+</button>
           </div>
-          <button class="item-remove" data-uid="${item.uid}">Удалить</button>
+          <button class="item-remove" data-uid="${uid}" aria-label="Удалить: ${name}">Удалить</button>
         </div>
       </div>`;
   }).join('');
@@ -370,22 +442,78 @@ function renderCart() {
       if (btn.dataset.action === 'minus' && qty > 1) qty--;
       ACC.updateQty(uid, qty);
       renderCart();
+      const same = list.querySelector(`.iqty-btn[data-uid="${CSS.escape(uid)}"][data-action="${btn.dataset.action}"]`);
+      if (same) same.focus();
     });
   });
 
-  // Remove
+  // Remove (с возможностью вернуть)
   list.querySelectorAll('.item-remove').forEach(btn => {
     btn.addEventListener('click', () => {
-      ACC.remove(btn.dataset.uid);
+      const removed = ACC.remove(btn.dataset.uid);
       renderCart();
+      if (removed) showUndo(removed);
     });
   });
 }
+
+// ── «Удалено · Вернуть» ~5 с ──
+const undoToast = document.getElementById('undoToast');
+const undoBtn   = document.getElementById('undoBtn');
+let undoState = null;
+function showUndo(removed) {
+  clearTimeout(undoState && undoState.timer);
+  undoState = { ...removed, timer: setTimeout(hideUndo, 5000) };
+  document.getElementById('undoText').innerHTML =
+    `Удалено<span class="sr-only">: ${ACC.esc(removed.item.name)}</span> <span aria-hidden="true">·</span>`;
+  undoToast.classList.add('show');
+  undoBtn.tabIndex = 0;
+  undoBtn.focus({ preventScroll: true });
+}
+function hideUndo() {
+  if (!undoState) return;
+  clearTimeout(undoState.timer);
+  undoState = null;
+  const hadFocus = undoToast.contains(document.activeElement);
+  undoToast.classList.remove('show');
+  undoBtn.tabIndex = -1;
+  if (hadFocus) document.getElementById('itemsLabel').focus({ preventScroll: true });
+}
+undoBtn.addEventListener('click', () => {
+  if (!undoState) return;
+  const { item, index } = undoState;
+  ACC.restore(item, index);
+  undoState.timer && clearTimeout(undoState.timer);
+  undoState = null;
+  undoToast.classList.remove('show');
+  undoBtn.tabIndex = -1;
+  renderCart();
+  const back = document.querySelector(`.item-remove[data-uid="${CSS.escape(item.uid)}"]`);
+  if (back) back.focus();
+});
+// Пауза, пока плашку трогают мышью или фокусом
+['mouseenter','focusin'].forEach(ev => undoToast.addEventListener(ev, () => undoState && clearTimeout(undoState.timer)));
+['mouseleave','focusout'].forEach(ev => undoToast.addEventListener(ev, e => {
+  if (!undoState || (e.relatedTarget && undoToast.contains(e.relatedTarget))) return;
+  clearTimeout(undoState.timer);
+  undoState.timer = setTimeout(hideUndo, 3000);
+}));
 
 // ── Submit order ──
 function setFieldError(input, errEl, bad) {
   input.setAttribute('aria-invalid', bad ? 'true' : 'false');
   errEl.hidden = !bad;
+}
+const TG_EMPTY = 'Укажи ник в Telegram, например @username';
+const TG_BAD   = 'Не похоже на Telegram: нужен @username (5–32 символа: латиница, цифры, _), ссылка t.me/… или номер телефона';
+// Проверка Telegram: '' — пусто, null — неверный формат, иначе приведённое значение
+function checkTelegramField(tgEl) {
+  const errEl = document.getElementById('errTelegram');
+  const v = ACC.normalizeTelegram(tgEl.value);
+  errEl.textContent = v === '' ? TG_EMPTY : TG_BAD;
+  setFieldError(tgEl, errEl, !v);
+  if (v) tgEl.value = v;
+  return v;
 }
 ['checkName','checkTelegram'].forEach(id => {
   const el = document.getElementById(id);
@@ -393,22 +521,34 @@ function setFieldError(input, errEl, bad) {
     if (el.value.trim()) setFieldError(el, document.getElementById(id === 'checkName' ? 'errName' : 'errTelegram'), false);
   });
 });
+// На blur только приводим верный ввод к @username; ошибку показываем при отправке,
+// чтобы текст ошибки не сдвигал вёрстку под курсором
+document.getElementById('checkTelegram').addEventListener('blur', e => {
+  const v = ACC.normalizeTelegram(e.target.value);
+  if (v) e.target.value = v;
+});
+document.getElementById('checkConsent').addEventListener('change', e => {
+  if (e.target.checked) setFieldError(e.target, document.getElementById('errConsent'), false);
+});
 
 document.getElementById('btnOrder').addEventListener('click', async () => {
-  const nameEl = document.getElementById('checkName');
-  const tgEl   = document.getElementById('checkTelegram');
+  if (ACC.get().length === 0) return;
+  const nameEl    = document.getElementById('checkName');
+  const tgEl      = document.getElementById('checkTelegram');
+  const consentEl = document.getElementById('checkConsent');
   const name     = nameEl.value.trim();
-  const telegram = tgEl.value.trim();
+  const telegram = checkTelegramField(tgEl);
   const comment  = document.getElementById('checkComment').value.trim();
+  const consent  = consentEl.checked;
 
   setFieldError(nameEl, document.getElementById('errName'), !name);
-  setFieldError(tgEl, document.getElementById('errTelegram'), !telegram);
-  if (!name || !telegram) {
-    (!name ? nameEl : tgEl).focus();
+  setFieldError(consentEl, document.getElementById('errConsent'), !consent);
+  if (!name || !telegram || !consent) {
+    (!name ? nameEl : !telegram ? tgEl : consentEl).focus();
     return;
   }
-  if (ACC.get().length === 0) return;
 
+  hideUndo();
   const btn = document.getElementById('btnOrder');
   btn.disabled = true;
   btn.textContent = 'Отправляем...';
@@ -424,8 +564,8 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
     delivered: sent
   });
 
-  document.getElementById('checkoutPanel').querySelector('.checkout-label').style.display = 'none';
-  document.querySelectorAll('.summary-row, .checkout-divider, .field, .btn-order:not(.btn-link), .checkout-note, .offer-note').forEach(el => el.style.display = 'none');
+  orderSubmitted = true;
+  document.getElementById('checkoutForm').hidden = true;
 
   if (sent) {
     ACC.clear();
@@ -457,7 +597,9 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
 function thumbBg(bg) {
   if (!bg) return '#e8e8e8';
   if (/^(url\(|#|rgb|linear-gradient)/.test(bg)) return bg;
-  return `#e8e8e8 url('${encodeURI(bg)}') center/cover no-repeat`;
+  // фото коллекций — берём лёгкую копию из sm/
+  if (/^images\/a[123]\//.test(bg) && !bg.includes('/sm/')) bg = bg.replace(/\/([^/]+)\.jpe?g$/i, '/sm/$1.jpeg');
+  return `#e8e8e8 url('${encodeURI(bg).replace(/'/g, '%27')}') center/cover no-repeat`;
 }
 function plural(n, one, few, many) {
   const m = Math.abs(n) % 100;
@@ -472,7 +614,8 @@ renderCart();
 
 // Предзаполнить имя/тг если пришли из формы заказа
 (function(){
-  const p = JSON.parse(localStorage.getItem('acc_prefill') || '{}');
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem('acc_prefill') || '{}') || {}; } catch {}
   if (p.name)     document.getElementById('checkName').value = p.name;
   if (p.telegram) document.getElementById('checkTelegram').value = p.telegram;
 })();

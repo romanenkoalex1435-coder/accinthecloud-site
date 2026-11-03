@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Страница не найдена — accinthecloud</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="/fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("/fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
+      font-display: swap;
+    }
+    :root { --ink:#0d0d0d; --muted:#6b6b6b; --pixel:'PixelImpacted',-apple-system,sans-serif; }
+    body {
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:20px; padding:24px; text-align:center;
+      font-family:-apple-system,'Inter',sans-serif; background:#fff; color:var(--ink);
+    }
+    img { width:96px; height:auto; }
+    h1 { font-family:var(--pixel); font-weight:normal; font-size:56px; letter-spacing:0.1em; }
+    p { font-size:15px; color:var(--muted); line-height:1.6; max-width:32ch; }
+    a.home {
+      display:inline-flex; align-items:center; min-height:44px; padding:0 28px;
+      border:1px solid var(--ink); color:var(--ink); text-decoration:none;
+      font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    }
+    a.home:hover { background:var(--ink); color:#fff; }
+    a:focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  </style>
+</head>
+<body>
+  <main style="display:contents">
+    <img src="/images/logo.png" alt="accinthecloud" width="240" height="110">
+    <h1>404</h1>
+    <p>Такой страницы нет. Возможно, ссылка устарела.</p>
+    <a class="home" href="/">На главную</a>
+  </main>
+</body>
+</html>

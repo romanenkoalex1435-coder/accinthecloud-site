@@ -4,8 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>accinthecloud</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
+  <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="accinthecloud">
+  <meta property="og:description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
+  <meta property="og:url" content="https://accinthecloud-site.vercel.app/">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <script src="cart.js"></script>
   <script src="js/gsap.min.js"></script>
   <script src="js/ScrollTrigger.min.js"></script>
@@ -15,7 +31,8 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -26,7 +43,7 @@
       --soft: #f5f5f5;
       --serif: 'Playfair Display', Georgia, serif;
       --sans: 'Inter', -apple-system, sans-serif;
-      --pixel: 'PixelImpacted', monospace;
+      --pixel: 'PixelImpacted', 'Inter', -apple-system, sans-serif;
     }
     html { scroll-behavior: smooth; font-size: 16px; }
     body {
@@ -34,12 +51,17 @@
       background: var(--bg);
       color: var(--ink);
       overflow-x: hidden;
-      cursor: none; /* custom cursor */
+    }
+    /* Свой курсор — только для мыши/тачпада и когда скрипт работает (класс ставит JS) */
+    @media (pointer: fine) and (min-width: 901px) {
+      html.has-cursor body, html.has-cursor .capsule-card { cursor: none; }
+      html.has-cursor #cursor, html.has-cursor #cursor-ring { display: block; }
     }
     a { text-decoration: none; color: inherit; }
     img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
     /* ─── Custom Cursor ──────────────────────────────────── */
+    #cursor, #cursor-ring { display: none; }
     #cursor {
       position: fixed; z-index: 9999; pointer-events: none;
       width: 8px; height: 8px; border-radius: 50%;
@@ -61,6 +83,14 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 200;
       padding: 28px 48px;
       display: flex; flex-wrap:wrap; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid transparent;
+      transition: background-color .3s, border-color .3s, padding .3s;
+    }
+    /* После первого экрана шапка получает фон, как на внутренних страницах */
+    nav.nav-solid {
+      background: rgba(255,255,255,0.92);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      border-bottom-color: var(--border);
     }
     .nav-logo {
       display: flex; align-items: center; opacity: 0;
@@ -110,11 +140,20 @@
       z-index: 1; text-align: center;
       font-family: var(--pixel);
       font-size: clamp(28px, 3vw, 42px); font-weight: normal;
-      letter-spacing: 0.15em; color: var(--ink);
+      letter-spacing: 0.15em; color: var(--ink); line-height: normal;
       opacity: 0;
     }
     @media (max-width: 900px) {
       .hero-brand { font-size: 36px; }
+    }
+    /* Телефон в альбомной ориентации: высота по видимой области Safari,
+       логотип меньше и чуть выше, надпись ниже его тени */
+    @media (max-height: 500px) and (orientation: landscape) {
+      #hero { height: 100vh; height: 100svh; }
+      .hero-logo-video { --size: min(175vw, 125vh); top: 44%; }
+      @supports (height: 100svh) { .hero-logo-video { --size: min(175vw, 125svh); } }
+      .hero-brand { font-size: 22px; bottom: max(14px, env(safe-area-inset-bottom)); }
+      .mobile-menu { gap: 18px; }
     }
 
     /* ─── Section Shared ─────────────────────────────────── */
@@ -147,7 +186,7 @@
     .capsules-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
     }
-    .capsule-card { position: relative; overflow: hidden; cursor: none; display:block; }
+    .capsule-card { position: relative; overflow: hidden; display:block; }
     .capsule-view { color: rgba(255,255,255,0.7) !important; }
     .capsule-card:hover .capsule-view { color: white !important; }
     .capsule-card-link { display:block; }
@@ -194,6 +233,11 @@
     .capsule-card:hover .capsule-body,
     .capsule-card:focus-within .capsule-body {
       opacity: 1; transform: translateY(0);
+    }
+    /* Без наведения (планшеты) названия видны всегда */
+    @media (hover: none) {
+      .capsule-thumb::after { opacity: 1; }
+      .capsule-body { opacity: 1; transform: none; }
     }
     .capsule-name {
       font-family: var(--sans); font-size: 28px; font-weight: 700;
@@ -272,7 +316,7 @@
       transition: opacity .3s ease;
     }
     .carousel-featured.fading { opacity: 0; }
-    .carousel-bg { position: absolute; inset: 0; }
+    .carousel-bg { position: absolute; inset: 0; background: #2a2520; }
     .carousel-featured::after {
       content: ''; position: absolute; bottom: 0; left: 0; right: 0;
       height: 55%; background: linear-gradient(transparent, rgba(0,0,0,0.72));
@@ -326,7 +370,6 @@
     /* ─── Animated reveal base ───────────────────────────── */
     .no-gsap .reveal, .no-gsap .reveal-left, .no-gsap .reveal-right,
     .no-gsap .hero-logo-video, .no-gsap .hero-brand, .no-gsap .nav-logo, .no-gsap .burger { opacity: 1 !important; }
-    .no-gsap body { cursor: auto; }
     .reveal { opacity: 0; }
     .reveal-left { opacity: 0; }
     .reveal-right { opacity: 0; }
@@ -341,7 +384,7 @@
       transition: transform .3s, opacity .3s;
     }
     .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-    .burger.open span:nth-child(2) { opacity: 0; }
+    .burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
     .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
     .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
     .cbadge {
@@ -385,8 +428,6 @@
       .order-cta-text h2 { font-size: 28px; }
       footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
-      body { cursor: auto; }
-      #cursor, #cursor-ring { display: none; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
     .section-label, .capsule-items, .capsule-tag,
@@ -406,10 +447,12 @@
 
 <!-- ─── MOBILE MENU ───────────────────────────────────────── -->
 <div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" aria-current="page" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
   <a href="#capsules" onclick="closeMobileMenu()">Capsules</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 
@@ -438,6 +481,7 @@
 <!-- ─── PAGE CURTAIN ──────────────────────────────────────── -->
 <div id="page-curtain"></div>
 
+<main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
   <div class="hero-logo-video" id="heroLogoVideo">
@@ -447,7 +491,7 @@
     </video>
     <img src="images/logo.png" alt="accinthecloud">
   </div>
-  <p class="hero-brand">accinthecloud</p>
+  <h1 class="hero-brand">accinthecloud</h1>
 </section>
 
 <!-- ─── MARQUEE ───────────────────────────────────────────── -->
@@ -477,7 +521,7 @@
     <!-- a1 -->
     <a class="capsule-card reveal capsule-card-link" href="collection-a1.html">
       <div class="capsule-thumb">
-        <div class="ph" style="background:linear-gradient(170deg,#1a1814,#2e2a24);"></div>
+        <img class="ph" src="images/a1/sm/camo.jpeg" srcset="images/a1/sm/camo.jpeg 479w, images/a1/camo.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
         <div class="capsule-tag">a1</div>
       </div>
       <div class="capsule-body">
@@ -490,7 +534,7 @@
     <!-- a2 -->
     <a class="capsule-card reveal capsule-card-link" href="collection-a2.html">
       <div class="capsule-thumb">
-        <div class="ph" style="background:linear-gradient(170deg,#2a2520,#3e3830);"></div>
+        <img class="ph" src="images/a2/taxes/sm/01.jpeg" srcset="images/a2/taxes/sm/01.jpeg 479w, images/a2/taxes/01.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
         <div class="capsule-tag">a2</div>
       </div>
       <div class="capsule-body">
@@ -503,7 +547,7 @@
     <!-- a3 -->
     <a class="capsule-card reveal capsule-card-link" href="collection-a3.html">
       <div class="capsule-thumb">
-        <div class="ph" style="background:linear-gradient(170deg,#363028,#4a4238);"></div>
+        <img class="ph" src="images/a3/RIVET/sm/01.jpeg" srcset="images/a3/RIVET/sm/01.jpeg 479w, images/a3/RIVET/01.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
         <div class="capsule-tag">a3</div>
       </div>
       <div class="capsule-body">
@@ -518,7 +562,7 @@
   <!-- Mobile Carousel -->
   <div class="capsule-carousel" id="capsuleCarousel">
     <a class="carousel-featured" id="carouselFeatured" href="collection-a1.html">
-      <div class="carousel-bg" id="carouselBg" style="background:linear-gradient(170deg,#1a1814,#2e2a24);"></div>
+      <img class="carousel-bg" id="carouselBg" src="images/a1/sm/camo.jpeg" srcset="images/a1/sm/camo.jpeg 479w, images/a1/camo.jpeg 959w" sizes="100vw" loading="lazy" decoding="async" alt="">
       <div class="carousel-tag" id="carouselTag">a1</div>
       <div class="carousel-info">
         <p class="carousel-name" id="carouselName">Access</p>
@@ -543,6 +587,7 @@
   </div>
   <a href="order.html" class="order-cta-btn">Заказать →</a>
 </div>
+</main>
 
 <!-- ─── FOOTER ─────────────────────────────────────────────── -->
 <footer>
@@ -565,17 +610,30 @@ if (!window.gsap) {
   if (pc) pc.remove();
 }
 
+// ── Шапка: фон после первого экрана ──
+(function(){
+  const nav = document.querySelector('nav');
+  const hero = document.getElementById('hero');
+  const upd = () => nav.classList.toggle('nav-solid', hero.getBoundingClientRect().bottom <= nav.offsetHeight);
+  addEventListener('scroll', upd, { passive: true });
+  addEventListener('resize', upd);
+  upd();
+})();
+
 // «Уменьшить движение»: анимации GSAP проигрываются мгновенно, ролик стоит на первом кадре
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduceMotion) {
-  gsap.globalTimeline.timeScale(1000);
+  if (window.gsap) gsap.globalTimeline.timeScale(1000);
   const hv = document.querySelector('#heroLogoVideo video');
   if (hv) { hv.removeAttribute('autoplay'); hv.pause(); }
 }
 
+// Всё, что ниже до меню, требует GSAP; без него меню и карусель всё равно работают
+if (window.gsap) {
 gsap.registerPlugin(ScrollTrigger);
 
-// ── Custom cursor ──
+// ── Custom cursor (только мышь/тачпад) ──
+if (matchMedia('(pointer: fine)').matches) document.documentElement.classList.add('has-cursor');
 const cur = document.getElementById('cursor');
 const ring = document.getElementById('cursor-ring');
 let rx=0, ry=0;
@@ -644,6 +702,7 @@ ScrollTrigger.create({
     opacity:1, y:0, duration:0.85, stagger:0.12, ease:'power2.out'
   })
 });
+} // if (window.gsap)
 
 
 // ── Mobile menu ────────────────────────────────────────────
@@ -699,9 +758,9 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // ── Mobile Capsule Carousel ─────────────────────────────────
 (function(){
   const capsules = [
-    { tag:'a1', name:'Access', sub:'Shoulder Bags', bg:'linear-gradient(170deg,#1a1814,#2e2a24)', href:'collection-a1.html' },
-    { tag:'a2', name:'Accept', sub:'Jackets',       bg:'linear-gradient(170deg,#2a2520,#3e3830)', href:'collection-a2.html' },
-    { tag:'a3', name:'Accent', sub:'Pants',         bg:'linear-gradient(170deg,#363028,#4a4238)', href:'collection-a3.html' }
+    { tag:'a1', name:'Access', sub:'Shoulder Bags', sm:'images/a1/sm/camo.jpeg',     img:'images/a1/camo.jpeg',     href:'collection-a1.html' },
+    { tag:'a2', name:'Accept', sub:'Jackets',       sm:'images/a2/taxes/sm/01.jpeg', img:'images/a2/taxes/01.jpeg', href:'collection-a2.html' },
+    { tag:'a3', name:'Accent', sub:'Pants',         sm:'images/a3/RIVET/sm/01.jpeg', img:'images/a3/RIVET/01.jpeg', href:'collection-a3.html' }
   ];
   let current = 0;
   const featured = document.getElementById('carouselFeatured');
@@ -730,7 +789,8 @@ document.querySelectorAll('.faq-q').forEach(btn => {
     featured.classList.add('fading');
     setTimeout(() => {
       const c = capsules[idx];
-      bgEl.style.background = c.bg;
+      bgEl.srcset = `${c.sm} 479w, ${c.img} 959w`;
+      bgEl.src = c.sm;
       tagEl.textContent = c.tag;
       nameEl.textContent = c.name;
       if (subEl) subEl.textContent = c.sub;
@@ -741,6 +801,8 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   }
 
   updateArc(0); // init positions
+  // Подгружаем остальные фото заранее, чтобы при переключении не было пустого кадра
+  window.addEventListener('load', () => capsules.slice(1).forEach(c => { const im = new Image(); im.sizes = '100vw'; im.srcset = `${c.sm} 479w, ${c.img} 959w`; }));
   arcBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
 
   // Swipe support (card + arc area)

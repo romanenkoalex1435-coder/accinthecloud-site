@@ -4,12 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Политика конфиденциальности — accinthecloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <meta name="description" content="Политика конфиденциальности accinthecloud.">
+  <link rel="canonical" href="https://accinthecloud-site.vercel.app/privacy.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="Политика конфиденциальности — accinthecloud">
+  <meta property="og:description" content="Политика конфиденциальности accinthecloud.">
+  <meta property="og:url" content="https://accinthecloud-site.vercel.app/privacy.html">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -17,7 +35,7 @@
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
-      --pixel:'PixelImpacted',monospace;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
     }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); line-height:1.8; }
     a { text-decoration:none; color:inherit; }
@@ -37,9 +55,9 @@
     }
     .doc-date { font-size:11px; color:var(--muted); letter-spacing:0.08em; margin-bottom:56px; }
     .wrap h2 { font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin:48px 0 16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
-    .wrap p { font-size:13px; color:#444; line-height:1.9; margin-bottom:14px; }
-    .wrap ul { padding-left:20px; margin-bottom:14px; }
-    .wrap ul li { font-size:13px; color:#444; line-height:1.9; margin-bottom:6px; }
+    .wrap p { font-size:16px; color:#444; line-height:1.7; margin-bottom:16px; max-width:68ch; }
+    .wrap ul { padding-left:20px; margin-bottom:16px; max-width:68ch; }
+    .wrap ul li { font-size:16px; color:#444; line-height:1.7; margin-bottom:8px; }
 
     footer {
       padding:36px 48px; border-top:1px solid var(--border);
@@ -68,7 +86,7 @@
   <a href="javascript:history.back()" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">← Назад</a>
 </nav>
 
-<div class="wrap">
+<main class="wrap">
   <h1>Политика конфиденциальности</h1>
   <p class="doc-date">Редакция от июня 2026 г.</p>
 
@@ -113,7 +131,7 @@
 
   <h2>8. Изменения политики</h2>
   <p>Оператор вправе вносить изменения в настоящую Политику. Актуальная версия всегда доступна на этой странице.</p>
-</div>
+</main>
 
 <footer>
   <span class="footer-logo">accinthecloud</span>

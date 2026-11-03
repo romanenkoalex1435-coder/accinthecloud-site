@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /cart.html
+Disallow: /api/
+
+Sitemap: https://accinthecloud-site.vercel.app/sitemap.xml

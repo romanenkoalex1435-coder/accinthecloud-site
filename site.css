@@ -14,3 +14,46 @@
   #page-curtain { display: none !important; }
   .marquee-track { animation: none !important; }
 }
+
+/* Только для скринридеров */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* iOS красит текст кнопок системным синим — берём цвет страницы */
+button { color: inherit; -webkit-tap-highlight-color: transparent; }
+
+/* Зона нажатия не меньше 44 px, без изменения вида */
+.cart-icon-btn, .burger, .qty-btn, .lb-filter, .item-remove { position: relative; }
+.cart-icon-btn::after, .burger::after, .qty-btn::after, .lb-filter::after, .item-remove::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+}
+
+/* Поля ввода от 16 px — иначе iOS увеличивает страницу при фокусе */
+@media (max-width: 900px) {
+  input, textarea, select { font-size: max(16px, 1em) !important; }
+}
+
+/* Уведомление «Добавлено в корзину» в одну строку */
+#cartFeedback { white-space: nowrap; }
+
+/* Мелкие служебные подписи: в пиксельном шрифте цифры на 12–14 px не читаются,
+   а латиница и кириллица в одной строке расходятся — набираем их Inter */
+.breadcrumb, .breadcrumb a, .items-label {
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  letter-spacing: 0.14em;
+}
+
+/* Двойной тап по кнопкам не увеличивает страницу */
+a, button, [role="button"], input, label { touch-action: manipulation; }
+
+/* На тач-экранах :hover «залипает» после тапа — тёмные кнопки не должны оставаться серыми */
+@media (hover: none) {
+  .btn-order:hover, .btn-submit:hover, .btn-cart:hover { opacity: 1; }
+}
+
+/* Подпись на пиксельном шрифте с русскими буквами набираем целиком Inter,
+   чтобы латиница и кириллица в одной строке не расходились по размеру */
+.mixed-script { font-family: 'Inter', -apple-system, sans-serif !important; letter-spacing: 0.12em; }

@@ -4,13 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Индивидуальный пошив — accinthecloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <meta name="description" content="Индивидуальный пошив accinthecloud: опиши идею, приложи референсы — обсудим детали в Telegram.">
+  <link rel="canonical" href="https://accinthecloud-site.vercel.app/order.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="Индивидуальный пошив — accinthecloud">
+  <meta property="og:description" content="Индивидуальный пошив accinthecloud: опиши идею, приложи референсы — обсудим детали в Telegram.">
+  <meta property="og:url" content="https://accinthecloud-site.vercel.app/order.html">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <script src="cart.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -18,7 +36,7 @@
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
-      --pixel:'PixelImpacted',monospace;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
     }
     html { scroll-behavior:smooth; }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
@@ -87,7 +105,20 @@
       text-transform:uppercase; cursor:pointer; transition:border-color .2s, color .2s; color:var(--muted);
     }
     .file-btn:hover { border-color:var(--ink); color:var(--ink); }
-    .file-names { font-size:11px; color:var(--muted); }
+    .file-names { font-size:11px; color:var(--muted); line-height:1.6; }
+    .file-names:empty { display:none; }
+
+    .field input[aria-invalid="true"] { border-bottom-color:#b3261e; }
+    .field-error { font-size:12px; color:#b3261e; margin-top:6px; line-height:1.5; }
+    .field-error[hidden] { display:none; }
+
+    /* Согласие на обработку персональных данных */
+    .consent { margin-bottom:16px; }
+    .consent-label { display:flex; gap:10px; align-items:flex-start; min-height:44px; padding:4px 0; cursor:pointer; font-size:11px; color:var(--muted); line-height:1.6; }
+    .consent-label input { flex:none; width:18px; height:18px; margin-top:1px; accent-color:var(--ink); cursor:pointer; }
+    .consent-label input[aria-invalid="true"] { outline:2px solid #b3261e; outline-offset:2px; }
+    .consent-label a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
+    .consent .field-error { margin-top:0; }
 
     .btn-submit {
       width:100%; padding:18px; margin-top:8px;
@@ -137,8 +168,9 @@
   <a href="index.html">Главная</a>
   <a href="lookbook.html">Lookbook</a>
   <a href="index.html#capsules">Capsules</a>
-  <a href="order.html">Индивидуальный пошив</a>
+  <a href="order.html" aria-current="page">Индивидуальный пошив</a>
   <a href="faq.html">FAQ</a>
+  <a href="cart.html">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 
@@ -146,7 +178,7 @@
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div class="nav-right">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
       <span class="cbadge" id="cartBadge"></span>
@@ -155,34 +187,44 @@
   </div>
 </nav>
 
-<div class="order-wrap">
+<main class="order-wrap">
   <h1>Индивидуальный<br>пошив</h1>
   <p class="order-sub">Опиши свою идею — свяжусь в телеграме и обсудим детали. Любой фасон, любой материал.</p>
 
-  <form id="orderForm">
+  <form id="orderForm" novalidate>
     <div class="field">
-      <label>Что хочешь сшить?</label>
-      <textarea name="idea" rows="5" placeholder="Материал, фасон, референсы — всё пригодится."></textarea>
+      <label for="orderIdea">Что хочешь сшить?</label>
+      <textarea id="orderIdea" name="idea" rows="5" placeholder="Материал, фасон, референсы — всё пригодится."></textarea>
     </div>
     <div class="field">
-      <label>Имя</label>
-      <input type="text" name="name" placeholder="Как тебя зовут?" required />
+      <label for="orderName">Имя</label>
+      <input type="text" id="orderName" name="name" placeholder="Как тебя зовут?" autocomplete="name" required aria-describedby="errOrderName" />
+      <p class="field-error" id="errOrderName" hidden>Напиши, как к тебе обращаться</p>
     </div>
     <div class="field">
-      <label>Telegram</label>
-      <input type="text" name="telegram" placeholder="@username" required />
+      <label for="orderTelegram">Telegram</label>
+      <input type="text" id="orderTelegram" name="telegram" placeholder="@username" autocomplete="off" autocapitalize="off" spellcheck="false" required aria-describedby="errOrderTelegram" />
+      <p class="field-error" id="errOrderTelegram" hidden aria-live="polite">Укажи ник в Telegram, например @username</p>
     </div>
     <div class="field">
-      <label>Комментарий</label>
-      <textarea name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
+      <label for="orderComment">Комментарий</label>
+      <textarea id="orderComment" name="comment" rows="3" placeholder="Размер, пожелания, вопросы..."></textarea>
     </div>
     <div class="field">
-      <label>Фото / референсы</label>
+      <label for="fileInput">Фото / референсы</label>
       <div class="file-upload">
         <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-        <button type="button" class="file-btn" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
-        <span class="file-names" id="fileNames"></span>
+        <button type="button" class="file-btn" id="fileBtn" aria-describedby="fileNames errPhotos" onclick="document.getElementById('fileInput').click()">+ Прикрепить фото</button>
+        <span class="file-names" id="fileNames" aria-live="polite"></span>
       </div>
+      <p class="field-error" id="errPhotos" hidden aria-live="polite"></p>
+    </div>
+    <div class="consent">
+      <label class="consent-label" for="orderConsent">
+        <input type="checkbox" id="orderConsent" name="consent" required aria-describedby="errOrderConsent" />
+        <span>Даю согласие на обработку персональных данных в соответствии с <a href="privacy.html" target="_blank">политикой конфиденциальности</a></span>
+      </label>
+      <p class="field-error" id="errOrderConsent" hidden>Без согласия на обработку данных заказ не отправить</p>
     </div>
     <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button type="submit" class="btn-submit" id="submitBtn">Добавить в корзину →</button>
@@ -192,7 +234,7 @@
     <h3>Запрос добавлен</h3>
     <p>Перейди в корзину для оформления заказа.</p>
   </div>
-</div>
+</main>
 
 <footer>
   <span class="footer-logo">accinthecloud</span>
@@ -204,16 +246,7 @@
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 
-<script src="js/gsap.min.js"></script>
 <script>
-
-// Cart badge
-(function(){
-  const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
-  const n=c.reduce((s,i)=>s+(i.qty||1),0);
-  const b=document.getElementById('cartBadge');
-  if(b&&n>0){b.textContent=n;b.classList.add('show');}
-})();
 
 // Burger
 const burgerBtn = document.getElementById('burgerBtn');
@@ -237,14 +270,49 @@ burgerBtn.addEventListener('click',()=>{
 });
 menuClose.addEventListener('click', closeMobileMenu);
 
-// File upload
+// File upload (не больше 5 фото)
+const MAX_PHOTOS = 5;
 const fileInput = document.getElementById('fileInput');
+function selectedPhotos() {
+  return fileInput ? Array.from(fileInput.files).slice(0, MAX_PHOTOS) : [];
+}
 if(fileInput){
   fileInput.addEventListener('change',()=>{
-    const names=Array.from(fileInput.files).map(f=>f.name).join(', ');
-    document.getElementById('fileNames').textContent=names||'';
+    const all = Array.from(fileInput.files);
+    const list = selectedPhotos();
+    document.getElementById('fileNames').textContent =
+      list.length ? `Выбрано ${list.length} фото: ${list.map(f=>f.name).join(', ')}` : '';
+    const err = document.getElementById('errPhotos');
+    err.textContent = all.length > MAX_PHOTOS
+      ? `Можно не больше ${MAX_PHOTOS} фото — выбрано ${all.length}, прикрепятся первые ${MAX_PHOTOS}`
+      : '';
+    err.hidden = all.length <= MAX_PHOTOS;
   });
 }
+
+// Errors like in the cart
+function setFieldError(input, errEl, bad) {
+  input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  errEl.hidden = !bad;
+}
+const TG_EMPTY = 'Укажи ник в Telegram, например @username';
+const TG_BAD   = 'Не похоже на Telegram: нужен @username (5–32 символа: латиница, цифры, _), ссылка t.me/… или номер телефона';
+function checkTelegramField(tgEl) {
+  const errEl = document.getElementById('errOrderTelegram');
+  const v = ACC.normalizeTelegram(tgEl.value);
+  errEl.textContent = v === '' ? TG_EMPTY : TG_BAD;
+  setFieldError(tgEl, errEl, !v);
+  if (v) tgEl.value = v;
+  return v;
+}
+const nameEl = document.getElementById('orderName');
+const tgEl = document.getElementById('orderTelegram');
+const consentEl = document.getElementById('orderConsent');
+nameEl.addEventListener('input',()=>{ if(nameEl.value.trim()) setFieldError(nameEl, document.getElementById('errOrderName'), false); });
+tgEl.addEventListener('input',()=>{ if(tgEl.value.trim()) setFieldError(tgEl, document.getElementById('errOrderTelegram'), false); });
+// На blur только приводим верный ввод к @username; ошибка — при отправке (без сдвига вёрстки)
+tgEl.addEventListener('blur',()=>{ const v=ACC.normalizeTelegram(tgEl.value); if(v) tgEl.value=v; });
+consentEl.addEventListener('change',()=>{ if(consentEl.checked) setFieldError(consentEl, document.getElementById('errOrderConsent'), false); });
 
 // Form submit
 document.getElementById('orderForm').addEventListener('submit',async e=>{
@@ -252,14 +320,21 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
   const form=e.target;
   const idea=form.idea.value.trim();
   const name=form.name.value.trim();
-  const telegram=form.telegram.value.trim();
+  const telegram=checkTelegramField(tgEl);
   const comment=form.comment.value.trim();
+  setFieldError(nameEl, document.getElementById('errOrderName'), !name);
+  setFieldError(consentEl, document.getElementById('errOrderConsent'), !consentEl.checked);
+  if(!name||!telegram||!consentEl.checked){
+    (!name?nameEl:!telegram?tgEl:consentEl).focus();
+    return;
+  }
   const itemName=idea?idea.slice(0,48):'Своя идея';
   const notes=[idea,comment].filter(Boolean).join('\n');
   localStorage.setItem('acc_prefill',JSON.stringify({name,telegram}));
-  if(fileInput&&fileInput.files.length){
+  const photos=selectedPhotos();
+  if(photos.length){
     document.getElementById('submitBtn').disabled=true;
-    await ACC.savePhotos(fileInput.files);
+    await ACC.savePhotos(photos);
   }
   ACC.add({
     id:'custom-'+Date.now(),

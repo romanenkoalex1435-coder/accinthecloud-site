@@ -31,9 +31,21 @@ const ACC = {
     ACC.showAddedFeedback();
   },
 
-  // ── Remove by uid ──
+  // ── Remove by uid; returns { item, index } so it can be restored ──
   remove(uid) {
-    const cart = ACC.get().filter(i => i.uid !== uid);
+    const cart  = ACC.get();
+    const index = cart.findIndex(i => i.uid === uid);
+    if (index < 0) return null;
+    const [item] = cart.splice(index, 1);
+    ACC.save(cart);
+    return { item, index };
+  },
+
+  // ── Put a removed item back to its old place ──
+  restore(item, index) {
+    const cart = ACC.get();
+    if (cart.some(i => i.uid === item.uid)) return;
+    cart.splice(Math.min(Math.max(index, 0), cart.length), 0, item);
     ACC.save(cart);
   },
 
@@ -41,6 +53,26 @@ const ACC = {
   updateQty(uid, qty) {
     const cart = ACC.get().map(i => i.uid === uid ? { ...i, qty } : i);
     ACC.save(cart);
+  },
+
+  // ── Escape user text before it goes into HTML ──
+  esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  },
+
+  // ── Telegram contact: '' — пусто, null — не похоже на ник/ссылку/телефон,
+  //    иначе приведённое значение (@username или номер) ──
+  normalizeTelegram(value) {
+    const s = String(value || '').trim();
+    if (!s) return '';
+    const link = s.match(/^(?:https?:\/\/)?(?:www\.)?(?:t|telegram)\.me\/@?([^\/?#\s]+)\/?(?:[?#].*)?$/i);
+    const phoneDigits = s.replace(/\D/g, '');
+    if (!link && /^\+?[\d\s()\-]+$/.test(s)) {
+      return phoneDigits.length >= 10 && phoneDigits.length <= 15 ? s.replace(/\s+/g, ' ') : null;
+    }
+    const user = link ? link[1] : s.replace(/^@/, '');
+    return /^[A-Za-z0-9_]{5,32}$/.test(user) ? '@' + user : null;
   },
 
   // ── Total items count ──
@@ -100,7 +132,7 @@ const ACC = {
       if (item.size)  line.push(`   · Размер: ${item.size}`);
       if (item.color) line.push(`   · Пожелания по цвету/ткани: ${item.color}`);
       if (item.notes) line.push(`   · Доп. пожелания: ${item.notes}`);
-      line.push(`   · Цена: ${item.price} × ${item.qty || 1} шт.`);
+      line.push(`   · Цена: ${String(item.price).replace(/&#8381;/g, "₽")} × ${item.qty || 1} шт.`);
       return line.join('\n');
     }).join('\n\n');
 

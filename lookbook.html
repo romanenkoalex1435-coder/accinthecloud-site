@@ -4,13 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lookbook — accinthecloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,300&display=swap" rel="stylesheet" />
+  <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
+  <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="Lookbook — accinthecloud">
+  <meta property="og:description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
+  <meta property="og:url" content="https://accinthecloud-site.vercel.app/lookbook.html">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
   <script src="cart.js"></script>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Regular.otf") format("opentype");
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -18,7 +36,7 @@
       --border:#ebebeb; --soft:#f5f5f5;
       --serif:'Playfair Display',Georgia,serif;
       --sans:'Inter',-apple-system,sans-serif;
-      --pixel:'PixelImpacted',monospace;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
     }
     body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
     a { text-decoration:none; color:inherit; }
@@ -33,7 +51,7 @@
     .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
     .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
     .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
-    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
     .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
     .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
     .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
@@ -93,7 +111,7 @@
     .modal-overlay.open { opacity:1; pointer-events:all; }
     .modal {
       display:flex; width:100%; max-width:1100px; height:88dvh;
-      margin:0 24px;
+      margin:0 24px; position:relative;
       transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
     }
     .modal-overlay.open .modal { transform:translateY(0); }
@@ -107,7 +125,8 @@
       overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
     }
     .modal-slides::-webkit-scrollbar { display:none; }
-    .modal-slide { flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; justify-content:center; }
+    .modal-slide { flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; justify-content:center;
+      background-position:center; background-size:contain; background-repeat:no-repeat; } /* фон — sm-копия, пока грузится полное фото */
     .modal-slide img { max-width:100%; max-height:100%; object-fit:contain; }
     .modal-dots-row {
       display:flex; gap:8px; justify-content:center; padding:14px; background:#000;
@@ -129,9 +148,10 @@
       display:flex; flex-direction:column; overflow-y:auto;
       padding:44px 36px 36px; position:relative;
     }
+    /* Кнопка закрытия — вне прокручиваемого описания, не уезжает */
     .modal-close {
-      position:absolute; top:18px; right:18px;
-      width:34px; height:34px; background:none; border:1px solid var(--border);
+      position:absolute; top:18px; right:18px; z-index:3;
+      width:34px; height:34px; background:#fff; border:1px solid var(--border);
       cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center;
     }
     .modal-num { font-family:var(--pixel); font-size:20px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
@@ -173,7 +193,7 @@
       .modal-dots-row { padding:10px; }
       #arrPrev, #arrNext { display:none; }
       .modal-info { flex:1; width:100%; min-height:0; overflow-y:auto; padding:20px 20px 32px; }
-      .modal-close { top:12px; right:12px; }
+      .modal-close { top:calc(58dvh + 12px); right:12px; }
       footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
     }
     @media(max-width:500px) {
@@ -195,6 +215,10 @@
     }
     .lb-filter:hover { border-color: var(--ink); color: var(--ink); }
     .lb-filter.active { background: var(--ink); color: white; border-color: var(--ink); }
+    .lb-title {
+      font-family:var(--pixel); font-size:clamp(22px,3.5vw,40px); font-weight:normal;
+      letter-spacing:0.08em; padding:32px 24px 0;
+    }
     .lb-count { font-size: 9px; color: var(--muted); margin-left: 4px; opacity: .6; }
     .section-label, .capsule-items, .capsule-tag,
     .modal-num, .modal-made, .items-label,
@@ -213,6 +237,7 @@
   <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
 </div>
 <nav>
@@ -230,15 +255,18 @@
   </div>
 </nav>
 
-<div class="lb-filters" id="filters">
-  <button class="lb-filter active" data-cat="all">Все</button>
-  <button class="lb-filter" data-cat="tops">Верх</button>
-  <button class="lb-filter" data-cat="bottoms">Низ</button>
-  <button class="lb-filter" data-cat="bags">Сумки</button>
-  <button class="lb-filter" data-cat="accessories">Аксессуары</button>
-  <button class="lb-filter" data-cat="special">Special</button>
+<main>
+<h1 class="lb-title">Lookbook</h1>
+<div class="lb-filters" id="filters" role="group" aria-label="Фильтр по категориям">
+  <button class="lb-filter active" data-cat="all" aria-pressed="true">Все</button>
+  <button class="lb-filter" data-cat="tops" aria-pressed="false">Верх</button>
+  <button class="lb-filter" data-cat="bottoms" aria-pressed="false">Низ</button>
+  <button class="lb-filter" data-cat="bags" aria-pressed="false">Сумки</button>
+  <button class="lb-filter" data-cat="accessories" aria-pressed="false">Аксессуары</button>
+  <button class="lb-filter" data-cat="special" aria-pressed="false">Special</button>
 </div>
 <div class="lb-grid" id="grid"></div>
+</main>
 
 <footer>
   <span class="footer-logo">accinthecloud</span>
@@ -253,6 +281,7 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="overlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
+    <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
     <div class="modal-gallery">
       <button class="marr" id="arrPrev" aria-label="Предыдущее фото">&#8592;</button>
       <button class="marr" id="arrNext" aria-label="Следующее фото">&#8594;</button>
@@ -260,7 +289,6 @@
       <div class="modal-dots-row" id="mDots"></div>
     </div>
     <div class="modal-info">
-      <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
       <p class="modal-num" id="mNum"></p>
       <h2 class="modal-name" id="mName"></h2>
       <div class="modal-divider"></div>
@@ -363,8 +391,10 @@ let activeFilter = 'all';
 document.querySelectorAll('.lb-filter').forEach(btn => {
   btn.addEventListener('click', () => {
     activeFilter = btn.dataset.cat;
-    document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    document.querySelectorAll('.lb-filter').forEach(b => {
+      b.classList.toggle('active', b === btn);
+      b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+    });
     document.querySelectorAll('.lb-card').forEach(card => {
       const cat = card.dataset.cat;
       const isSpecial = card.dataset.special === 'true';
@@ -375,6 +405,14 @@ document.querySelectorAll('.lb-filter').forEach(btn => {
     });
   });
 });
+
+// Остальные фото каруселей грузим, только когда карточка почти на экране
+const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
+const restObserver = 'IntersectionObserver' in window
+  ? new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.isIntersecting) { loadRest(en.target); restObserver.unobserve(en.target); }
+    }), { rootMargin: '200px 0px' })
+  : { observe: loadRest, unobserve() {} };
 
 ITEMS.forEach((item, cardIndex) => {
   const card = document.createElement('div');
@@ -398,10 +436,13 @@ ITEMS.forEach((item, cardIndex) => {
     img.decoding = 'async';
     if (eager) img.fetchPriority = 'high';
     img.alt = item.name;
-    img.src = `images/lookbook/${item.folder}/sm/${String(i).padStart(2,'0')}.jpeg`;
+    const src = `images/lookbook/${item.folder}/sm/${String(i).padStart(2,'0')}.jpeg`;
+    // первое фото карточки — сразу (лениво), остальные — когда карточка рядом с экраном
+    if (i === 1) img.src = src; else img.dataset.src = src;
     slide.appendChild(img);
     slidesEl.appendChild(slide);
   }
+  if (item.photos > 1) restObserver.observe(card);
 
   // dots
   const dotsEl = document.createElement('div');
@@ -467,8 +508,11 @@ function openModal(item, startIndex) {
   cur = item; curSlide = startIndex || 0;
 
   mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
-    const src = `images/lookbook/${item.folder}/${String(i+1).padStart(2,'0')}.jpeg`;
-    return `<div class="modal-slide"><img src="${src}" loading="lazy" alt=""></div>`;
+    const nn = String(i+1).padStart(2,'0');
+    const src = `images/lookbook/${item.folder}/${nn}.jpeg`;
+    const sm  = `images/lookbook/${item.folder}/sm/${nn}.jpeg`;
+    const load = Math.abs(i - curSlide) <= 1 ? 'eager' : 'lazy';
+    return `<div class="modal-slide" style="background-image:url('${sm}')"><img src="${src}" loading="${load}" decoding="async" alt=""></div>`;
   }).join('');
 
   mDots.innerHTML = Array.from({length: item.photos}, (_, i) =>

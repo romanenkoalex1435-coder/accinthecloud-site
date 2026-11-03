@@ -31,7 +31,10 @@
   // ── Модалки: роль диалога, фокус внутрь и обратно ──
   document.querySelectorAll('.modal-overlay').forEach(ov => {
     const box = ov.querySelector('.modal');
-    if (!box || box.getAttribute('role')) return; // лукбук настроен сам
+    if (!box) return;
+    // имя на случай, пока заголовок модалки ещё пуст
+    if (!box.getAttribute('aria-label')) box.setAttribute('aria-label', 'Карточка изделия');
+    if (box.getAttribute('role')) return; // лукбук настроен сам
     box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
     const title = box.querySelector('h2, .modal-name');
@@ -51,6 +54,27 @@
       }
     }).observe(ov, { attributes: true, attributeFilter: ['class'] });
   });
+
+  // ── Ссылки в новой вкладке: безопасно и с подсказкой для скринридера ──
+  document.querySelectorAll('a[target="_blank"]').forEach(a => {
+    a.rel = 'noopener';
+    if (!a.querySelector('.sr-only')) a.insertAdjacentHTML('beforeend', '<span class="sr-only"> (откроется в новой вкладке)</span>');
+  });
+
+  // ── Уведомление о добавлении в корзину читается скринридером ──
+  const fb = document.getElementById('cartFeedback');
+  if (fb) { fb.setAttribute('role', 'status'); fb.setAttribute('aria-live', 'polite'); }
+
+  // ── Строки на пиксельном шрифте, где есть кириллица, — целиком Inter ──
+  const CYR = /[А-Яа-яЁё]/, LAT = /[A-Za-z]/;
+  const fixMixed = root => root.querySelectorAll('p, span, a, button, h2, h3, div').forEach(el => {
+    if (el.children.length > 1 || el.classList.contains('mixed-script')) return;
+    const t = el.textContent;
+    if (!CYR.test(t) || !LAT.test(t)) return;
+    if (!getComputedStyle(el).fontFamily.includes('PixelImpacted')) return;
+    el.classList.add('mixed-script');
+  });
+  fixMixed(document);
 
   // ── Карточки товаров открываются с клавиатуры ──
   document.querySelectorAll('.product-card:not(.is-sold)').forEach(card => {
