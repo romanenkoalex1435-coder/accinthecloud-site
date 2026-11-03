@@ -57,3 +57,12 @@ a, button, [role="button"], input, label { touch-action: manipulation; }
 /* Подпись на пиксельном шрифте с русскими буквами набираем целиком Inter,
    чтобы латиница и кириллица в одной строке не расходились по размеру */
 .mixed-script { font-family: 'Inter', -apple-system, sans-serif !important; letter-spacing: 0.12em; }
+
+/* Кнопка «Поделиться ссылкой» в карточке вещи */
+.share-link {
+  display: block; margin: 14px auto 0; padding: 12px 4px; min-height: 44px;
+  background: none; border: 0; cursor: pointer;
+  font: 500 11px/1 'Inter', -apple-system, sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #5c5c5c; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px;
+}
+.share-link:hover { color: #0d0d0d; }

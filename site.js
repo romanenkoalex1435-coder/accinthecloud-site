@@ -89,3 +89,30 @@
     });
   });
 })();
+
+/* Своя ссылка на каждую вещь: collection-a1.html?item=camo, lookbook.html?item=bag-n03.
+   Страница вызывает set/clear при открытии и закрытии карточки. */
+window.ACC_LINK = {
+  set(slug) { history.replaceState(history.state, '', '?item=' + encodeURIComponent(slug) + location.hash); },
+  clear() { if (location.search) history.replaceState(history.state, '', location.pathname + location.hash); },
+  open(list, keyOf, openFn) {
+    const slug = new URLSearchParams(location.search).get('item');
+    const item = slug && list.find(x => keyOf(x) === slug);
+    if (item) openFn(item); else if (slug) this.clear();
+  },
+  async share(title) {
+    const url = location.href;
+    const btn = document.getElementById('mShare');
+    // на телефоне — системное меню «Поделиться», на компьютере — копируем
+    if (navigator.share && matchMedia('(hover: none)').matches) {
+      try { await navigator.share({ title: title ? title + ' — accinthecloud' : 'accinthecloud', url }); } catch (e) {}
+      return;
+    }
+    try { await navigator.clipboard.writeText(url); } catch (e) { prompt('Ссылка на вещь', url); return; }
+    if (btn) {
+      btn.textContent = 'Ссылка скопирована';
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => { btn.textContent = 'Поделиться ссылкой'; }, 2000);
+    }
+  }
+};

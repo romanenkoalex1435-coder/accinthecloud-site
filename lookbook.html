@@ -297,6 +297,7 @@
         <p class="modal-made">Индивидуальный пошив</p>
         <div class="modal-disclaimer">Точное повторение не гарантируется — материалы, фурнитура и поставки могут отличаться. Каждое изделие создаётся заново под ваши параметры.</div>
         <button class="modal-order" id="mOrderBtn">Заказать похожее →</button>
+        <button type="button" class="share-link" id="mShare">Поделиться ссылкой</button>
       </div>
     </div>
   </div>
@@ -506,6 +507,7 @@ const mDots   = document.getElementById('mDots');
 
 function openModal(item, startIndex) {
   cur = item; curSlide = startIndex || 0;
+  ACC_LINK.set(item.id);
 
   mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
     const nn = String(i+1).padStart(2,'0');
@@ -560,11 +562,15 @@ function closeModal() {
   const ov = document.getElementById('overlay');
   if (!ov.classList.contains('open')) return;
   ov.classList.remove('open');
+  ACC_LINK.clear();
   document.body.style.overflow = '';
   mSlides.removeEventListener('scroll', onScroll);
   if (lastFocus) lastFocus.focus({preventScroll:true});
 }
 document.getElementById('mClose').addEventListener('click', closeModal);
+document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
+/* ссылка вида ?item=bag-n03 сразу открывает вещь */
+document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(ITEMS, it => it.id, openModal));
 document.getElementById('overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('overlay')) closeModal();
 });

@@ -284,6 +284,7 @@
       </div>
       <button class="btn-cart" id="btnCart">Добавить в корзину</button>
       <p class="modal-note">Бесплатная доставка по России</p>
+      <button type="button" class="share-link" id="mShare">Поделиться ссылкой</button>
     </div>
   </div>
 </div>
@@ -352,6 +353,7 @@ let cur = null, qty = 1;
 
 function openModal(p) {
   cur = p; qty = 1;
+  ACC_LINK.set(p.id.replace(/^a\d-/, ''));
   document.getElementById('mName').textContent = p.name;
   document.getElementById('mPrice').innerHTML = p.price;
   document.getElementById('mPriceUsd').textContent = p.priceUsd;
@@ -378,10 +380,14 @@ function openModal(p) {
 }
 
 function closeModal() {
+  ACC_LINK.clear();
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
 
+document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
+/* ссылка вида ?item=camo сразу открывает вещь */
+document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(PRODUCTS, p => p.id.replace(/^a\d-/, ''), openModal));
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('overlay')) closeModal();

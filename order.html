@@ -328,7 +328,8 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     (!name?nameEl:!telegram?tgEl:consentEl).focus();
     return;
   }
-  const itemName=idea?idea.slice(0,48):'Своя идея';
+  // идея целиком идёт в пожелания, чтобы в заказе она не повторялась дважды
+  const itemName='Своя идея';
   const notes=[idea,comment].filter(Boolean).join('\n');
   localStorage.setItem('acc_prefill',JSON.stringify({name,telegram}));
   const photos=selectedPhotos();

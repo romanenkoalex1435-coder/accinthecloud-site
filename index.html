@@ -116,25 +116,18 @@
       justify-content: center; align-items: center;
       position: relative; overflow: hidden;
     }
-    /* Логотип в ролике занимает ~55% кадра: на телефоне ролик шире экрана,
-       чтобы сам знак слегка выходил за края, на компьютере ограничен высотой */
-    .hero-logo-video {
-      --size: min(175vw, 170vh);
-      position: absolute; left: 50%; top: 50%;
-      width: var(--size); height: var(--size);
-      margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
-      opacity: 0;
+    /* 3D-знак: холст на весь первый экран, до загрузки — чёткая картинка того же кадра */
+    .hero-3d { position: absolute; inset: 0; opacity: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+    .hero-3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    /* тот же кадр картинкой: виден, пока грузится 3D, и остаётся, если WebGL недоступен */
+    .hero-still {
+      position: absolute; left: 50%; top: 50%; transform: translate(-49%, -47.1%);
+      width: min(139.6vw, 135.4vh); height: auto; transition: opacity .6s ease;
     }
-    .hero-logo-video video,
-    .hero-logo-video img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
-    .hero-logo-video img { display: none; }
-    .hero-logo-video.video-failed video { display: none; }
-    .hero-logo-video.video-failed img { display: block; width: 60%; margin: auto; }
-    @keyframes logoBreathe {
-      0%,100% { transform: scale(1); }
-      50% { transform: scale(1.022); }
-    }
-    .hero-logo-video.breathing { animation: logoBreathe 4.5s ease-in-out infinite; }
+    @media (max-height: 500px) and (orientation: landscape) { .hero-still { width: min(139.6vw, 99.2vh); } }
+    .hero-3d canvas { opacity: 0; transition: opacity .6s ease; }
+    .hero-3d.is-ready canvas { opacity: 1; }
+    .hero-3d.is-ready .hero-still { opacity: 0; }
     .hero-brand {
       position: absolute; left: 0; right: 0; bottom: clamp(48px, 9vh, 104px);
       z-index: 1; text-align: center;
@@ -150,11 +143,10 @@
        логотип меньше и чуть выше, надпись ниже его тени */
     @media (max-height: 500px) and (orientation: landscape) {
       #hero { height: 100vh; height: 100svh; }
-      .hero-logo-video { --size: min(175vw, 125vh); top: 44%; }
-      @supports (height: 100svh) { .hero-logo-video { --size: min(175vw, 125svh); } }
       .hero-brand { font-size: 22px; bottom: max(14px, env(safe-area-inset-bottom)); }
       .mobile-menu { gap: 18px; }
     }
+
 
     /* ─── Section Shared ─────────────────────────────────── */
     .section { padding: 120px 48px; }
@@ -369,7 +361,7 @@
 
     /* ─── Animated reveal base ───────────────────────────── */
     .no-gsap .reveal, .no-gsap .reveal-left, .no-gsap .reveal-right,
-    .no-gsap .hero-logo-video, .no-gsap .hero-brand, .no-gsap .nav-logo, .no-gsap .burger { opacity: 1 !important; }
+    .no-gsap .hero-3d, .no-gsap .hero-brand, .no-gsap .nav-logo, .no-gsap .burger { opacity: 1 !important; }
     .reveal { opacity: 0; }
     .reveal-left { opacity: 0; }
     .reveal-right { opacity: 0; }
@@ -484,15 +476,14 @@
 <main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
-  <div class="hero-logo-video" id="heroLogoVideo">
-    <video autoplay loop muted playsinline preload="auto" poster="images/logo-hero-poster.jpg" aria-hidden="true">
-      <source src="logo-hero.webm" type="video/webm">
-      <source src="logo-hero.mp4" type="video/mp4" onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')">
-    </video>
-    <img src="images/logo.png" alt="accinthecloud">
+  <div class="hero-3d" id="hero3d" aria-hidden="true">
+    <img class="hero-still" src="images/mark-still.webp" alt="" width="1219" height="584" fetchpriority="high">
+    <canvas></canvas>
   </div>
   <h1 class="hero-brand">accinthecloud</h1>
 </section>
+
+<!-- ─── DROP ─────────────────────────────────────────────── -->
 
 <!-- ─── MARQUEE ───────────────────────────────────────────── -->
 <div class="marquee-section">
@@ -620,12 +611,11 @@ if (!window.gsap) {
   upd();
 })();
 
+
 // «Уменьшить движение»: анимации GSAP проигрываются мгновенно, ролик стоит на первом кадре
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduceMotion) {
   if (window.gsap) gsap.globalTimeline.timeScale(1000);
-  const hv = document.querySelector('#heroLogoVideo video');
-  if (hv) { hv.removeAttribute('autoplay'); hv.pause(); }
 }
 
 // Всё, что ниже до меню, требует GSAP; без него меню и карусель всё равно работают
@@ -662,11 +652,7 @@ gsap.to('#page-curtain', {
 
 // ── Hero entrance (fires after curtain lifts) ──
 const tl = gsap.timeline({ delay: 0.6 });
-tl.fromTo('.hero-logo-video',
-    { opacity:0, scale:0.94 },
-    { opacity:1, scale:1, duration:1.3, ease:'power3.out',
-      onComplete: () => document.querySelector('.hero-logo-video').classList.add('breathing')
-    })
+tl.fromTo('.hero-3d', { opacity:0 }, { opacity:1, duration:0.9, ease:'power2.out' })
   .fromTo('.hero-brand',
     { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
   .fromTo('.nav-logo', { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
@@ -835,6 +821,11 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   // Prevent link navigation on swipe
   featured.addEventListener('click', e => { if (didSwipe) { e.preventDefault(); didSwipe = false; } });
 })();
+</script>
+<script>
+// 3D (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
+// до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
+addEventListener('load', () => setTimeout(() => import('./js/scene3d.js').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>

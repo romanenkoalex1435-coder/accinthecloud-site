@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winter Jackets — accinthecloud</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Семь зимних курток accinthecloud: выбери модель и забронируй пошив по своим меркам.">
+  <link rel="canonical" href="https://accinthecloud-site.vercel.app/drop.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="Winter Jackets — accinthecloud">
+  <meta property="og:description" content="Семь зимних курток accinthecloud: выбери модель и забронируй пошив по своим меркам.">
+  <meta property="og:url" content="https://accinthecloud-site.vercel.app/drop.html">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
+    :root {
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#6b6b6b;
+      --border:#ebebeb; --soft:#f5f5f5;
+      --serif:'Playfair Display',Georgia,serif;
+      --sans:'Inter',-apple-system,sans-serif;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
+    }
+    body { font-family:var(--sans); background:var(--bg); color:var(--ink); line-height:1.8; }
+    a { text-decoration:none; color:inherit; }
+
+    nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
+    }
+    .nav-logo { display:flex; align-items:center; }
+    .nav-logo img { height:28px; width:auto; }
+
+    .drop-page { flex:1; }
+    .wrap { max-width:720px; margin:0 auto; padding:72px 48px 120px; }
+    .wrap h1 {
+      font-family:var(--serif); font-weight:400; font-size:clamp(26px,3.5vw,40px);
+      margin-bottom:8px; line-height:1.2;
+    }
+    .doc-date { font-size:11px; color:var(--muted); letter-spacing:0.08em; margin-bottom:56px; }
+    .wrap h2 { font-family:var(--sans); font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin:48px 0 16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+    .wrap p { font-size:16px; color:#444; line-height:1.7; margin-bottom:16px; max-width:68ch; }
+    .wrap ul { padding-left:20px; margin-bottom:16px; max-width:68ch; }
+    .wrap ul li { font-size:16px; color:#444; line-height:1.7; margin-bottom:8px; }
+
+    footer {
+      padding:36px 48px; border-top:1px solid var(--border);
+      display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;
+    }
+    .footer-logo { font-size:13px; letter-spacing:0.1em; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .footer-links a:hover { color:var(--ink); }
+    .footer-copy { font-size:10px; color:var(--muted); }
+
+    @media(max-width:600px) {
+      nav { padding:16px 20px; }
+      .wrap { padding:48px 24px 80px; }
+      footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
+      .footer-links { flex-wrap:wrap; justify-content:center; gap:16px; }
+    }
+    /* ─── Drop ──────────────────────────────────────────── */
+    /* фон в цвет фотографий — куртки «висят» прямо на странице */
+    .drop {
+      --d-bg: #ebebeb; --d-mute: #5f5f5f; --d-line: rgba(13,13,13,.14);
+      background: var(--d-bg); color: var(--ink);
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      grid-template-areas: "head stage" "info stage";
+      column-gap: clamp(32px, 5vw, 96px); align-items: start;
+      padding: clamp(80px, 9vw, 140px) 48px;
+    }
+    .drop-head { grid-area: head; }
+    .drop-stage { grid-area: stage; align-self: center; }
+    .drop-info { grid-area: info; align-self: end; }
+    .drop-kicker {
+      display: flex; align-items: center; gap: 10px;
+      font: 500 11px/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--d-mute);
+    }
+    .drop-live { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); animation: dropPulse 2s ease-in-out infinite; }
+    @keyframes dropPulse { 50% { opacity: .25; } }
+    .drop-title {
+      margin-top: 22px; font-family: var(--pixel); font-weight: normal;
+      font-size: clamp(52px, 7.4vw, 124px); line-height: .62; letter-spacing: .02em;
+    }
+    .drop-lead { margin-top: 24px; max-width: 34ch; font: 400 16px/1.55 var(--sans); color: var(--d-mute); }
+    .drop-stage {
+      position: relative; aspect-ratio: 1 / 1; width: 100%; max-height: 84vh; margin: 0 auto;
+      touch-action: pan-y; user-select: none; -webkit-user-select: none; perspective: 1200px;
+    }
+    .drop-photo {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block;
+      opacity: 0; transform: translateX(var(--dx, 0)) scale(.985);
+      transition: opacity .45s ease, transform .6s cubic-bezier(.2,.8,.2,1);
+    }
+    .drop-photo.is-on { opacity: 1; transform: none; }
+    .drop-num {
+      position: absolute; left: 0; bottom: 2%; pointer-events: none;
+      font-family: var(--pixel); font-size: clamp(64px, 9vw, 150px); line-height: .8; color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .drop-num small { font-size: .32em; margin-left: .25em; color: var(--d-mute); }
+    .drop-picks { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .drop-pick {
+      position: relative; aspect-ratio: 1 / 1; padding: 0; border: 1px solid transparent; border-radius: 6px;
+      background: var(--d-bg) center / cover no-repeat; cursor: pointer; transition: border-color .2s ease, transform .2s ease;
+    }
+    .drop-pick[aria-pressed="true"] { border-color: var(--ink); }
+    @media (hover: hover) { .drop-pick:hover { transform: translateY(-2px); } }
+    .drop-pick:focus-visible, .drop-cta:focus-visible, .drop-vote:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .drop-cta {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      height: 56px; margin-top: 24px; background: var(--ink); color: #fff;
+      font: 600 12px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
+      transition: transform .2s ease;
+    }
+    .drop-cta span { transition: transform .2s ease; }
+    @media (hover: hover) { .drop-cta:hover span { transform: translateX(4px); } }
+    .drop-cta:active { transform: scale(.98); }
+    .drop-vote {
+      display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px;
+      font: 500 13px/1.4 var(--sans); color: var(--d-mute); text-decoration: underline; text-underline-offset: 4px;
+    }
+    @media (max-width: 900px) {
+      .drop {
+        grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "stage" "info";
+        padding: 72px 20px 64px;
+      }
+      .drop-stage { margin-top: 16px; }
+      .drop-info { margin-top: 8px; }
+      .drop-picks { gap: 4px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .drop-photo { transition: none; } }
+    body { display:flex; flex-direction:column; min-height:100vh; }
+    .drop { min-height: calc(100svh - 69px); }
+  </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud — на главную"></a>
+  <a href="index.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">Все вещи →</a>
+</nav>
+
+<main class="drop-page">
+<section id="drop" class="drop" aria-labelledby="dropTitle">
+  <div class="drop-head">
+    <p class="drop-kicker"><span class="drop-live" aria-hidden="true"></span>New drop · Winter</p>
+    <h1 class="drop-title" id="dropTitle">WINTER<br>JACKETS</h1>
+    <p class="drop-lead">Семь курток на зиму. Выбери модель и забронируй место на пошив — сошью по твоим меркам.</p>
+  </div>
+  <div class="drop-stage" id="dropStage" role="group" aria-roledescription="карусель" aria-label="Куртки зимнего дропа">
+    <img class="drop-photo is-on" id="dropPhoto" src="images/drop/winter-4.jpg" alt="Зимняя куртка №4" width="800" height="800" fetchpriority="high" decoding="async">
+    <p class="drop-num" aria-hidden="true"><span id="dropNum">04</span><small>/07</small></p>
+  </div>
+  <div class="drop-info">
+    <div class="drop-picks" role="group" aria-label="Модель">
+      <!-- кнопки моделей добавляются скриптом -->
+    </div>
+    <a class="drop-cta" id="dropCta" href="https://t.me/accinthecloud" target="_blank" rel="noopener">Забронировать №4 в Telegram <span aria-hidden="true">→</span></a>
+    <a class="drop-vote" href="https://t.me/accinthecloud1/1214" target="_blank" rel="noopener">Голосование за модели в канале</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="offer.html">Публичная оферта</a>
+    <a href="privacy.html">Политика конфиденциальности</a>
+  </div>
+  <span class="footer-copy">© 2026 accinthecloud</span>
+</footer>
+
+<script>
+// ── Дроп: семь курток, выбор модели, свайп по фото, бронь в Telegram ──
+(function(){
+  const drop = document.getElementById('drop');
+  if (!drop) return;
+  const N = 7, photo = document.getElementById('dropPhoto'), stage = document.getElementById('dropStage');
+  const num = document.getElementById('dropNum'), cta = document.getElementById('dropCta');
+  const picks = drop.querySelector('.drop-picks');
+  const pad = n => String(n).padStart(2, '0');
+  for (let i = 1; i <= N; i++) {
+    picks.insertAdjacentHTML('beforeend', `<button type="button" class="drop-pick" data-i="${i}" aria-pressed="${i === 4}" aria-label="Куртка №${i}" style="background-image:url('images/drop/winter-${i}-sm.jpg')"></button>`);
+  }
+  let cur = 4;
+  function show(i, dir) {
+    if (i === cur) return;
+    cur = i;
+    picks.querySelectorAll('.drop-pick').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
+    num.textContent = pad(i);
+    cta.firstChild.textContent = `Забронировать №${i} в Telegram `;
+    cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent(`Здравствуйте! Хочу забронировать пошив зимней куртки №${i} с сайта.`);
+    // новое фото въезжает с той стороны, куда листают, старое растворяется
+    const next = photo.cloneNode();
+    next.classList.remove('is-on');
+    next.src = `images/drop/winter-${i}.jpg`;
+    next.alt = `Зимняя куртка №${i}`;
+    next.removeAttribute('id');
+    next.style.setProperty('--dx', (dir || 1) * 24 + 'px');
+    stage.insertBefore(next, num.parentNode);
+    const old = stage.querySelectorAll('.drop-photo.is-on');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      next.classList.add('is-on');
+      old.forEach(o => { o.classList.remove('is-on'); setTimeout(() => o.remove(), 600); });
+    }));
+  }
+  cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent('Здравствуйте! Хочу забронировать пошив зимней куртки №4 с сайта.');
+  picks.addEventListener('click', e => {
+    const b = e.target.closest('.drop-pick');
+    if (b) show(+b.dataset.i, +b.dataset.i > cur ? 1 : -1);
+  });
+  // свайп по фото
+  let x0 = null, y0 = 0;
+  stage.addEventListener('pointerdown', e => { x0 = e.clientX; y0 = e.clientY; });
+  stage.addEventListener('pointerup', e => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < 40 || Math.abs(dy) > Math.abs(dx)) return;
+    show(dx < 0 ? cur % N + 1 : (cur + N - 2) % N + 1, dx < 0 ? 1 : -1);
+  });
+  stage.addEventListener('pointercancel', () => { x0 = null; });
+  // подгружаем остальные фото заранее, когда блок близко
+  new IntersectionObserver((es, io) => {
+    if (!es[0].isIntersecting) return;
+    io.disconnect();
+    for (let i = 1; i <= N; i++) new Image().src = `images/drop/winter-${i}.jpg`;
+  }, { rootMargin: '400px' }).observe(drop);
+})();
+</script>
+</body>
+</html>
