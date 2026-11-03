@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <title>a1 ACCESS — accinthecloud</title>
   <meta name="description" content="Капсула a1 ACCESS от accinthecloud: сумки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a1.html">
@@ -259,7 +260,7 @@
 <div class="modal-overlay" id="overlay">
   <div class="modal">
     <button class="modal-close" id="mClose">&#10005;</button>
-    <div class="modal-left" id="mImgWrap"></div>
+    <div class="modal-left" id="mImgWrap" data-morph></div>
     <div class="modal-body">
       <p class="modal-tag">Capsule a1 · ACCESS shoulder bag</p>
       <h2 class="modal-name" id="mName"></h2>
@@ -302,7 +303,7 @@
 <script>
 const PRODUCTS = [
   { id:'a1-camo',         name:'CAMO',         price:'7 500 ₽', priceUsd:'100$',          priceNum:7500, img:'images/a1/camo.jpeg' },
-  { id:'a1-grey-trouser', name:'GREY TROUSER',  price:'7 500 ₽', priceUsd:'',              priceNum:7500, img:'images/a1/grey_trouser.jpeg' },
+  { id:'a1-grey-trouser', name:'GREY TROUSER',  price:'7 500 ₽', priceUsd:'100$',            priceNum:7500, img:'images/a1/grey_trouser.jpeg' },
   { id:'a1-beige',        name:'BEIGE',         price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/beige.jpeg' },
   { id:'a1-black',        name:'BLACK',         price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/black.jpeg' },
   { id:'a1-jeans',        name:'JEANS',         price:'7 500 ₽', priceUsd:'100$',          priceNum:7500, img:'images/a1/jeans.jpeg' },
@@ -339,7 +340,7 @@ PRODUCTS.forEach((p, n) => {
       <span class="card-cta">Подробнее &#8594;</span>
     </div>`;
 
-  card.addEventListener('click', () => openModal(p));
+  card.addEventListener('click', () => ACC_MORPH(card, () => openModal(p)));
   grid.appendChild(card);
 });
 

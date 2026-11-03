@@ -126,21 +126,26 @@ const ACC = {
 
   // ── Format cart items as plain-text order message ──
   formatTelegramMessage(name, telegram, comment) {
+    const en = window.ACC_LANG === 'en';
+    const T = s => (window.ACC_T ? ACC_T(String(s)) : String(s));
+    const L = en
+      ? { head: 'Order from accinthecloud website', size: 'Size', color: 'Colour/fabric wishes', notes: 'Extra wishes', price: 'Price', pcs: 'pcs', total: 'Total: from', name: 'Name', comment: 'Comment' }
+      : { head: 'Заказ с сайта accinthecloud', size: 'Размер', color: 'Пожелания по цвету/ткани', notes: 'Доп. пожелания', price: 'Цена', pcs: 'шт.', total: 'Итого: от', name: 'Имя', comment: 'Комментарий' };
     const cart = ACC.get();
     const items = cart.map((item, i) => {
-      const line = [`${i+1}. ${item.name} (${item.capsule})`];
-      if (item.size)  line.push(`   · Размер: ${item.size}`);
-      if (item.color) line.push(`   · Пожелания по цвету/ткани: ${item.color}`);
-      if (item.notes) line.push(`   · Доп. пожелания: ${item.notes}`);
-      line.push(`   · Цена: ${String(item.price).replace(/&#8381;/g, "₽")} × ${item.qty || 1} шт.`);
+      const line = [`${i+1}. ${T(item.name)} (${T(item.capsule)})`];
+      if (item.size)  line.push(`   · ${L.size}: ${item.size}`);
+      if (item.color) line.push(`   · ${L.color}: ${T(item.color)}`);
+      if (item.notes) line.push(`   · ${L.notes}: ${item.notes}`);
+      line.push(`   · ${L.price}: ${T(String(item.price).replace(/&#8381;/g, "₽"))} × ${item.qty || 1} ${L.pcs}`);
       return line.join('\n');
     }).join('\n\n');
 
     const total = ACC.total();
-    return `Заказ с сайта accinthecloud\n\n${items}\n\n` +
-           `${total > 0 ? `Итого: от ${total.toLocaleString('ru-RU')} ₽\n\n` : ''}` +
-           `Имя: ${name}\nTelegram: ${telegram}` +
-           `${comment ? '\nКомментарий: ' + comment : ''}`;
+    return `${L.head}\n\n${items}\n\n` +
+           `${total > 0 ? `${L.total} ${total.toLocaleString('ru-RU')} ₽\n\n` : ''}` +
+           `${L.name}: ${name}\nTelegram: ${telegram}` +
+           `${comment ? `\n${L.comment}: ` + comment : ''}`;
   },
 
   // ── Send order via /api/order; true only if it reached Telegram ──
@@ -156,6 +161,19 @@ const ACC = {
     } catch {
       return false;
     }
+  },
+
+  // ── Заявка в бота, когда клиент ушёл в Telegram: если он так и не нажмёт «Отправить»,
+  //    мастер всё равно увидит заказ и сможет написать первым. keepalive — запрос доживёт,
+  //    даже если страница сменилась на Telegram ──
+  sendLead(text, telegram, photos) {
+    const lead = `🔔 Новая заявка: клиент открыл Telegram с готовым заказом.\n` +
+                 `Если он не напишет — напиши первым: ${telegram}\n\n${text}`;
+    let body = JSON.stringify({ text: lead, photos: photos || [] });
+    if (body.length > 60000) body = JSON.stringify({ text: lead + '\n\n(фото-референсы клиент приложит в чате)' });
+    return fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true })
+      .then(r => r.json().then(d => r.ok && d.ok === true, () => false))
+      .catch(() => false);
   },
 
   // ── Reference photos from order.html (shrunk, kept until the order is sent) ──

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
@@ -285,7 +286,7 @@
     <div class="modal-gallery">
       <button class="marr" id="arrPrev" aria-label="Предыдущее фото">&#8592;</button>
       <button class="marr" id="arrNext" aria-label="Следующее фото">&#8594;</button>
-      <div class="modal-slides" id="mSlides"></div>
+      <div class="modal-slides" id="mSlides" data-morph></div>
       <div class="modal-dots-row" id="mDots"></div>
     </div>
     <div class="modal-info">
@@ -476,7 +477,7 @@ ITEMS.forEach((item, cardIndex) => {
   card.addEventListener('click', e => {
     if (moved) return;
     const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-    openModal(item, idx);
+    ACC_MORPH(card, () => openModal(item, idx));
   });
 
   // touch tap: открываем только если палец почти не двигался — свайп по ленте не считается
@@ -487,7 +488,7 @@ ITEMS.forEach((item, cardIndex) => {
     if (Math.abs(t.clientX - tx) < 10 && Math.abs(t.clientY - ty) < 10) {
       e.preventDefault(); // без двойного открытия от последующего click
       const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-      openModal(item, idx);
+      ACC_MORPH(card, () => openModal(item, idx));
     }
   });
 

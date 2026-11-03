@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -637,8 +638,10 @@ document.querySelectorAll('a,button,.work-item,.capsule-card').forEach(el => {
   el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
 });
 
-// ── Page curtain reveal ──
-gsap.to('#page-curtain', {
+// ── Page curtain reveal: только при входе на сайт; внутри сайта страницы сменяются плавным переходом ──
+const fromSite = (() => { try { return new URL(document.referrer).origin === location.origin; } catch (e) { return false; } })();
+if (fromSite) document.getElementById('page-curtain')?.remove();
+else gsap.to('#page-curtain', {
   scaleY: 0,
   duration: 1.1,
   ease: 'power4.inOut',

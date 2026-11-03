@@ -66,3 +66,40 @@ a, button, [role="button"], input, label { touch-action: manipulation; }
   color: #5c5c5c; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px;
 }
 .share-link:hover { color: #0d0d0d; }
+
+/* Плавный переход между страницами (Chrome, Safari 18.2+; где нет — обычный переход) */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: acc-vt-out .2s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: acc-vt-in .42s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes acc-vt-out { to { opacity: 0; } }
+@keyframes acc-vt-in { from { opacity: 0; transform: translateY(10px); } }
+/* фото карточки перетекает в окно вещи */
+::view-transition-group(acc-item) { animation-duration: .46s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+::view-transition-old(acc-item), ::view-transition-new(acc-item) { height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* Вторая фотография вещи при наведении */
+.hover-alt {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity .45s ease; pointer-events: none;
+}
+@media (hover: hover) {
+  .product-card:hover .hover-alt, .lb-card:hover .hover-alt { opacity: 1; }
+}
+
+/* Переключатель RU / EN в шапке */
+.lang-switch { display: flex; align-items: center; gap: 2px; margin-right: 4px; }
+.lang-switch--end { margin-left: auto; margin-right: 24px; }
+.lang-switch button {
+  position: relative; background: none; border: 0; padding: 4px 5px; cursor: pointer;
+  font: 500 11px/1 'Inter', -apple-system, sans-serif; letter-spacing: .14em; color: #8a8a8a;
+  transition: color .2s;
+}
+.lang-switch button::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 100%; height: 44px; transform: translate(-50%, -50%);
+}
+.lang-switch button[aria-pressed="true"] { color: var(--ink, #0d0d0d); }
+@media (hover: hover) { .lang-switch button:hover { color: var(--ink, #0d0d0d); } }

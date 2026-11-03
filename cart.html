@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -203,21 +204,13 @@
     .offer-note { font-size:10px; color:var(--muted); line-height:1.7; margin-bottom:14px; }
     .offer-note a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
 
-    /* ── Success ── */
-    #successScreen {
-      display:none; flex-direction:column; align-items:center; justify-content:center;
-      padding:80px 40px; text-align:center; gap:16px;
-    }
-    #successScreen.show { display:flex; }
+    /* ── После отправки: чат в Telegram открыт ── */
     #fallbackScreen { display:none; flex-direction:column; gap:14px; padding:24px 0; }
     #fallbackScreen.show { display:flex; }
     #fallbackScreen h2 { font-family:var(--serif); font-size:24px; font-weight:400; }
     #fallbackScreen p { font-size:13px; color:var(--muted); line-height:1.7; }
     .btn-link { display:block; text-align:center; }
     #fallbackScreen .btn-back { margin-top:0; background:none; cursor:pointer; font-family:inherit; color:var(--ink); }
-    .success-icon { font-size:40px; margin-bottom:8px; }
-    #successScreen h2 { font-family:var(--serif); font-size:28px; font-weight:400; }
-    #successScreen p { font-size:13px; color:var(--muted); line-height:1.7; max-width:280px; }
     .btn-back { display:inline-block; margin-top:16px; padding:12px 32px; border:1px solid var(--ink); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; transition:all .2s; }
     .btn-back:hover { background:var(--ink); color:white; }
 
@@ -334,20 +327,13 @@
       <p class="field-error" id="errConsent" hidden>Без согласия на обработку данных заказ не отправить</p>
     </div>
     <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
-    <button class="btn-order" id="btnOrder">Отправить запрос на пошив</button>
-    <p class="checkout-note">Я свяжусь с тобой в Telegram, уточню детали и подтвержу заказ.</p>
+    <button class="btn-order" id="btnOrder">Отправить заказ в Telegram</button>
+    <p class="checkout-note">Откроется чат с мастером с готовым текстом заказа — останется нажать «Отправить».</p>
    </div>
 
-    <div id="successScreen">
-      <div class="success-icon">✓</div>
-      <h2>Запрос отправлен</h2>
-      <p>Скоро свяжусь с тобой в Telegram — обсудим детали и согласуем сроки.</p>
-      <a href="index.html" class="btn-back">На главную</a>
-    </div>
-
     <div id="fallbackScreen" role="alert">
-      <h2>Последний шаг — Telegram</h2>
-      <p>Текст заказа уже готов. Открой чат с мастером и нажми «Отправить» — я отвечу там же.</p>
+      <h2>Нажми «Отправить» в Telegram</h2>
+      <p>Чат с мастером открыт, текст заказа уже там. Отправь его — я отвечу в том же чате. Чат не открылся? Кнопка ниже.</p>
       <a href="#" class="btn-order btn-link" id="fallbackLink" target="_blank" rel="noopener">Открыть Telegram</a>
       <button type="button" class="btn-back" id="fallbackCopy">Скопировать текст заказа</button>
       <p class="fallback-hint" id="fallbackHint" aria-live="polite"></p>
@@ -549,39 +535,21 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   }
 
   hideUndo();
-  const btn = document.getElementById('btnOrder');
-  btn.disabled = true;
-  btn.textContent = 'Отправляем...';
-
   const text = ACC.formatTelegramMessage(name, telegram, comment);
-  const sent = await ACC.sendOrder(text, ACC.getPhotos());
+  const link = ACC.telegramLink(text);
+  const photos = ACC.getPhotos();
 
-  ACC.saveOrder({
-    type: 'cart',
-    name, telegram, comment,
-    details: text,
-    items: ACC.get(),
-    delivered: sent
-  });
+  // Чат открываем сразу, в том же нажатии, — иначе браузер заблокирует новое окно
+  const win = window.open(link, '_blank');
+  if (win) win.opener = null;
+  const leadSent = ACC.sendLead(text, telegram, photos);
+  if (!win) location.href = link;
 
   orderSubmitted = true;
   document.getElementById('checkoutForm').hidden = true;
-
-  if (sent) {
-    ACC.clear();
-    localStorage.removeItem('acc_prefill');
-    localStorage.removeItem(ACC.PHOTOS_KEY);
-    document.getElementById('successScreen').classList.add('show');
-    renderCart();
-    return;
-  }
-
-  // Не доставлено: честно просим отправить текст самому, корзину не трогаем
   const fb = document.getElementById('fallbackScreen');
-  document.getElementById('fallbackLink').href = ACC.telegramLink(text);
-  if (ACC.getPhotos().length) {
-    fb.querySelector('p').textContent += ' Фото-референсы прикрепи в том же чате.';
-  }
+  document.getElementById('fallbackLink').href = link;
+  if (photos.length) fb.querySelector('p').textContent += ' Фото-референсы прикрепи в том же чате.';
   document.getElementById('fallbackCopy').onclick = async () => {
     const hint = document.getElementById('fallbackHint');
     try { await navigator.clipboard.writeText(text); hint.textContent = 'Скопировано'; }
@@ -590,6 +558,16 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   fb.classList.add('show');
   fb.querySelector('h2').setAttribute('tabindex', '-1');
   fb.querySelector('h2').focus();
+
+  const sent = await leadSent;
+  ACC.saveOrder({ type: 'cart', name, telegram, comment, details: text, items: ACC.get(), delivered: sent });
+  // Заявка у мастера — корзину можно очищать; не дошла — оставляем, чтобы заказ не потерялся
+  if (sent) {
+    ACC.clear();
+    localStorage.removeItem('acc_prefill');
+    localStorage.removeItem(ACC.PHOTOS_KEY);
+    renderCart();
+  }
 });
 
 // ── Helpers ──

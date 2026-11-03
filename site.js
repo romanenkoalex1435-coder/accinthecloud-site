@@ -116,3 +116,44 @@ window.ACC_LINK = {
     }
   }
 };
+
+/* Окно вещи раскрывается из её карточки: фото перетекает на место. */
+window.ACC_MORPH = function (card, open) {
+  const from = card && (card.querySelector('.card-gallery, .lb-card-slides') || card.querySelector('img'));
+  if (!document.startViewTransition || !from || matchMedia('(prefers-reduced-motion: reduce)').matches) return open();
+  let to = null;
+  from.style.viewTransitionName = 'acc-item';
+  const vt = document.startViewTransition(async () => {
+    from.style.viewTransitionName = '';
+    open();
+    to = document.querySelector('.modal-overlay.open [data-morph]');
+    if (!to) return;
+    to.style.viewTransitionName = 'acc-item';
+    // ждём первое фото окна, но не дольше 300 мс
+    const img = to.querySelector('img');
+    if (img && !img.complete) await Promise.race([img.decode().catch(() => {}), new Promise(r => setTimeout(r, 300))]);
+  });
+  vt.finished.finally(() => { if (to) to.style.viewTransitionName = ''; });
+};
+
+// ── Вторая фотография при наведении: в первый слайд карточки кладём второе фото ──
+if (matchMedia('(hover: hover)').matches) {
+  const addAlt = card => {
+    if (card._alt) return;
+    card._alt = true;
+    const slides = card.querySelectorAll('.card-gallery .slide, .lb-card-slide');
+    const second = slides[1] && slides[1].querySelector('img');
+    if (!second) return;
+    const alt = document.createElement('img');
+    alt.className = 'hover-alt';
+    alt.alt = '';
+    alt.decoding = 'async';
+    alt.src = second.dataset.src || second.currentSrc || second.src;
+    slides[0].style.position = 'relative';
+    slides[0].appendChild(alt);
+  };
+  document.addEventListener('pointerover', e => {
+    const card = e.target.closest && e.target.closest('.product-card:not(.is-sold), .lb-card');
+    if (card) addAlt(card);
+  });
+}

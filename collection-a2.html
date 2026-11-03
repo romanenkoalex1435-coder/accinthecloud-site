@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <title>a2 ACCEPT — accinthecloud</title>
   <meta name="description" content="Капсула a2 ACCEPT от accinthecloud: куртки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a2.html">
@@ -279,7 +280,7 @@
   <div class="modal">
     <button class="modal-close" id="mClose">&#10005;</button>
     <div class="modal-left">
-      <div class="modal-gallery" id="mGallery"></div>
+      <div class="modal-gallery" id="mGallery" data-morph></div>
       <div class="modal-dots" id="mDots"></div>
     </div>
     <div class="modal-body">
@@ -498,7 +499,7 @@ PRODUCTS.forEach((p, n) => {
         const rect=gallery.getBoundingClientRect();
         if(e.clientX-rect.left>rect.width/2) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
         else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
-      } else { openModal(p); }
+      } else { ACC_MORPH(card, () => openModal(p)); }
     });
   }
   grid.appendChild(card);
