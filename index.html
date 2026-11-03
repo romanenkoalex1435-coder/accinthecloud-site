@@ -86,33 +86,35 @@
       justify-content: center; align-items: center;
       position: relative; overflow: hidden;
     }
-    .hero-content { position: relative; z-index: 1; text-align: center; }
+    /* Логотип в ролике занимает ~55% кадра: на телефоне ролик шире экрана,
+       чтобы сам знак слегка выходил за края, на компьютере ограничен высотой */
     .hero-logo-video {
-      width: clamp(240px, 44vw, 560px); margin: 0 auto;
+      --size: min(175vw, 170vh);
+      position: absolute; left: 50%; top: 50%;
+      width: var(--size); height: var(--size);
+      margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
       opacity: 0;
     }
     .hero-logo-video video,
-    .hero-logo-video img { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
+    .hero-logo-video img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
     .hero-logo-video img { display: none; }
     .hero-logo-video.video-failed video { display: none; }
-    .hero-logo-video.video-failed img { display: block; }
+    .hero-logo-video.video-failed img { display: block; width: 60%; margin: auto; }
     @keyframes logoBreathe {
       0%,100% { transform: scale(1); }
       50% { transform: scale(1.022); }
     }
     .hero-logo-video.breathing { animation: logoBreathe 4.5s ease-in-out infinite; }
     .hero-brand {
+      position: absolute; left: 0; right: 0; bottom: clamp(48px, 9vh, 104px);
+      z-index: 1; text-align: center;
       font-family: var(--pixel);
       font-size: clamp(28px, 3vw, 42px); font-weight: normal;
       letter-spacing: 0.15em; color: var(--ink);
-      margin-top: 20px; opacity: 0;
+      opacity: 0;
     }
     @media (max-width: 900px) {
       .hero-brand { font-size: 36px; }
-    }
-    .hero-eyebrow {
-      font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: var(--muted); margin-top: 8px; opacity: 0;
     }
 
     /* ─── Section Shared ─────────────────────────────────── */
@@ -433,14 +435,11 @@
 
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <section id="hero">
-  <div class="hero-content">
-    <div class="hero-logo-video" id="heroLogoVideo">
-      <video src="LogoPolyacc.MOV" autoplay loop muted playsinline onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')"></video>
-      <img src="images/logo.png" alt="accinthecloud">
-    </div>
-    <p class="hero-brand">accinthecloud</p>
-    <p class="hero-eyebrow">Handmade · Moscow</p>
+  <div class="hero-logo-video" id="heroLogoVideo">
+    <video src="LogoPolyacc.MOV" autoplay loop muted playsinline onerror="document.getElementById('heroLogoVideo').classList.add('video-failed')"></video>
+    <img src="images/logo.png" alt="accinthecloud">
   </div>
+  <p class="hero-brand">accinthecloud</p>
 </section>
 
 <!-- ─── MARQUEE ───────────────────────────────────────────── -->
@@ -606,8 +605,6 @@ tl.fromTo('.hero-logo-video',
     })
   .fromTo('.hero-brand',
     { opacity:0, y:8 }, { opacity:1, y:0, duration:0.7, ease:'power2.out' }, '-=0.5')
-  .fromTo('.hero-eyebrow',
-    { opacity:0 }, { opacity:1, duration:0.6, ease:'power2.out' }, '-=0.3')
   .fromTo('.nav-logo', { opacity:0 }, { opacity:1, duration:0.6 }, 0.7)
   .fromTo('.burger',  { opacity:0 }, { opacity:1, duration:0.6 }, 1.0);
 
