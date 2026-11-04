@@ -93,7 +93,10 @@ async function initMark() {
   mark.castShadow = true;
   const pivot = new THREE.Group();
   pivot.add(mark);
-  scene.add(pivot);
+  // внешняя группа наклоняет знак к курсору или по наклону телефона
+  const tilt = new THREE.Group();
+  tilt.add(pivot);
+  scene.add(tilt);
 
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ color: 0x34426a, opacity: 0.34 }));
   floor.rotation.x = -Math.PI / 2;
@@ -122,12 +125,44 @@ async function initMark() {
   let angle = 0, spinV = 0, dragging = false;
   dragSpin(host, dx => { dragging = true; angle += dx * 0.008; }, v => { dragging = false; spinV = v * 8; });
 
+  // знак чуть поворачивается за курсором; на телефоне — за наклоном телефона
+  const look = { x: 0, y: 0 }, aim = { x: 0, y: 0 };
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    addEventListener('pointermove', e => {
+      aim.x = (e.clientX / innerWidth - 0.5) * 2;
+      aim.y = (e.clientY / innerHeight - 0.5) * 2;
+    }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => { aim.x = aim.y = 0; });
+  } else if (window.DeviceOrientationEvent) {
+    // ноль — то, как человек держит телефон; он медленно подстраивается под новое положение
+    let base = null;
+    const onTilt = e => {
+      if (e.beta == null || e.gamma == null) return;
+      if (!base) base = { b: e.beta, g: e.gamma };
+      base.b += (e.beta - base.b) * 0.01;
+      base.g += (e.gamma - base.g) * 0.01;
+      aim.x = Math.max(-1, Math.min(1, (e.gamma - base.g) / 20));
+      aim.y = Math.max(-1, Math.min(1, (e.beta - base.b) / 20));
+    };
+    const listen = () => addEventListener('deviceorientation', onTilt);
+    // iPhone спрашивает разрешение — только после касания знака, а не сразу при входе
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      host.addEventListener('touchend', () => {
+        DeviceOrientationEvent.requestPermission().then(r => { if (r === 'granted') listen(); }).catch(() => {});
+      }, { once: true });
+    } else listen();
+  }
+
   function frame(dt) {
     if (!dragging) {
       spinV = damp(spinV, 0, 2.2, dt);
       angle += (REDUCE ? 0 : MARK_TURN + spinV) * dt;
     }
     pivot.rotation.y = angle;
+    look.x = damp(look.x, aim.x, 4, dt);
+    look.y = damp(look.y, aim.y, 4, dt);
+    tilt.rotation.y = look.x * 0.35;
+    tilt.rotation.x = look.y * 0.16;
     renderer.render(scene, camera);
   }
 

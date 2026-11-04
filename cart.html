@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js"></script>
+  <script src="/js/i18n.js?v=2"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="accinthecloud">
   <meta name="theme-color" content="#ffffff">
   <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="fonts/fonts.css">
@@ -367,14 +370,13 @@ function renderCart() {
   const empty = document.getElementById('emptyCart');
   const lines = cart.length;
   const pieces = ACC.count();
-  const total = ACC.total();
   const esc = ACC.esc;
 
   document.getElementById('itemsLabel').textContent = lines + ' ' + plural(lines,'позиция','позиции','позиций');
   document.getElementById('summaryCount').textContent = lines;
   document.getElementById('summaryPieces').textContent = pieces;
   document.getElementById('summaryPiecesRow').hidden = pieces === lines;
-  document.getElementById('summaryTotal').textContent = total > 0 ? total.toLocaleString('ru-RU') + ' ₽' : '—';
+  document.getElementById('summaryTotal').textContent = ACC.totalLabel() || '—';
 
   // Пустая корзина: оформлять нечего — прячем форму (экраны успеха/запасной остаются)
   const hideCheckout = lines === 0 && !orderSubmitted;
@@ -406,7 +408,7 @@ function renderCart() {
           ${metas.length ? `<div class="item-meta">${metas.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
         </div>
         <div class="item-right">
-          <p class="item-price">${esc(String(item.price).replace(/&#8381;/g, "₽"))}</p>
+          <p class="item-price">${esc(ACC.priceLabel(item))}</p>
           <div class="item-qty">
             <button class="iqty-btn" data-uid="${uid}" data-action="minus" aria-label="Меньше: ${name}">−</button>
             <div class="iqty-val" aria-label="Количество">${Number(item.qty) || 1}</div>

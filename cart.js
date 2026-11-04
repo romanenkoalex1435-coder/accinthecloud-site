@@ -85,6 +85,29 @@ const ACC = {
     return ACC.get().reduce((s, i) => s + (i.priceNum || 0) * (i.qty || 1), 0);
   },
 
+  // ── Цена в долларах для английской версии. У старых позиций в корзине priceUsd нет —
+  //    пересчитываем по курсу витрины капсул a1 и a3 (75 ₽ за $, до 5$) ──
+  usd(item) {
+    const m = String(item.priceUsd || '').match(/^(\d+)\$$/);
+    if (m) return +m[1];
+    return item.priceNum > 0 ? Math.max(5, Math.round(item.priceNum / 75 / 5) * 5) : 0;
+  },
+  totalUsd() {
+    return ACC.get().reduce((s, i) => s + ACC.usd(i) * (i.qty || 1), 0);
+  },
+  // ── Цена позиции и итог в валюте текущего языка ──
+  priceLabel(item) {
+    const raw = String(item.price).replace(/&#8381;/g, '₽');
+    if (window.ACC_LANG !== 'en') return raw;
+    const usd = ACC.usd(item);
+    return usd ? usd + '$' : (window.ACC_T ? ACC_T(raw) : raw);
+  },
+  totalLabel() {
+    if (window.ACC_LANG === 'en') { const t = ACC.totalUsd(); return t > 0 ? t.toLocaleString('en-US') + '$' : ''; }
+    const t = ACC.total();
+    return t > 0 ? t.toLocaleString('ru-RU') + ' ₽' : '';
+  },
+
   // ── Clear cart ──
   clear() {
     localStorage.removeItem(ACC.KEY);
@@ -137,13 +160,13 @@ const ACC = {
       if (item.size)  line.push(`   · ${L.size}: ${item.size}`);
       if (item.color) line.push(`   · ${L.color}: ${T(item.color)}`);
       if (item.notes) line.push(`   · ${L.notes}: ${item.notes}`);
-      line.push(`   · ${L.price}: ${T(String(item.price).replace(/&#8381;/g, "₽"))} × ${item.qty || 1} ${L.pcs}`);
+      line.push(`   · ${L.price}: ${ACC.priceLabel(item)} × ${item.qty || 1} ${L.pcs}`);
       return line.join('\n');
     }).join('\n\n');
 
-    const total = ACC.total();
+    const total = ACC.totalLabel();
     return `${L.head}\n\n${items}\n\n` +
-           `${total > 0 ? `${L.total} ${total.toLocaleString('ru-RU')} ₽\n\n` : ''}` +
+           `${total ? `${L.total} ${total}\n\n` : ''}` +
            `${L.name}: ${name}\nTelegram: ${telegram}` +
            `${comment ? `\n${L.comment}: ` + comment : ''}`;
   },
