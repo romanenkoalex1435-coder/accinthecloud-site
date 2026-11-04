@@ -215,7 +215,7 @@
     picks.querySelectorAll('.drop-pick').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
     num.textContent = pad(i);
     cta.firstChild.textContent = `Забронировать №${i} в Telegram `;
-    cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent(window.ACC_LANG === 'en' ? `Hi! I'd like to book winter jacket No. ${i} from the website.` : `Здравствуйте! Хочу забронировать пошив зимней куртки №${i} с сайта.`);
+    cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent(`Здравствуйте! Хочу забронировать пошив зимней куртки №${i} с сайта.`);
     // новое фото въезжает с той стороны, куда листают, старое растворяется
     const next = photo.cloneNode();
     next.classList.remove('is-on');
@@ -230,7 +230,7 @@
       old.forEach(o => { o.classList.remove('is-on'); setTimeout(() => o.remove(), 600); });
     }));
   }
-  cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent(window.ACC_LANG === 'en' ? "Hi! I'd like to book winter jacket No. 4 from the website." : 'Здравствуйте! Хочу забронировать пошив зимней куртки №4 с сайта.');
+  cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent('Здравствуйте! Хочу забронировать пошив зимней куртки №4 с сайта.');
   picks.addEventListener('click', e => {
     const b = e.target.closest('.drop-pick');
     if (b) show(+b.dataset.i, +b.dataset.i > cur ? 1 : -1);
