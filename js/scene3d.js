@@ -4,7 +4,8 @@
 import * as THREE from './three.module.min.js';
 
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const meshData = fetch('js/logo-mesh.json').then(r => r.json());
+// ?v= менять при перепечке: файлы js/ браузер хранит неделю
+const meshData = fetch('js/logo-mesh.json?v=2').then(r => r.json());
 const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
 // отдаём поток браузеру между тяжёлыми шагами, чтобы страница не подвисала
 const breathe = () => new Promise(r => setTimeout(r, 0));
