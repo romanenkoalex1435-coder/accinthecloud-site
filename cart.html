@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=2"></script>
+  <script src="/js/i18n.js?v=4"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -83,6 +83,7 @@
     }
     .cart-layout.is-empty { grid-template-columns:1fr; }
     .cart-layout.is-empty .cart-items { border-right:none; }
+    .cart-layout.is-done { grid-template-columns:minmax(0, 560px); justify-content:center; }
 
     /* ── Items ── */
     .cart-items { padding:40px 48px; border-right:1px solid var(--border); }
@@ -382,6 +383,10 @@ function renderCart() {
   const hideCheckout = lines === 0 && !orderSubmitted;
   document.getElementById('checkoutPanel').hidden = hideCheckout;
   document.getElementById('cartLayout').classList.toggle('is-empty', hideCheckout);
+  // заказ ушёл и корзина очищена — остаётся только экран «Нажми «Отправить»», без «Корзина пустая»
+  const done = lines === 0 && orderSubmitted;
+  document.querySelector('.cart-items').hidden = done;
+  document.getElementById('cartLayout').classList.toggle('is-done', done);
 
   if (lines === 0) {
     list.innerHTML = '';

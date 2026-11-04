@@ -132,7 +132,7 @@ const ACC = {
     if (!fb) return;
     fb.classList.add('show');
     clearTimeout(ACC._fbTimer);
-    ACC._fbTimer = setTimeout(() => fb.classList.remove('show'), 2000);
+    ACC._fbTimer = setTimeout(() => fb.classList.remove('show'), 3500); // хватает времени нажать «Открыть»
   },
 
   // ── Save completed order to localStorage ──

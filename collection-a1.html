@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=2"></script>
+  <script src="/js/i18n.js?v=4"></script>
   <title>a1 ACCESS — accinthecloud</title>
   <meta name="description" content="Капсула a1 ACCESS от accinthecloud: сумки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a1.html">
@@ -212,7 +212,7 @@
   <script src="site.js" defer></script>
 </head>
 <body>
-<div id="cartFeedback">Добавлено в корзину ✓</div>
+<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
 
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
@@ -243,13 +243,12 @@
   <div>
     <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a1</p>
     <h1 class="hero-title">ACCESS</h1>
-    <p class="hero-sub">Shoulder bag &mdash; ручной пошив</p>
+    <p class="hero-sub">Сумки через плечо &mdash; ручной пошив</p>
   </div>
   <div class="hero-right">
     <div class="hero-info">
-      <strong>Available to order</strong><br>
-      Под заказ<br>
-      Free shipping &middot; Russia
+      <strong>Под заказ</strong><br>
+      Бесплатная доставка по России
     </div>
   </div>
 </div>
@@ -333,10 +332,10 @@ PRODUCTS.forEach((p, n) => {
   card.innerHTML = `
     <div class="card-img-wrap">
       ${imgHtml}
-      <div class="avail-tag">Order</div>
+      <div class="avail-tag">Под заказ</div>
     </div>
     <div class="card-info">
-      <p class="card-type">ACCESS shoulder bag</p>
+      <p class="card-type">Сумка через плечо</p>
       <p class="card-name">${p.name}</p>
       <p class="card-price">${priceStr}</p>
       <p class="card-made">Индивидуальный пошив</p>

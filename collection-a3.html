@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=2"></script>
+  <script src="/js/i18n.js?v=4"></script>
   <title>a3 ACCENT — accinthecloud</title>
   <meta name="description" content="Капсула a3 ACCENT от accinthecloud: джинсы и рабочие брюки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a3.html">
@@ -217,7 +217,7 @@
   <script src="site.js" defer></script>
 </head>
 <body>
-<div id="cartFeedback">Добавлено в корзину ✓</div>
+<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
@@ -246,13 +246,12 @@
   <div>
     <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a3</p>
     <h1 class="hero-title">ACCENT</h1>
-    <p class="hero-sub">Jeans &amp; Workpants &mdash; под заказ</p>
+    <p class="hero-sub">Джинсы и рабочие брюки &mdash; ручной пошив</p>
   </div>
   <div class="hero-right">
     <div class="hero-info">
-      <strong>Available to order</strong><br>
-      Только под заказ<br>
-      Free shipping &middot; Russia
+      <strong>Под заказ</strong><br>
+      Бесплатная доставка по России
     </div>
   </div>
 </div>
@@ -316,7 +315,7 @@ const PRODUCTS = [
   {
     id:'a3-rivet', type:'jeans',
     name:'RIVET jeans',
-    typeLabel:'Jeans · Under order',
+    typeLabel:'Джинсы',
     price:'12 790 ₽', priceUsd:'170$', priceNum:12790,
     specs:'Японский raw деним · Bootcut крой',
     images: imgs('RIVET', 6),
@@ -324,7 +323,7 @@ const PRODUCTS = [
   {
     id:'a3-classic', type:'jeans',
     name:'CLASSIC jeans',
-    typeLabel:'Jeans · Under order',
+    typeLabel:'Джинсы',
     price:'11 390 ₽', priceUsd:'150$', priceNum:11390,
     specs:'Итальянский деним натурального окрашивания · Wide leg крой',
     images: imgs('CLASSIC', 6),
@@ -332,7 +331,7 @@ const PRODUCTS = [
   {
     id:'a3-utility', type:'workpants',
     name:'UTILITY workpants',
-    typeLabel:'Workpants · Under order',
+    typeLabel:'Рабочие брюки',
     price:'15 790 ₽', priceUsd:'210$', priceNum:15790,
     specs:'Extra wide · Canvas 12/14/16 oz · Only for work',
     images: imgs('UTILITY', 6),
@@ -340,7 +339,7 @@ const PRODUCTS = [
   {
     id:'a3-herdsman', type:'jeans',
     name:'HERDSMAN jeans',
-    typeLabel:'Jeans · Under order',
+    typeLabel:'Джинсы',
     price:'12 790 ₽', priceUsd:'170$', priceNum:12790,
     specs:'Wide straight · Raw-washed denim · Italian denim',
     images: imgs('HERDSMAN', 6),
@@ -348,7 +347,7 @@ const PRODUCTS = [
   {
     id:'a3-bolt', type:'jeans',
     name:'BOLT jeans',
-    typeLabel:'Jeans · Under order',
+    typeLabel:'Джинсы',
     price:'12 790 ₽', priceUsd:'170$', priceNum:12790,
     specs:'Baggy · Raw-washed denim · Italian fittings',
     images: imgs('BOLT', 4),
@@ -356,7 +355,7 @@ const PRODUCTS = [
   {
     id:'a3-tube', type:'jeans',
     name:'TUBE jeans',
-    typeLabel:'Jeans · Under order',
+    typeLabel:'Джинсы',
     price:'11 890 ₽', priceUsd:'150$', priceNum:11890,
     specs:'Huge cut · Italian denim · One-piece trousers',
     images: imgs('TUBE', 6),
@@ -364,7 +363,7 @@ const PRODUCTS = [
   {
     id:'a3-builder', type:'workpants',
     name:'BUILDER workpants',
-    typeLabel:'Workpants · Under order',
+    typeLabel:'Рабочие брюки',
     price:'15 790 ₽', priceUsd:'210$', priceNum:15790,
     specs:'Extra wide · Canvas · A lot of rivets · Only for work',
     images: imgs('BUILDER', 5),
@@ -372,7 +371,7 @@ const PRODUCTS = [
   {
     id:'a3-unique', type:'unique',
     name:'Unique / Уникальные',
-    typeLabel:'Unique · Ваш дизайн',
+    typeLabel:'Ваш дизайн',
     price:'По запросу', priceUsd:'Price on request', priceNum:0,
     specs:'Ваш дизайн · Ваши параметры · Изготавливается индивидуально',
     images: [],
@@ -413,7 +412,7 @@ PRODUCTS.forEach((p, n) => {
   card.innerHTML = `
     <div style="position:relative;">
       <div class="card-gallery" data-gallery>${slides}</div>
-      <div class="avail-tag">Order</div>
+      <div class="avail-tag">Под заказ</div>
     </div>
     ${dotsHtml}
     <div class="card-info">

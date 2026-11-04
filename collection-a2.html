@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=2"></script>
+  <script src="/js/i18n.js?v=4"></script>
   <title>a2 ACCEPT — accinthecloud</title>
   <meta name="description" content="Капсула a2 ACCEPT от accinthecloud: куртки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a2.html">
@@ -235,7 +235,7 @@
   <script src="site.js" defer></script>
 </head>
 <body>
-<div id="cartFeedback">Добавлено в корзину ✓</div>
+<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
@@ -264,13 +264,12 @@
   <div>
     <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a2</p>
     <h1 class="hero-title">ACCEPT</h1>
-    <p class="hero-sub">Jackets &mdash; Capsule a2</p>
+    <p class="hero-sub">Куртки &mdash; ручной пошив</p>
   </div>
   <div class="hero-right">
     <div class="hero-info">
-      <strong>Available to order</strong><br>
-      Только под заказ<br>
-      Free shipping &middot; Russia
+      <strong>Под заказ</strong><br>
+      Бесплатная доставка по России
     </div>
   </div>
 </div>
@@ -346,7 +345,7 @@ const PRODUCTS = [
   {
     id:'a2-texas', type:'jacket',
     name:'TEXAS jacket',
-    typeLabel:'Jacket · Under order',
+    typeLabel:'Куртка',
     price:'20 000 ₽', priceUsd:'255$', priceNum:20000,
     temp:'до -10..-20°С',
     desc:'Только под заказ.',
@@ -356,7 +355,7 @@ const PRODUCTS = [
   {
     id:'a2-firework', type:'jacket',
     name:'FIREWORK jacket',
-    typeLabel:'Jacket · Under order',
+    typeLabel:'Куртка',
     price:'17 890 ₽', priceUsd:'230$', priceNum:17890,
     temp:'0 до -20°С (по запросу)',
     desc:'Доступна только в чёрном цвете. Только под заказ.',
@@ -366,7 +365,7 @@ const PRODUCTS = [
   {
     id:'a2-knight', type:'jacket',
     name:'KNIGHT jacket',
-    typeLabel:'Jacket',
+    typeLabel:'Куртка',
     price:'—', priceUsd:'—', priceNum:0,
     temp:'',
     desc:'',
@@ -376,7 +375,7 @@ const PRODUCTS = [
   {
     id:'a2-redtusk', type:'jacket',
     name:'RED TUSK jacket',
-    typeLabel:'Jacket · Under order',
+    typeLabel:'Куртка',
     price:'24 590 ₽', priceUsd:'300$', priceNum:24590,
     temp:'до -15..-20°С',
     desc:'Только под заказ.',
@@ -386,7 +385,7 @@ const PRODUCTS = [
   {
     id:'a2-facer', type:'jacket',
     name:'FACER double-sided',
-    typeLabel:'Jacket · Under order',
+    typeLabel:'Куртка',
     price:'24 590 ₽', priceUsd:'300$', priceNum:24590,
     temp:'до -10°С (по запросу до -15..-25°С)',
     desc:'Двусторонняя. Только под заказ.',
@@ -396,7 +395,7 @@ const PRODUCTS = [
   {
     id:'a2-chevy', type:'jacket',
     name:'CHEVY jacket',
-    typeLabel:'Jacket · Under order',
+    typeLabel:'Куртка',
     price:'20 000 ₽', priceUsd:'255$', priceNum:20000,
     temp:'до -10°С (по запросу до -15..-25°С)',
     desc:'Только под заказ.',
@@ -406,7 +405,7 @@ const PRODUCTS = [
   {
     id:'a2-classic', type:'classic',
     name:'ACCORD Classic',
-    typeLabel:'Pre-order · 4 цвета',
+    typeLabel:'Предзаказ · 4 цвета',
     price:'14 590 ₽', priceUsd:'185$', priceNum:14590,
     temp:'до -15°С (до -25°С по запросу) · водонепроницаемая основа',
     desc:'Предзаказ. Изготавливается по вашим параметрам. Возможность добавить детали по запросу без изменения стоимости.',
@@ -416,7 +415,7 @@ const PRODUCTS = [
   {
     id:'a2-unique', type:'unique',
     name:'ACCORD Unique',
-    typeLabel:'Unique · Ваш дизайн',
+    typeLabel:'Ваш дизайн',
     price:'24 590 ₽', priceUsd:'300$', priceNum:24590,
     temp:'до -15°С (до -25°С по запросу)',
     desc:'Предзаказ. Ваш дизайн — мой крой. Изготавливается по вашим параметрам.',
@@ -459,11 +458,11 @@ PRODUCTS.forEach((p, n) => {
     : '';
 
   const badge = p.sold
-    ? `<div class="sold-overlay">Sold</div>`
-    : (p.type==='unique' ? '' : `<div class="avail-tag">Order</div>`);
+    ? `<div class="sold-overlay">Продано</div>`
+    : (p.type==='unique' ? '' : `<div class="avail-tag">Под заказ</div>`);
 
   const priceHtml = p.sold
-    ? `<p class="card-price" style="color:var(--muted);">Sold out</p>`
+    ? `<p class="card-price" style="color:var(--muted);">Нет в наличии</p>`
     : `<p class="card-price">${p.price} / ${p.priceUsd}</p>`;
 
   const ctaHtml = p.sold ? '' : `<span class="card-cta">Подробнее &#8594;</span>`;

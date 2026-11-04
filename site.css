@@ -38,6 +38,10 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 /* Уведомление «Добавлено в корзину» в одну строку */
 #cartFeedback { white-space: nowrap; }
+/* из уведомления можно сразу перейти в корзину */
+#cartFeedback.show { pointer-events: auto; }
+#cartFeedback a { color: inherit; margin-left: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, .45); transition: border-color .2s ease; }
+#cartFeedback a:hover { border-bottom-color: #fff; }
 
 /* Мелкие служебные подписи: в пиксельном шрифте цифры на 12–14 px не читаются,
    а латиница и кириллица в одной строке расходятся — набираем их Inter */
