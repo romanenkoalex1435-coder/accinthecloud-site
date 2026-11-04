@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=4"></script>
+  <script src="/js/i18n.js?v=5"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -24,7 +24,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="accinthecloud">
   <meta name="theme-color" content="#ffffff">
-  <link rel="preload" href="fonts/PixelImpacted-Latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/PixelImpacted.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="fonts/fonts.css">
   <script src="cart.js"></script>
   <script src="js/gsap.min.js"></script>
@@ -35,8 +35,8 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
       font-family: "PixelImpacted";
-      src: url("fonts/PixelImpacted-Latin.woff2") format("woff2");
-      unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-2193, U+20BD, U+2116;
+      src: url("fonts/PixelImpacted.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+0400-04FF, U+2010-2027, U+20BD, U+2116;
       font-weight: normal; font-style: normal; font-display: swap;
     }
     :root {
@@ -115,8 +115,9 @@
     }
 
     /* ─── Hero ───────────────────────────────────────────── */
+    /* видимая высота: в Safari 100vh больше экрана, и надпись уходила под панель */
     #hero {
-      height: 100vh; display: flex; flex-direction: column;
+      height: 100vh; height: 100svh; display: flex; flex-direction: column;
       justify-content: center; align-items: center;
       position: relative; overflow: hidden;
     }
@@ -125,7 +126,7 @@
     .hero-3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     /* тот же кадр картинкой: виден, пока грузится 3D, и остаётся, если WebGL недоступен */
     .hero-still {
-      position: absolute; left: 50%; top: 50%; transform: translate(-49%, -47.1%);
+      position: absolute; left: 50%; top: 50%; transform: translate(-49%, calc(-47.1% - var(--lift, 0px)));
       width: min(139.6vw, 135.4vh); height: auto; transition: opacity .6s ease;
     }
     @media (max-height: 500px) and (orientation: landscape) { .hero-still { width: min(139.6vw, 99.2vh); } }
@@ -133,21 +134,16 @@
     .hero-3d.is-ready canvas { opacity: 1; }
     .hero-3d.is-ready .hero-still { opacity: 0; }
     .hero-brand {
-      position: absolute; left: 0; right: 0; bottom: clamp(48px, 9vh, 104px);
-      z-index: 1; text-align: center;
-      font-family: var(--pixel);
-      font-size: clamp(28px, 3vw, 42px); font-weight: normal;
-      letter-spacing: 0.15em; color: var(--ink); line-height: normal;
+      position: absolute; left: 0; right: 0; top: var(--brand-top, 76%);
+      z-index: 1; text-align: center; margin: 0;
+      font-family: var(--pixel); font-size: 42.67px; font-weight: normal;
+      letter-spacing: 0; color: var(--ink); line-height: 1;
       opacity: 0;
     }
-    @media (max-width: 900px) {
-      .hero-brand { font-size: 36px; }
-    }
-    /* Телефон в альбомной ориентации: высота по видимой области Safari,
-       логотип меньше и чуть выше, надпись ниже его тени */
+    @media (max-width: 900px) { .hero-brand { font-size: 32px; } }
+    /* Телефон в альбомной ориентации: логотип меньше, надпись мельче */
     @media (max-height: 500px) and (orientation: landscape) {
-      #hero { height: 100vh; height: 100svh; }
-      .hero-brand { font-size: 22px; bottom: max(14px, env(safe-area-inset-bottom)); }
+      .hero-brand { font-size: 21.33px; }
       .mobile-menu { gap: 18px; }
     }
 
@@ -165,106 +161,46 @@
     }
 
     /* ─── Capsules ───────────────────────────────────────── */
+    /* Карточка: светлая плитка, вещь нарисована пикселями; на телефоне — лента, листается пальцем */
     #capsules { background: var(--bg); }
-    .capsules-header {
-      display: flex; justify-content: space-between; align-items: flex-end;
-      margin-bottom: 64px;
+    .capsules-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+    .capsules-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .capsule-card { display: block; color: var(--ink); text-decoration: none; }
+    .capsule-tile {
+      position: relative; aspect-ratio: 4 / 5; background: #f2f1ee;
+      display: grid; place-items: center; overflow: hidden;
+      transition: background-color .3s ease;
     }
-    .capsules-header h2 {
-      font-family: var(--pixel); font-size: clamp(22px, 3.5vw, 48px); font-weight: normal;
-      letter-spacing: 0.08em;
+    /* одна клетка рисунка = 1/32 ширины плитки у всех трёх вещей */
+    .capsule-art { width: calc(var(--cols) / 32 * 82%); height: auto; image-rendering: pixelated; }
+    .capsule-tag { position: absolute; top: 14px; left: 16px; font-family: var(--pixel); font-size: 21.33px; line-height: 1; }
+    .capsule-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; }
+    .capsule-sub { color: var(--muted); margin-top: 6px; }
+    .capsule-view { white-space: nowrap; color: var(--muted); transition: color .2s ease; }
+    .capsule-view::after { content: ' →'; }
+    @media (hover: hover) {
+      /* на наведении вещь подпрыгивает ровно на одну клетку — по-пиксельному, без плавности */
+      .capsule-card:hover .capsule-art { transform: translateY(calc(-100% / var(--rows))); }
+      .capsule-card:hover .capsule-tile { background: #ebe9e4; }
+      .capsule-card:hover .capsule-view { color: var(--ink); }
     }
-    .capsules-header span {
-      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--muted);
+    .capsule-card:active .capsule-tile { background: #e6e4de; }
+    .capsule-count { display: none; }
+    @media (max-width: 900px) {
+      .capsules-grid {
+        display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+        margin: 0 -24px; padding: 0 24px; scroll-padding: 0 24px; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+      }
+      .capsules-grid::-webkit-scrollbar { display: none; }
+      .capsule-card { flex: 0 0 82%; scroll-snap-align: start; }
+      .capsule-count { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+      .capsule-count b { font-family: var(--pixel); font-weight: 400; font-size: 21.33px; line-height: 1; min-width: 3.2em; }
+      .capsule-bars { display: flex; gap: 4px; flex: 1; }
+      .capsule-bars i { flex: 1; height: 4px; background: var(--border); transition: background-color .2s ease; }
+      .capsule-bars i.on { background: var(--ink); }
     }
 
-    .capsules-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
-    }
-    .capsule-card { position: relative; overflow: hidden; display:block; }
-    .capsule-view { color: rgba(255,255,255,0.7) !important; }
-    .capsule-card:hover .capsule-view { color: white !important; }
-    .capsule-card-link { display:block; }
-    .capsule-view {
-      display:inline-flex; align-items:center; gap:10px; margin-top:14px;
-      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
-      color:var(--muted); transition:color .3s;
-    }
-    .capsule-view::after { content:'→'; transition:transform .3s; }
-    .capsule-card:hover .capsule-view { color:var(--ink); }
-    .capsule-card:hover .capsule-view::after { transform:translateX(4px); }
-    .capsule-thumb {
-      aspect-ratio: 2/3; overflow: hidden; position: relative;
-    }
-    .capsule-thumb .ph {
-      width: 100%; height: 100%;
-      transition: transform 0.9s cubic-bezier(0.25,0.46,0.45,0.94);
-    }
-    .capsule-card:hover .capsule-thumb .ph { transform: scale(1.06); }
-
-    .capsule-tag {
-      position: absolute; top: 20px; left: 20px;
-      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: white; background: rgba(0,0,0,0.5);
-      padding: 5px 10px; backdrop-filter: blur(4px);
-    }
-    /* Body overlaid on image */
-    .capsule-thumb::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-      height: 50%; background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      pointer-events: none;
-      opacity: 0; transition: opacity 0.45s ease;
-    }
-    .capsule-card:hover .capsule-thumb::after,
-    .capsule-card:focus-within .capsule-thumb::after {
-      opacity: 1;
-    }
-    .capsule-body {
-      position: absolute; bottom: 24px; left: 20px; right: 20px;
-      padding: 0; z-index: 2;
-      opacity: 0; transform: translateY(14px);
-      transition: opacity 0.45s ease, transform 0.45s ease;
-    }
-    .capsule-card:hover .capsule-body,
-    .capsule-card:focus-within .capsule-body {
-      opacity: 1; transform: translateY(0);
-    }
-    /* Без наведения (планшеты) названия видны всегда */
-    @media (hover: none) {
-      .capsule-thumb::after { opacity: 1; }
-      .capsule-body { opacity: 1; transform: none; }
-    }
-    .capsule-name {
-      font-family: var(--sans); font-size: 28px; font-weight: 700;
-      color: white; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
-      margin-bottom: 4px;
-    }
-    .capsule-sub {
-      font-family: var(--sans); font-size: 11px; font-weight: 400;
-      color: rgba(255,255,255,0.5); margin-bottom: 10px;
-      letter-spacing: 0.18em; text-transform: uppercase;
-    }
-    .capsule-desc { display: none; }
-    .capsule-items { display: none; }
-
-    /* ─── Marquee ────────────────────────────────────────── */
-    .marquee-section {
-      overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      padding: 20px 0; background: var(--bg);
-    }
-    .marquee-track {
-      display: flex; gap: 64px; width: max-content;
-      animation: marquee 18s linear infinite;
-    }
-    .marquee-section:hover .marquee-track { animation-play-state: paused; }
-    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-    .marquee-item {
-      font-family: var(--serif); font-style: italic;
-      font-size: 15px; color: var(--muted); white-space: nowrap;
-      display: flex; align-items: center; gap: 64px;
-    }
-    .marquee-item::after { content:'·'; font-style:normal; }
 
     /* ─── Order CTA banner ───────────────────────────────── */
     .order-cta {
@@ -300,68 +236,6 @@
     }
     .footer-links a:hover { color: var(--ink); }
     .footer-copy { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }
-
-    /* ─── Capsule Carousel (mobile only) ─────────────────── */
-    .capsule-carousel { display: none; }
-
-    .carousel-featured {
-      display: block; position: relative;
-      max-width: 560px; margin: 0 auto;
-      aspect-ratio: 3/4; overflow: hidden;
-      text-decoration: none; color: white;
-      transition: opacity .3s ease;
-    }
-    .carousel-featured.fading { opacity: 0; }
-    .carousel-bg { position: absolute; inset: 0; background: #2a2520; }
-    .carousel-featured::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-      height: 55%; background: linear-gradient(transparent, rgba(0,0,0,0.72));
-      pointer-events: none;
-    }
-    .carousel-tag {
-      position: absolute; top: 20px; left: 20px; z-index: 2;
-      font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-      background: rgba(0,0,0,0.4); padding: 5px 10px; backdrop-filter: blur(4px);
-    }
-    .carousel-info {
-      position: absolute; bottom: 32px; left: 28px; right: 28px; z-index: 2;
-    }
-    .carousel-name {
-      font-family: var(--sans); font-size: 32px; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      line-height: 1; margin-bottom: 4px;
-    }
-    .carousel-sub {
-      font-family: var(--sans); font-size: 11px; font-weight: 400;
-      color: rgba(255,255,255,0.5); margin-bottom: 6px;
-      letter-spacing: 0.18em; text-transform: uppercase;
-    }
-    .carousel-cta {
-      display: inline-block; margin-top: 14px;
-      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.3);
-      padding-bottom: 2px;
-    }
-    .carousel-arc {
-      position: relative; height: 108px;
-    }
-    .arc-btn {
-      position: absolute; left: 50%; bottom: 12px;
-      transform: translateX(-50%);
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 1.5px solid var(--border); background: none;
-      font-family: var(--pixel); font-size: 17px; letter-spacing: 0.04em;
-      color: var(--muted); cursor: pointer;
-      transition: transform .42s cubic-bezier(.25,.46,.45,.94),
-                  width .42s cubic-bezier(.25,.46,.45,.94),
-                  height .42s cubic-bezier(.25,.46,.45,.94),
-                  font-size .42s, background .3s, color .3s,
-                  border-color .3s, opacity .42s;
-    }
-    .arc-btn.active {
-      background: var(--ink); color: white; border-color: var(--ink);
-      width: 70px; height: 70px; font-size: 22px;
-    }
 
     /* ─── Animated reveal base ───────────────────────────── */
     .no-gsap .reveal, .no-gsap .reveal-left, .no-gsap .reveal-right,
@@ -411,22 +285,13 @@
       .burger { display: flex; }
       .section { padding: 36px 24px 48px; }
       .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      /* Mobile: hide grid, show carousel */
-      .capsules-grid { display: none; }
-      .capsule-carousel { display: block; }
-      .carousel-featured { max-width: 100%; }
-      .carousel-name { font-size: 22px; }
-      .arc-btn { width: 48px; height: 48px; font-size: 16px; }
-      .arc-btn.active { width: 60px; height: 60px; font-size: 20px; }
-      .carousel-arc { height: 88px; }
-      .capsules-header h2 { font-size: 32px; }
       .order-cta { margin: 0 24px 56px; padding: 32px 28px; flex-direction: column; align-items: flex-start; }
       .order-cta-text h2 { font-size: 28px; }
       footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
     }
     .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
-    .section-label, .capsule-items, .capsule-tag,
+    .section-label, .capsule-items,
     .modal-num, .modal-made, .items-label,
     .checkout-label, .breadcrumb, .offer-wrap h2 {
       font-family: var(--pixel);
@@ -486,24 +351,24 @@
   </div>
   <h1 class="hero-brand">accinthecloud</h1>
 </section>
+<script>
+/* Знак и надпись — одна группа по центру экрана: знак чуть выше середины, надпись сразу под ним.
+   Размер знака считается как в js/scene3d.js (0.462 — высота знака к ширине). */
+window.accHeroLayout = function () {
+  const hero = document.getElementById('hero'), brand = hero.querySelector('.hero-brand');
+  const w = hero.clientWidth, h = hero.clientHeight;
+  const markH = 0.462 * Math.min(1.35 * w, (w > h && h < 500 ? 0.96 : 1.31) * h);
+  const gap = Math.max(20, markH * 0.16), lift = (gap + brand.offsetHeight) / 2;
+  hero.style.setProperty('--lift', lift + 'px');
+  hero.style.setProperty('--brand-top', (h / 2 - lift + markH / 2 + gap) + 'px');
+  return lift;
+};
+accHeroLayout();
+addEventListener('resize', accHeroLayout);
+document.fonts && document.fonts.ready.then(accHeroLayout);
+</script>
 
 <!-- ─── DROP ─────────────────────────────────────────────── -->
-
-<!-- ─── MARQUEE ───────────────────────────────────────────── -->
-<div class="marquee-section">
-  <div class="marquee-track">
-    <span class="marquee-item">Bespoke tailoring</span>
-    <span class="marquee-item">Custom-made</span>
-    <span class="marquee-item">Handcrafted</span>
-    <span class="marquee-item">Attention to detail</span>
-    <span class="marquee-item">accinthecloud</span>
-    <span class="marquee-item">Bespoke tailoring</span>
-    <span class="marquee-item">Custom-made</span>
-    <span class="marquee-item">Handcrafted</span>
-    <span class="marquee-item">Attention to detail</span>
-    <span class="marquee-item">accinthecloud</span>
-  </div>
-</div>
 
 <!-- ─── CAPSULES ─────────────────────────────────────────── -->
 <section id="capsules" class="section">
@@ -511,67 +376,39 @@
     <h2 class="reveal">Capsule Collections</h2>
   </div>
 
-  <div class="capsules-grid">
-
-    <!-- a1 -->
-    <a class="capsule-card reveal capsule-card-link" href="collection-a1.html">
-      <div class="capsule-thumb">
-        <img class="ph" src="images/a1/sm/camo.jpeg" srcset="images/a1/sm/camo.jpeg 479w, images/a1/camo.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
-        <div class="capsule-tag">a1</div>
+  <div class="capsules-grid" id="capsulesGrid">
+    <a class="capsule-card reveal" href="collection-a1.html">
+      <div class="capsule-tile">
+        <span class="capsule-tag">a1</span>
+        <img class="capsule-art" src="images/capsules/a1.svg" alt="" style="--rows:24;--cols:24" width="240" height="240" loading="lazy" decoding="async">
       </div>
-      <div class="capsule-body">
-        <p class="capsule-name">Access</p>
-        <p class="capsule-sub">Shoulder Bags</p>
+      <div class="capsule-meta">
+        <div><p class="capsule-name">Access</p><p class="capsule-sub">Сумки через плечо</p></div>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
-
-    <!-- a2 -->
-    <a class="capsule-card reveal capsule-card-link" href="collection-a2.html">
-      <div class="capsule-thumb">
-        <img class="ph" src="images/a2/taxes/sm/01.jpeg" srcset="images/a2/taxes/sm/01.jpeg 479w, images/a2/taxes/01.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
-        <div class="capsule-tag">a2</div>
+    <a class="capsule-card reveal" href="collection-a2.html">
+      <div class="capsule-tile">
+        <span class="capsule-tag">a2</span>
+        <img class="capsule-art" src="images/capsules/a2.svg" alt="" style="--rows:23;--cols:30" width="300" height="230" loading="lazy" decoding="async">
       </div>
-      <div class="capsule-body">
-        <p class="capsule-name">Accept</p>
-        <p class="capsule-sub">Jackets</p>
+      <div class="capsule-meta">
+        <div><p class="capsule-name">Accept</p><p class="capsule-sub">Куртки</p></div>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
-
-    <!-- a3 -->
-    <a class="capsule-card reveal capsule-card-link" href="collection-a3.html">
-      <div class="capsule-thumb">
-        <img class="ph" src="images/a3/RIVET/sm/01.jpeg" srcset="images/a3/RIVET/sm/01.jpeg 479w, images/a3/RIVET/01.jpeg 959w" sizes="33vw" loading="lazy" decoding="async" alt="" style="background:#2a2520;">
-        <div class="capsule-tag">a3</div>
+    <a class="capsule-card reveal" href="collection-a3.html">
+      <div class="capsule-tile">
+        <span class="capsule-tag">a3</span>
+        <img class="capsule-art" src="images/capsules/a3.svg" alt="" style="--rows:28;--cols:24" width="240" height="280" loading="lazy" decoding="async">
       </div>
-      <div class="capsule-body">
-        <p class="capsule-name">Accent</p>
-        <p class="capsule-sub">Pants</p>
+      <div class="capsule-meta">
+        <div><p class="capsule-name">Accent</p><p class="capsule-sub">Брюки</p></div>
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
-
   </div>
-
-  <!-- Mobile Carousel -->
-  <div class="capsule-carousel" id="capsuleCarousel">
-    <a class="carousel-featured" id="carouselFeatured" href="collection-a1.html">
-      <img class="carousel-bg" id="carouselBg" src="images/a1/sm/camo.jpeg" srcset="images/a1/sm/camo.jpeg 479w, images/a1/camo.jpeg 959w" sizes="100vw" loading="lazy" decoding="async" alt="">
-      <div class="carousel-tag" id="carouselTag">a1</div>
-      <div class="carousel-info">
-        <p class="carousel-name" id="carouselName">Access</p>
-        <p class="carousel-sub" id="carouselSub">Shoulder Bags</p>
-        <span class="carousel-cta">Смотреть →</span>
-      </div>
-    </a>
-    <div class="carousel-arc">
-      <button class="arc-btn active" data-idx="0">a1</button>
-      <button class="arc-btn" data-idx="1">a2</button>
-      <button class="arc-btn" data-idx="2">a3</button>
-    </div>
-  </div>
-
+  <div class="capsule-count" aria-hidden="true"><b id="capsuleNum">01/03</b><span class="capsule-bars"><i class="on"></i><i></i><i></i></span></div>
 </section>
 
 <!-- ─── ORDER CTA ──────────────────────────────────────────── -->
@@ -747,91 +584,28 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   });
 });
 
-// ── Mobile Capsule Carousel ─────────────────────────────────
+// ── Капсулы на телефоне: лента листается пальцем, счётчик показывает, какая сейчас ──
 (function(){
-  const capsules = [
-    { tag:'a1', name:'Access', sub:'Shoulder Bags', sm:'images/a1/sm/camo.jpeg',     img:'images/a1/camo.jpeg',     href:'collection-a1.html' },
-    { tag:'a2', name:'Accept', sub:'Jackets',       sm:'images/a2/taxes/sm/01.jpeg', img:'images/a2/taxes/01.jpeg', href:'collection-a2.html' },
-    { tag:'a3', name:'Accent', sub:'Pants',         sm:'images/a3/RIVET/sm/01.jpeg', img:'images/a3/RIVET/01.jpeg', href:'collection-a3.html' }
-  ];
-  let current = 0;
-  const featured = document.getElementById('carouselFeatured');
-  if (!featured) return;
-  const bgEl    = document.getElementById('carouselBg');
-  const tagEl   = document.getElementById('carouselTag');
-  const nameEl  = document.getElementById('carouselName');
-  const subEl   = document.getElementById('carouselSub');
-  const arcBtns = document.querySelectorAll('.arc-btn');
-
-  const SPACING = 76; // px between button centers
-
-  function updateArc(idx) {
-    arcBtns.forEach((btn, i) => {
-      const offset = (i - idx) * SPACING;
-      const dist = Math.abs(i - idx);
-      btn.classList.toggle('active', i === idx);
-      btn.style.transform = `translateX(calc(-50% + ${offset}px)) translateY(${dist > 0 ? 10 : 0}px)`;
-      btn.style.opacity = '1';
-    });
-  }
-
-  function goTo(idx) {
-    if (idx === current || idx < 0 || idx >= capsules.length) return;
-    current = idx;
-    featured.classList.add('fading');
-    setTimeout(() => {
-      const c = capsules[idx];
-      bgEl.srcset = `${c.sm} 479w, ${c.img} 959w`;
-      bgEl.src = c.sm;
-      tagEl.textContent = c.tag;
-      nameEl.textContent = c.name;
-      if (subEl) subEl.textContent = c.sub;
-      featured.href = c.href;
-      featured.classList.remove('fading');
-    }, 200);
-    updateArc(idx);
-  }
-
-  updateArc(0); // init positions
-  // Подгружаем остальные фото заранее, чтобы при переключении не было пустого кадра
-  window.addEventListener('load', () => capsules.slice(1).forEach(c => { const im = new Image(); im.sizes = '100vw'; im.srcset = `${c.sm} 479w, ${c.img} 959w`; }));
-  arcBtns.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
-
-  // Swipe support (card + arc area)
-  let tx = 0, ty = 0, didSwipe = false;
-
-  function attachSwipe(el) {
-    el.addEventListener('touchstart', e => {
-      tx = e.touches[0].clientX;
-      ty = e.touches[0].clientY;
-      didSwipe = false;
-    }, { passive: true });
-    el.addEventListener('touchmove', e => {
-      const dx = e.touches[0].clientX - tx;
-      const dy = e.touches[0].clientY - ty;
-      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) e.preventDefault();
-    }, { passive: false });
-    el.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - tx;
-      const dy = e.changedTouches[0].clientY - ty;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-        didSwipe = true;
-        goTo(dx < 0 ? current + 1 : current - 1);
-      }
-    });
-  }
-
-  attachSwipe(featured);
-  attachSwipe(document.querySelector('.carousel-arc'));
-
-  // Prevent link navigation on swipe
-  featured.addEventListener('click', e => { if (didSwipe) { e.preventDefault(); didSwipe = false; } });
+  const grid = document.getElementById('capsulesGrid'), num = document.getElementById('capsuleNum');
+  if (!grid || !num) return;
+  const cards = [...grid.children], bars = document.querySelectorAll('.capsule-bars i');
+  let cur = -1;
+  const upd = () => {
+    const x = grid.scrollLeft, w = cards[0].offsetWidth + 12;
+    const i = Math.min(cards.length - 1, Math.round(x / w));
+    if (i === cur) return;
+    cur = i;
+    num.textContent = String(i + 1).padStart(2, '0') + '/' + String(cards.length).padStart(2, '0');
+    bars.forEach((b, k) => b.classList.toggle('on', k === i));
+  };
+  grid.addEventListener('scroll', upd, { passive: true });
+  upd();
 })();
 </script>
 <script>
 // 3D (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
-addEventListener('load', () => setTimeout(() => import('./js/scene3d.js?v=3').catch(() => {}), 1400), { once: true });
+addEventListener('load', () => setTimeout(() => import('./js/scene3d.js?v=4').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>

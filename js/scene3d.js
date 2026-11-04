@@ -116,6 +116,9 @@ async function initMark() {
     // камера чуть сверху, как в ролике
     camera.position.set(0, dist * Math.sin(0.07), dist * Math.cos(0.07));
     camera.lookAt(0, 0, 0);
+    // знак поднят над серединой, чтобы под ним поместилась надпись (расчёт в index.html)
+    const lift = window.accHeroLayout ? window.accHeroLayout() : 0;
+    camera.setViewOffset(w, h, 0, lift, w, h);
     camera.updateProjectionMatrix();
   }
   resize();

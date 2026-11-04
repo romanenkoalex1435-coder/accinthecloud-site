@@ -65,16 +65,13 @@
   const fb = document.getElementById('cartFeedback');
   if (fb) { fb.setAttribute('role', 'status'); fb.setAttribute('aria-live', 'polite'); }
 
-  // ── Строки на пиксельном шрифте, где есть кириллица, — целиком Inter ──
-  const CYR = /[А-Яа-яЁё]/, LAT = /[A-Za-z]/;
-  const fixMixed = root => root.querySelectorAll('p, span, a, button, h2, h3, div').forEach(el => {
-    if (el.children.length > 1 || el.classList.contains('mixed-script')) return;
-    const t = el.textContent;
-    if (!CYR.test(t) || !LAT.test(t)) return;
-    if (!getComputedStyle(el).fontFamily.includes('PixelImpacted')) return;
-    el.classList.add('mixed-script');
+  // ── Поле Telegram: «@» нарисована перед полем, свою «@» в начале убираем ──
+  document.querySelectorAll('.field.tg input').forEach(el => {
+    const strip = () => { const v = el.value.replace(/^\s*@+/, ''); if (v !== el.value) el.value = v; };
+    strip();
+    el.addEventListener('input', strip);
+    addEventListener('load', strip);
   });
-  fixMixed(document);
 
   // ── Карточки товаров открываются с клавиатуры ──
   document.querySelectorAll('.product-card:not(.is-sold)').forEach(card => {
@@ -541,7 +538,7 @@ function accVelocity(hist) {
 
 /* ── Фото вещей проявляются из размытия, когда догрузились ── */
 (function () {
-  const SEL = '.product-card img, .lb-card img, .capsule-thumb img, .mslide img, .modal-slide img, .modal-img, .drop-card img';
+  const SEL = '.product-card img, .lb-card img, .capsule-art, .mslide img, .modal-slide img, .modal-img, .drop-card img';
   const wait = im => {
     if (im.classList.contains('hover-alt') || !im.matches(SEL)) return;
     // первые фото страницы не прячем: от них считается скорость загрузки (LCP)

@@ -12,7 +12,6 @@
     scroll-behavior: auto !important;
   }
   #page-curtain { display: none !important; }
-  .marquee-track { animation: none !important; }
 }
 
 /* Только для скринридеров */
@@ -43,13 +42,6 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 #cartFeedback a { color: inherit; margin-left: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, .45); transition: border-color .2s ease; }
 #cartFeedback a:hover { border-bottom-color: #fff; }
 
-/* Мелкие служебные подписи: в пиксельном шрифте цифры на 12–14 px не читаются,
-   а латиница и кириллица в одной строке расходятся — набираем их Inter */
-.breadcrumb, .breadcrumb a, .items-label {
-  font-family: 'Inter', -apple-system, sans-serif !important;
-  letter-spacing: 0.14em;
-}
-
 /* Двойной тап по кнопкам не увеличивает страницу */
 a, button, [role="button"], input, label { touch-action: manipulation; }
 
@@ -57,10 +49,6 @@ a, button, [role="button"], input, label { touch-action: manipulation; }
 @media (hover: none) {
   .btn-order:hover, .btn-submit:hover, .btn-cart:hover { opacity: 1; }
 }
-
-/* Подпись на пиксельном шрифте с русскими буквами набираем целиком Inter,
-   чтобы латиница и кириллица в одной строке не расходились по размеру */
-.mixed-script { font-family: 'Inter', -apple-system, sans-serif !important; letter-spacing: 0.12em; }
 
 /* Кнопка «Поделиться ссылкой» в карточке вещи */
 .share-link {
@@ -98,7 +86,7 @@ a, button, [role="button"], input, label { touch-action: manipulation; }
 .lang-switch--end { margin-left: auto; margin-right: 24px; }
 .lang-switch button {
   position: relative; background: none; border: 0; padding: 4px 5px; cursor: pointer;
-  font: 500 11px/1 'Inter', -apple-system, sans-serif; letter-spacing: .14em; color: #8a8a8a;
+  font: 500 11px/1 'Inter', -apple-system, sans-serif; letter-spacing: .14em; color: #6e6e6e;
   transition: color .2s;
 }
 .lang-switch button::after {
@@ -177,3 +165,90 @@ img.img-in { transition: opacity .4s cubic-bezier(.23, 1, .32, 1), filter .4s cu
 @media (prefers-reduced-motion: reduce) { img.img-wait { filter: none; } }
 html.vt-opening .modal-overlay, html.vt-opening .modal-overlay .modal { transition: none !important; }
 html.vt-opening .modal-overlay.open .modal { transform: none !important; }
+
+/* ── Шрифты: два и только два ──
+   Пиксельный — заголовки и названия. Inter — всё остальное.
+   Пиксель у шрифта = 3/64 em, поэтому кегли кратны 32/3 px: так квадраты не размываются. */
+:root {
+  --f-pixel: 'PixelImpacted', 'Inter', -apple-system, sans-serif;
+  --f-text: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+  --d-1: 42.67px;  /* название капсулы */
+  --d-2: 32px;     /* заголовок страницы */
+  --d-3: 21.33px;  /* заголовок раздела, вещь в окне */
+  --d-4: 21.33px;                       /* знак в подвале, мелкие заголовки */
+}
+/* кегли меняются ступенями по сетке шрифта, а не плавно — иначе пиксели мылятся */
+@media (min-width: 768px) { :root { --d-1: 64px; --d-2: 42.67px; --d-3: 32px; } }
+@media (min-width: 1200px) { :root { --d-1: 85.33px; --d-2: 64px; } }
+button, input, textarea, select { font-family: inherit; }
+.lang-switch button { font-size: 12px; letter-spacing: .06em; }
+
+/* Пиксельные заголовки */
+.hero-title, .drop-title {
+  font-family: var(--f-pixel) !important; font-size: var(--d-1) !important;
+  font-weight: 400; line-height: 1; letter-spacing: 0 !important;
+}
+h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .capsules-header h2, .lb-title {
+  font-family: var(--f-pixel) !important; font-size: var(--d-2) !important;
+  font-weight: 400; line-height: 1.05; letter-spacing: 0 !important;
+}
+.order-cta-text h2, .modal-name, .carousel-name, .capsule-name, #fallbackScreen h2, .form-success h3, .faq-section-title {
+  font-family: var(--f-pixel) !important; font-size: var(--d-3) !important;
+  font-weight: 400; line-height: 1.1; letter-spacing: 0 !important; text-transform: none;
+}
+.footer-logo {
+  font-family: var(--f-pixel) !important; font-size: var(--d-4) !important; letter-spacing: 0 !important;
+}
+
+/* Подписи: Inter 12, прописные, лёгкая разрядка */
+.breadcrumb, .breadcrumb a, .items-label, .checkout-label, .card-type, .card-made, .modal-tag, .modal-num, .modal-made,
+.section-label, .capsules-header span, .capsule-sub, .carousel-tag, .carousel-sub, .page-hero-label,
+.field label, .mfield label, .hero-info, .avail-tag, .sold-overlay, .item-capsule, .doc-date, .offer-date,
+.offer-wrap h2, .wrap h2, .lb-filter, .nav-links a, .footer-links a, .capsule-view, .card-cta, .carousel-cta,
+.faq-contact-link, .btn-browse, .btn-back, .cart-link, #cartFeedback, .item-remove, .undo-toast button, .file-btn,
+.modal-order, .share-link {
+  font-family: var(--f-text) !important; font-size: 12px !important; font-weight: 400;
+  letter-spacing: 0.06em !important; line-height: 1.4;
+}
+.mobile-menu a { font-family: var(--f-text) !important; font-size: 16px !important; letter-spacing: 0.06em !important; }
+
+/* Главные кнопки: Inter 14, прописные — одинаково везде */
+.btn-cart, .btn-order, .btn-submit, .order-cta-btn, .drop-cta {
+  font-family: var(--f-text) !important; font-size: 14px !important; font-weight: 400;
+  letter-spacing: 0.06em !important; text-transform: uppercase;
+}
+
+/* Текст: Inter 14 / 16 */
+.hero-sub, .faq-a, .item-meta, .summary-row, .checkout-note, .modal-specs, .modal-temp, .modal-text, .card-specs,
+.card-temp, .order-cta-text p, .order-wrap .order-sub, #fallbackScreen p, .form-success p, .empty-cart p,
+.faq-contact-text, .faq-note, .consent-label, .modal-disclaimer, .file-names, .field-error, .color-err,
+.modal-price-usd, .card-price, .item-price, .modal-note, .offer-note, .footer-copy, .insta-note, .undo-toast {
+  font-family: var(--f-text) !important; font-size: 14px !important; letter-spacing: 0 !important; line-height: 1.5;
+}
+.modal-note, .offer-note, .footer-copy, .insta-note, .modal-disclaimer, .consent-label, .checkout-note { font-size: 12px !important; }
+.card-name, .item-name, .faq-q, .modal-price, .summary-row.total, .wrap p, .wrap ul li, .offer-wrap p, .offer-wrap ul li,
+.field input, .field textarea, .field select, .mfield input, .mfield textarea, .color-btn {
+  font-family: var(--f-text) !important; font-size: 16px !important; letter-spacing: 0 !important;
+}
+.color-btn { font-size: 14px !important; }
+
+/* Поля формы: одна линия, подсказка внутри; при вводе подсказка уезжает вверх */
+.field.float { position: relative; padding-top: 18px; }
+.field.float > label {
+  position: absolute; left: 0; top: 28px; margin: 0 !important; pointer-events: none;
+  font-size: 16px !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--muted);
+  transform-origin: left top; transition: transform .2s cubic-bezier(.23, 1, .32, 1), color .2s ease;
+}
+.field.float:has(:focus, input:not(:placeholder-shown), textarea:not(:placeholder-shown)) > label {
+  transform: translateY(-26px) scale(.75);
+}
+.field.float :is(input, textarea)::placeholder { color: transparent; transition: color .2s ease; }
+.field.float :is(input, textarea):focus::placeholder { color: #9a9a9a; }
+/* Telegram: «@» уже стоит в начале строки, ник вводится после неё */
+.field.tg::before {
+  content: "@"; position: absolute; left: 0; top: 28px; font: 16px/1.5 var(--f-text); color: var(--ink);
+}
+.field.tg > label { left: 18px; }
+.field.tg input { padding-left: 18px !important; }
+.field.float input, .field.float textarea { line-height: 1.5; padding-top: 10px; padding-bottom: 10px; }
+.field.tg:has(:focus, input:not(:placeholder-shown)) > label { transform: translate(-18px, -26px) scale(.75); }
