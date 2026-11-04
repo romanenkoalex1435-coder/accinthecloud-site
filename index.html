@@ -168,19 +168,19 @@
     .capsule-card { display: block; color: var(--ink); text-decoration: none; }
     .capsule-tile {
       position: relative; aspect-ratio: 4 / 5; background: #f2f1ee;
-      display: grid; place-items: center; overflow: hidden;
+      display: grid; place-items: center; overflow: hidden; container-type: inline-size;
       transition: background-color .3s ease;
     }
-    /* одна клетка рисунка = 1/32 ширины плитки у всех трёх вещей */
-    .capsule-art { width: calc(var(--cols) / 32 * 82%); height: auto; image-rendering: pixelated; }
+    /* все три вещи одной высоты; клетки почти равны — рисунки по 60–64 клетки в высоту */
+    .capsule-art { height: 72cqw; width: auto; image-rendering: pixelated; }
     .capsule-tag { position: absolute; top: 14px; left: 16px; font-family: var(--pixel); font-size: 21.33px; line-height: 1; }
     .capsule-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; }
     .capsule-sub { color: var(--muted); margin-top: 6px; }
     .capsule-view { white-space: nowrap; color: var(--muted); transition: color .2s ease; }
     .capsule-view::after { content: ' →'; }
     @media (hover: hover) {
-      /* на наведении вещь подпрыгивает ровно на одну клетку — по-пиксельному, без плавности */
-      .capsule-card:hover .capsule-art { transform: translateY(calc(-100% / var(--rows))); }
+      /* на наведении вещь подпрыгивает ровно на две клетки — по-пиксельному, без плавности */
+      .capsule-card:hover .capsule-art { transform: translateY(calc(-200% / var(--rows))); }
       .capsule-card:hover .capsule-tile { background: #ebe9e4; }
       .capsule-card:hover .capsule-view { color: var(--ink); }
     }
@@ -380,7 +380,7 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
     <a class="capsule-card reveal" href="collection-a1.html">
       <div class="capsule-tile">
         <span class="capsule-tag">a1</span>
-        <img class="capsule-art" src="images/capsules/a1.svg" alt="" style="--rows:24;--cols:24" width="240" height="240" loading="lazy" decoding="async">
+        <img class="capsule-art" src="images/capsules/a1.png" alt="" style="--rows:62;--cols:60" width="480" height="496" loading="lazy" decoding="async">
       </div>
       <div class="capsule-meta">
         <div><p class="capsule-name">Access</p><p class="capsule-sub">Сумки через плечо</p></div>
@@ -390,7 +390,7 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
     <a class="capsule-card reveal" href="collection-a2.html">
       <div class="capsule-tile">
         <span class="capsule-tag">a2</span>
-        <img class="capsule-art" src="images/capsules/a2.svg" alt="" style="--rows:23;--cols:30" width="300" height="230" loading="lazy" decoding="async">
+        <img class="capsule-art" src="images/capsules/a2.png" alt="" style="--rows:60;--cols:66" width="528" height="480" loading="lazy" decoding="async">
       </div>
       <div class="capsule-meta">
         <div><p class="capsule-name">Accept</p><p class="capsule-sub">Куртки</p></div>
@@ -400,7 +400,7 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
     <a class="capsule-card reveal" href="collection-a3.html">
       <div class="capsule-tile">
         <span class="capsule-tag">a3</span>
-        <img class="capsule-art" src="images/capsules/a3.svg" alt="" style="--rows:28;--cols:24" width="240" height="280" loading="lazy" decoding="async">
+        <img class="capsule-art" src="images/capsules/a3.png" alt="" style="--rows:64;--cols:42" width="336" height="512" loading="lazy" decoding="async">
       </div>
       <div class="capsule-meta">
         <div><p class="capsule-name">Accent</p><p class="capsule-sub">Брюки</p></div>
