@@ -100,6 +100,14 @@ function inflatedMark(loops, step, height, radius) {
         if (!inside(x, y) || edgeDist(x, y) < r * 0.8 || !far(x, y, step * 0.45)) return;
         add(x, y, edgeDist(x, y));
       });
+      // в узких местах (дуга над «a») ряды не помещаются — ставим точку посередине,
+      // иначе грани от края до края выходят плоскими, будто кусок вырезан
+      let w = 0.005;
+      while (w < 0.3 && inside(p.x + nx * w, p.y + ny * w)) w += 0.005;
+      if (w < 0.2) {
+        const x = p.x + nx * w / 2, y = p.y + ny * w / 2;
+        if (far(x, y, step * 0.4)) add(x, y, edgeDist(x, y));
+      }
     });
   });
   const rand = rng(21);
