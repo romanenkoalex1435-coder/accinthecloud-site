@@ -65,11 +65,16 @@
   const fb = document.getElementById('cartFeedback');
   if (fb) { fb.setAttribute('role', 'status'); fb.setAttribute('aria-live', 'polite'); }
 
-  // ── Поле Telegram: «@» нарисована перед полем, свою «@» в начале убираем ──
+  // ── Поле Telegram: «@» нарисована перед полем, свою «@» в начале убираем;
+  //    у телефона и ссылки t.me нарисованную «@» прячем ──
   document.querySelectorAll('.field.tg input').forEach(el => {
-    const strip = () => { const v = el.value.replace(/^\s*@+/, ''); if (v !== el.value) el.value = v; };
+    const strip = () => {
+      const v = el.value.replace(/^\s*@+\s*/, '');
+      if (v !== el.value) el.value = v;
+      el.parentElement.classList.toggle('no-at', /^[+\d(]|t(elegram)?\.me\//i.test(v));
+    };
     strip();
-    el.addEventListener('input', strip);
+    ['input', 'change', 'blur'].forEach(e => el.addEventListener(e, strip));
     addEventListener('load', strip);
   });
 

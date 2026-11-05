@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=7"></script>
+  <script src="/js/i18n.js?v=8"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -156,6 +156,8 @@
     }
     .summary-row .label { color:var(--muted); }
     .summary-row[hidden] { display:none; }
+    .summary-note { font-size:12px; line-height:1.6; color:var(--muted); margin-top:12px; }
+    .summary-note a { color:inherit; text-decoration:underline; }
 
     .checkout-divider { height:1px; background:var(--border); margin:28px 0; }
 
@@ -252,7 +254,7 @@
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()" aria-current="page">Корзина</a>
-  <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+  <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 <nav>
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
@@ -302,9 +304,10 @@
       <span id="summaryPieces">0</span>
     </div>
     <div class="summary-row total">
-      <span class="label">Итого от</span>
+      <span class="label" id="summaryTotalLabel">Итого</span>
       <span id="summaryTotal">0 ₽</span>
     </div>
+    <p class="summary-note">Пошив — 3–28 рабочих дней. Обычно предоплата 50 %, для капсул бывает 100 %. Доставка по России бесплатная. Детали подтвержу в Telegram, условия — в <a href="offer.html">оферте</a>.</p>
 
     <div class="checkout-divider"></div>
 
@@ -355,7 +358,7 @@
 <footer>
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
-    <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
     <a href="offer.html">Публичная оферта</a>
     <a href="privacy.html">Политика конфиденциальности</a>
   </div>
@@ -378,6 +381,8 @@ function renderCart() {
   document.getElementById('summaryPieces').textContent = pieces;
   document.getElementById('summaryPiecesRow').hidden = pieces === lines;
   document.getElementById('summaryTotal').textContent = ACC.totalLabel() || '—';
+  // «от» — только если в корзине есть вещь без точной цены
+  document.getElementById('summaryTotalLabel').textContent = cart.some(i => !i.priceNum) ? 'Итого от' : 'Итого';
 
   // Пустая корзина: оформлять нечего — прячем форму (экраны успеха/запасной остаются)
   const hideCheckout = lines === 0 && !orderSubmitted;
