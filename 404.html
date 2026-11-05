@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=5"></script>
+  <script src="/js/i18n.js?v=6"></script>
   <title>Страница не найдена — accinthecloud</title>
   <meta name="robots" content="noindex">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -13,6 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="accinthecloud">
   <meta name="theme-color" content="#ffffff">
   <link rel="preload" href="/fonts/PixelImpacted.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts/fonts.css">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     @font-face {
@@ -25,11 +26,11 @@
     body {
       min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:20px; padding:24px; text-align:center;
-      font-family:-apple-system,'Inter',sans-serif; background:#fff; color:var(--ink);
+      font-family:'Inter',-apple-system,sans-serif; font-weight:400; background:#fff; color:var(--ink);
     }
     img { width:96px; height:auto; }
     h1 { font-family:var(--pixel); font-weight:normal; font-size:64px; letter-spacing:0; }
-    p { font-size:15px; color:var(--muted); line-height:1.6; max-width:32ch; }
+    p { font-size:16px; color:var(--muted); line-height:1.6; max-width:32ch; }
     a.home {
       display:inline-flex; align-items:center; min-height:44px; padding:0 28px;
       border:1px solid var(--ink); color:var(--ink); text-decoration:none;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=5"></script>
+  <script src="/js/i18n.js?v=6"></script>
   <title>a1 ACCESS — accinthecloud</title>
   <meta name="description" content="Капсула a1 ACCESS от accinthecloud: сумки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a1.html">
@@ -217,7 +217,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
@@ -241,7 +241,7 @@
 <main>
 <div class="hero reveal">
   <div>
-    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a1</p>
+    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Капсула a1</p>
     <h1 class="hero-title">ACCESS</h1>
     <p class="hero-sub">Сумки через плечо &mdash; ручной пошив</p>
   </div>
@@ -261,10 +261,10 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="overlay">
   <div class="modal">
-    <button class="modal-close" id="mClose">&#10005;</button>
+    <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
     <div class="modal-left" id="mImgWrap" data-morph></div>
     <div class="modal-body">
-      <p class="modal-tag">Capsule a1 · ACCESS shoulder bag</p>
+      <p class="modal-tag">Капсула a1 · ACCESS · сумка через плечо</p>
       <h2 class="modal-name" id="mName"></h2>
       <p class="modal-price" id="mPrice"></p>
       <p class="modal-price-usd" id="mPriceUsd"></p>
@@ -311,7 +311,7 @@ const PRODUCTS = [
   { id:'a1-jeans',        name:'JEANS',         price:'7 500 ₽', priceUsd:'100$',          priceNum:7500, img:'images/a1/jeans.jpeg' },
   { id:'a1-stripe',       name:'STRIPE',        price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/stripe.jpeg' },
   { id:'a1-limestone',    name:'LIMESTONE',     price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/limestone.jpeg' },
-  { id:'a1-unique',       name:'Unique',        price:'По запросу', priceUsd:'Price on request', priceNum:0, img:'' },
+  { id:'a1-unique',       name:'Unique',        price:'По запросу', priceUsd:'', priceNum:0, img:'' },
 ];
 
 const grid = document.getElementById('grid');
@@ -325,7 +325,7 @@ PRODUCTS.forEach((p, n) => {
 
   const imgHtml = p.img
     ? `<img loading="${n<2?'eager':'lazy'}"${n===0?' fetchpriority="high"':''} decoding="async" src="${sm(p.img)}" alt="Сумка ${p.name}">`
-    : `<div class="ph">a1</div>`;
+    : `<div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png" alt="" decoding="async"></div>`;
 
   const priceStr = p.priceUsd ? `${p.price} / ${p.priceUsd}` : p.price;
 
@@ -367,7 +367,7 @@ function openModal(p) {
   if (p.img) {
     wrap.innerHTML = `<img class="modal-img" decoding="async" src="${p.img}" alt="Сумка ${p.name}">`;
   } else {
-    wrap.innerHTML = `<div class="modal-img-ph">a1</div>`;
+    wrap.innerHTML = `<div class="modal-img-ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png" alt="" decoding="async"></div>`;
   }
 
   const secUnique = document.getElementById('secUnique');
@@ -408,7 +408,7 @@ document.getElementById('btnCart').addEventListener('click', () => {
   const notes = document.getElementById('inputNotes').value.trim();
   const unique = cur.id === 'a1-unique' ? document.getElementById('inputUnique').value.trim() : '';
   ACC.add({
-    id: cur.id, capsule: 'Capsule a1 · Access', name: cur.name,
+    id: cur.id, capsule: 'Капсула a1 · Access', name: cur.name,
     price: cur.price, priceUsd: cur.priceUsd, priceNum: cur.priceNum,
     size: '', color: unique, notes, qty,
     bg: cur.img || ''

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=5"></script>
+  <script src="/js/i18n.js?v=6"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -299,6 +299,9 @@
   </style>
   <link rel="stylesheet" href="site.css">
   <script src="site.js" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"accinthecloud","url":"https://accinthecloud-site.vercel.app/","logo":"https://accinthecloud-site.vercel.app/images/icon-512.png","description":"Одежда и сумки ручной работы, пошив под заказ. Москва.","sameAs":["https://t.me/accinthecloud1"]}
+  </script>
 </head>
 <body>
 
@@ -310,7 +313,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" aria-current="page" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="#capsules" onclick="closeMobileMenu()">Капсулы</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
@@ -373,7 +376,7 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
 <!-- ─── CAPSULES ─────────────────────────────────────────── -->
 <section id="capsules" class="section">
   <div class="capsules-header">
-    <h2 class="reveal">Capsule Collections</h2>
+    <h2 class="reveal">Капсульные коллекции</h2>
   </div>
 
   <div class="capsules-grid" id="capsulesGrid">

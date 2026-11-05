@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=5"></script>
+  <script src="/js/i18n.js?v=6"></script>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
@@ -238,7 +238,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
@@ -267,7 +267,7 @@
   <button class="lb-filter" data-cat="bottoms" aria-pressed="false">Низ</button>
   <button class="lb-filter" data-cat="bags" aria-pressed="false">Сумки</button>
   <button class="lb-filter" data-cat="accessories" aria-pressed="false">Аксессуары</button>
-  <button class="lb-filter" data-cat="special" aria-pressed="false">Special</button>
+  <button class="lb-filter" data-cat="special" aria-pressed="false">Особые</button>
 </div>
 <div class="lb-grid" id="grid"></div>
 </main>
@@ -431,6 +431,7 @@ ITEMS.forEach((item, cardIndex) => {
   // slides
   const slidesEl = document.createElement('div');
   slidesEl.className = 'lb-card-slides';
+  slidesEl.tabIndex = -1;  // с клавиатуры фото листаются в окне стрелками
   for (let i = 1; i <= item.photos; i++) {
     const slide = document.createElement('div');
     slide.className = 'lb-card-slide';

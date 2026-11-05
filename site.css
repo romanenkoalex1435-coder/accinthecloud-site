@@ -26,8 +26,9 @@
 button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 /* Зона нажатия не меньше 44 px, без изменения вида */
-.cart-icon-btn, .burger, .qty-btn, .lb-filter, .item-remove { position: relative; }
-.cart-icon-btn::after, .burger::after, .qty-btn::after, .lb-filter::after, .item-remove::after {
+.cart-icon-btn, .burger, .qty-btn, .lb-filter, .item-remove, .nav-logo, .faq-contact-link, .file-btn, .btn-browse { position: relative; }
+.cart-icon-btn::after, .burger::after, .qty-btn::after, .lb-filter::after, .item-remove::after,
+.modal-close::after, .nav-logo::after, .faq-contact-link::after, .file-btn::after, .btn-browse::after {
   content: ""; position: absolute; left: 50%; top: 50%;
   width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
 }
@@ -256,3 +257,25 @@ h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .capsules-header
 .field.tg input { padding-left: 18px !important; }
 .field.float input, .field.float textarea { line-height: 1.5; padding-top: 10px; padding-bottom: 10px; }
 .field.tg:has(:focus, input:not(:placeholder-shown)) > label { transform: translate(-18px, -26px) scale(.75); }
+
+/* Подвал одинаковый на всех страницах; на телефоне — по центру, ссылки переносятся, зона нажатия 44 px */
+footer {
+  padding: 40px 48px !important; border-top: 1px solid var(--border, #ebebeb);
+  display: flex !important; flex-direction: row !important; flex-wrap: wrap; justify-content: space-between !important;
+  align-items: center !important; gap: 16px 32px !important; text-align: left;
+}
+.footer-links { display: flex; flex-wrap: wrap; gap: 0 24px !important; justify-content: center; }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted, #6e6e6e); transition: color .2s ease; }
+@media (hover: hover) { .footer-links a:hover { color: var(--ink, #0d0d0d); } }
+@media (max-width: 900px) {
+  footer { flex-direction: column !important; justify-content: center !important; padding: 40px 24px !important; gap: 12px !important; text-align: center; }
+  .footer-links { flex-direction: column; gap: 0 !important; }
+}
+
+/* «← Назад» в шапке оферты и политики: подпись Inter 12, зона нажатия 44 px */
+nav > a.btn-back { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted, #6e6e6e); text-decoration: none; transition: color .2s ease; }
+@media (hover: hover) { nav > a.btn-back:hover { color: var(--ink, #0d0d0d); } }
+
+/* Карточка «Unique» без фото: пиксельный рисунок капсулы на светлой плитке, как на главной */
+.ph-art { background: #f2f1ee !important; display: flex !important; align-items: center; justify-content: center; container-type: inline-size; }
+.ph-art .ph-pixel { position: static !important; width: auto !important; height: 52cqw !important; max-width: 84%; min-height: 0 !important; object-fit: contain !important; transform: none !important; image-rendering: pixelated; }

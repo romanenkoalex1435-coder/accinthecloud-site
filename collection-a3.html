@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=5"></script>
+  <script src="/js/i18n.js?v=6"></script>
   <title>a3 ACCENT — accinthecloud</title>
   <meta name="description" content="Капсула a3 ACCENT от accinthecloud: джинсы и рабочие брюки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a3.html">
@@ -221,7 +221,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html" onclick="closeMobileMenu()">Главная</a>
   <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Capsules</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
   <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
@@ -244,7 +244,7 @@
 <main>
 <div class="hero reveal">
   <div>
-    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Capsule a3</p>
+    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Капсула a3</p>
     <h1 class="hero-title">ACCENT</h1>
     <p class="hero-sub">Джинсы и рабочие брюки &mdash; ручной пошив</p>
   </div>
@@ -262,7 +262,7 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="overlay">
   <div class="modal">
-    <button class="modal-close" id="mClose">&#10005;</button>
+    <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
     <div class="modal-left">
       <div class="modal-gallery" id="mGallery" data-morph></div>
       <div class="modal-dots" id="mDots"></div>
@@ -305,7 +305,7 @@
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 <script>
-const CAPSULE = "Capsule a3 · Accent";
+const CAPSULE = "Капсула a3 · Accent";
 
 function imgs(folder, n){
   return Array.from({length:n}, (_,i) => `images/a3/${folder}/${String(i+1).padStart(2,'0')}.jpeg`);
@@ -372,7 +372,7 @@ const PRODUCTS = [
     id:'a3-unique', type:'unique',
     name:'Unique / Уникальные',
     typeLabel:'Ваш дизайн',
-    price:'По запросу', priceUsd:'Price on request', priceNum:0,
+    price:'По запросу', priceUsd:'', priceNum:0,
     specs:'Ваш дизайн · Ваши параметры · Изготавливается индивидуально',
     images: [],
   },
@@ -393,7 +393,7 @@ const restObserver = 'IntersectionObserver' in window
     }), { rootMargin: '200px 0px' })
   : { observe: loadRest, unobserve() {} };
 function makePlaceholder(cls){
-  return `<div class="${cls}"><div class="ph" style="background:linear-gradient(160deg,#e8e4e0,#d0ccc8);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5a5a5a;">a3</div></div>`;
+  return `<div class="${cls}"><div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a3.png" alt="" decoding="async"></div></div>`;
 }
 
 const grid = document.getElementById('grid');
@@ -411,14 +411,14 @@ PRODUCTS.forEach((p, n) => {
 
   card.innerHTML = `
     <div style="position:relative;">
-      <div class="card-gallery" data-gallery>${slides}</div>
+      <div class="card-gallery" data-gallery tabindex="-1">${slides}</div>
       <div class="avail-tag">Под заказ</div>
     </div>
     ${dotsHtml}
     <div class="card-info">
       <p class="card-type">${p.typeLabel}</p>
       <p class="card-name">${p.name}</p>
-      <p class="card-price">${p.price} / ${p.priceUsd}</p>
+      <p class="card-price">${p.priceUsd ? `${p.price} / ${p.priceUsd}` : p.price}</p>
       <p class="card-specs">${p.specs}</p>
       <p class="card-made">Индивидуальный пошив</p>
       <span class="card-cta">Подробнее &#8594;</span>
