@@ -2,6 +2,8 @@
 
 :focus-visible { outline: 2px solid #0d0d0d; outline-offset: 3px; }
 .product-card:focus-visible, .lb-card:focus-visible { outline-offset: -2px; }
+/* на тёмных поверхностях чёрная рамка не видна */
+.order-cta :focus-visible, .zoom-view :focus-visible, #cartFeedback :focus-visible { outline-color: #fff; }
 
 /* «Уменьшить движение» в настройках системы */
 @media (prefers-reduced-motion: reduce) {
@@ -37,8 +39,10 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 /* Уведомление «Добавлено в корзину» в одну строку */
 #cartFeedback { white-space: nowrap; }
+/* скрытое уведомление не ловит фокус с клавиатуры: visibility выключается после того, как оно растает */
+#cartFeedback:not(.show) { visibility: hidden; transition: opacity .35s, transform .35s, visibility 0s linear .35s; }
 /* из уведомления можно сразу перейти в корзину */
-#cartFeedback.show { pointer-events: auto; }
+#cartFeedback.show { pointer-events: auto; visibility: visible; }
 #cartFeedback a { color: inherit; margin-left: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, .45); transition: border-color .2s ease; }
 #cartFeedback a:hover { border-bottom-color: #fff; }
 
