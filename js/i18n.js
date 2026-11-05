@@ -71,6 +71,7 @@
     [/^Выбрано (\d+) фото: (.+)$/, (m, n, list) => `${plural(n, 'photo', 'photos')} selected: ${list}`],
     [/^Можно не больше (\d+) фото — выбрано (\d+), прикрепятся первые (\d+)$/, 'Up to $1 photos — you chose $2, the first $3 will be attached'],
     [/^Капсула (a\d)(.*)$/, 'Capsule $1$2'],
+    [/^Стежков: (\d+) из (\d+)$/, 'Stitches: $1 of $2'],
   ];
   const CYR = /[А-Яа-яЁё]/;
   let DICT = {};
@@ -113,7 +114,7 @@
   }
 
   // ?v= поднимать вместе с i18n.js?v= в страницах при правке словаря: js/ браузер хранит неделю
-  const dict = fetch('/js/i18n-en.json?v=9').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
+  const dict = fetch('/js/i18n-en.json?v=10').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
   document.addEventListener('DOMContentLoaded', () => dict.then(() => {
     walk(document.documentElement);
     const t = tr(document.title); if (t) document.title = t;

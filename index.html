@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=9"></script>
+  <script src="/js/i18n.js?v=10"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -124,7 +124,10 @@
     /* телефон стоя: знак упирается в ширину, лишняя высота давала ~300 px пустоты до капсул */
     @media (max-width: 900px) and (orientation: portrait) { #hero { height: 74vh; height: 74svh; } }
     /* 3D-знак: холст на весь первый экран, до загрузки — чёткая картинка того же кадра */
-    .hero-3d { position: absolute; inset: 0; opacity: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+    .hero-3d { position: absolute; inset: 0; opacity: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+    /* знак из пикселей: нажатие выбивает кубики, перетаскивание крутит */
+    .hero-3d.is-ready { cursor: grab; }
+    .hero-3d.is-grabbing { cursor: grabbing; }
     .hero-3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     /* тот же кадр картинкой: виден, пока грузится 3D, и остаётся, если WebGL недоступен */
     .hero-still {
@@ -378,14 +381,14 @@
 <script src="/js/site-data.js?v=2"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
-    <img class="hero-still" src="images/mark-still.webp" alt="" width="1219" height="584" fetchpriority="high">
+    <img class="hero-still" src="images/mark-still.webp?v=2" alt="" width="1219" height="584" fetchpriority="high">
     <canvas></canvas>
   </div>
   <h1 class="hero-brand">accinthecloud</h1>
 </section>
 <script>
 /* Знак и надпись — одна группа по центру экрана: знак чуть выше середины, надпись сразу под ним.
-   Размер знака считается как в js/scene3d.js (0.462 — высота знака к ширине). */
+   Размер знака считается как в js/znak.js (0.462 — высота знака к ширине). */
 window.accHeroLayout = function () {
   if (document.documentElement.classList.contains('has-drop')) return 0;
   const hero = document.getElementById('hero'), brand = hero.querySelector('.hero-brand');
@@ -685,10 +688,10 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 })();
 </script>
 <script>
-// 3D (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
+// 3D-знак из пикселей (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
 if (!document.documentElement.classList.contains('has-drop'))
-  addEventListener('load', () => setTimeout(() => import('./js/scene3d.js?v=4').catch(() => {}), 1400), { once: true });
+  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=1').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>

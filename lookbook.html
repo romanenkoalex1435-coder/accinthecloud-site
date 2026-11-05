@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=9"></script>
+  <script src="/js/i18n.js?v=10"></script>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
@@ -37,16 +37,21 @@
     }
     :root {
       --bg:#ffffff; --ink:#0d0d0d; --muted:#6b6b6b;
-      --border:#ebebeb; --soft:#f5f5f5;
-      --serif:'PixelImpacted',sans-serif;
+      --border:#ebebeb; --soft:#f5f5f5; --table:#efefed;
       --sans:'Inter',-apple-system,sans-serif;
       --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
+      --spring:cubic-bezier(.34,1.36,.64,1);
+      --ease:cubic-bezier(.23,1,.32,1);
+      --navH:69px;
     }
-    body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
+    html, body { height:100%; overflow:hidden; }
+    body { font-family:var(--sans); background:var(--table); color:var(--ink); -webkit-font-smoothing:antialiased; }
     a { text-decoration:none; color:inherit; }
+    button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+    .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 
     nav {
-      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
+      position:fixed; top:0; left:0; right:0; z-index:200; background:rgba(255,255,255,0.92);
       backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
       padding:20px 48px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
     }
@@ -69,166 +74,98 @@
     .mobile-menu.visible { opacity:1; }
     .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
     .mobile-menu a:hover { color:var(--ink); }
+    .mobile-menu .mm-small { font-size:10px; letter-spacing:0.16em; }
 
-    /* GRID */
-    .lb-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3px;
-      padding: 3px;
-    }
+    /* Стол мастера: светло-серый, вещи лежат на нём стопками белых отпечатков */
+    .table { position:fixed; inset:var(--navH) 0 0 0; background:var(--table); overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none; }
 
-    /* CARD — scrollable gallery */
-    .lb-card { position:relative; overflow:hidden; cursor:pointer; }
-    .lb-card-slides {
-      display:flex;
-      overflow-x:auto;
-      scroll-snap-type:x mandatory;
-      -webkit-overflow-scrolling:touch;
+    /* стопка: сверху первое фото, под ним край следующих двух */
+    .stack { position:absolute; left:0; top:0; cursor:grab; will-change:transform; transition:opacity .35s var(--ease); }
+    .stack.held { cursor:grabbing; }
+    .stack.off { opacity:.18; pointer-events:none; }
+    .stack.gone { opacity:0; pointer-events:none; }
+    .print {
+      position:absolute; left:0; top:0; background:#fff; padding:6px 6px 22px;
+      box-shadow:0 1px 1px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.08);
     }
-    .lb-card-slides::-webkit-scrollbar { display:none; }
-    .lb-card-slide {
-      flex:0 0 100%;
-      scroll-snap-align:start;
-      aspect-ratio:3/4;
-      overflow:hidden;
-      background:var(--soft);
+    .print img { display:block; width:100%; height:100%; object-fit:cover; background:var(--soft); pointer-events:none; -webkit-user-drag:none; }
+    .stack .under1 { transform:rotate(var(--r2)) translate(3px, 2px); }
+    .stack .under2 { transform:rotate(var(--r3)) translate(-3px, 3px); }
+    .stack.held .print:not([class*=under]), .stack:hover .print:not([class*=under]) { box-shadow:0 2px 3px rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.14); }
+    /* номер на полоске малярного скотча */
+    .tape {
+      position:absolute; left:50%; top:-9px; transform:translateX(-50%) rotate(-3deg); z-index:5;
+      padding:3px 10px 2px; background:rgba(228,224,212,.88); font:400 10.67px/1 var(--pixel); letter-spacing:.04em; color:#3a3a3a;
+      white-space:nowrap;
     }
-    .lb-card-slide img {
-      width:100%; height:100%; object-fit:cover; display:block;
-      transition:transform .7s cubic-bezier(.25,.46,.45,.94);
-    }
-    .lb-card:hover .lb-card-slide img { transform:scale(1.03); }
-    .lb-card-dots {
-      display:flex; gap:5px; justify-content:center;
-      padding:8px 0 6px;
-    }
-    .lb-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; }
-    .lb-dot.active { background:var(--ink); }
+    .count { position:absolute; right:8px; bottom:6px; z-index:5; font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums; }
 
-    /* MODAL */
-    .modal-overlay {
-      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.92);
-      opacity:0; pointer-events:none; transition:opacity .3s;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .modal-overlay.open { opacity:1; pointer-events:all; }
-    .modal {
-      display:flex; width:100%; max-width:1100px; height:88dvh;
-      margin:0 24px; position:relative;
-      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
-    }
-    .modal-overlay.open .modal { transform:translateY(0); }
+    /* разложенные фото вещи */
+    .deal { position:absolute; left:0; top:0; z-index:400; transform-origin:50% 50%; cursor:zoom-in;
+      transition:transform .62s var(--spring), opacity .3s ease; }
+    .deal.zoom { cursor:zoom-out; z-index:600; }
+    .deal .print { position:relative; padding:8px 8px 28px; box-shadow:0 2px 3px rgba(0,0,0,.08), 0 14px 32px rgba(0,0,0,.14); }
+    .deal .cap { position:absolute; left:10px; bottom:7px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
 
-    .modal-gallery {
-      flex:1; position:relative; background:#000;
-      display:flex; flex-direction:column; overflow:hidden;
+    .filters { position:fixed; left:32px; top:calc(var(--navH) + 20px); z-index:20; display:flex; gap:4px; flex-wrap:wrap; transition:opacity .3s ease; }
+    .filters button {
+      min-height:36px; padding:0 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+      background:rgba(255,255,255,.7); transition:color .2s ease, background-color .2s ease;
     }
-    .modal-slides {
-      flex:1; display:flex;
-      overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-    }
-    .modal-slides::-webkit-scrollbar { display:none; }
-    .modal-slide { flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; justify-content:center;
-      background-position:center; background-size:contain; background-repeat:no-repeat; } /* фон — sm-копия, пока грузится полное фото */
-    .modal-slide img { max-width:100%; max-height:100%; object-fit:contain; }
-    .modal-dots-row {
-      display:flex; gap:8px; justify-content:center; padding:14px; background:#000;
-    }
-    .mdot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:background .2s; }
-    .mdot.active { background:#fff; }
-    .marr {
-      position:absolute; top:50%; transform:translateY(-50%);
-      width:44px; height:44px; border:none; background:rgba(255,255,255,0.1);
-      color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-      transition:background .2s; z-index:2;
-    }
-    .marr:hover { background:rgba(255,255,255,0.22); }
-    #arrPrev { left:12px; }
-    #arrNext { right:12px; }
+    .filters button:hover { color:var(--ink); background:#fff; }
+    .filters button[aria-pressed="true"] { color:#fff; background:var(--ink); }
 
-    .modal-info {
-      width:360px; flex-shrink:0; background:#fff;
-      display:flex; flex-direction:column; overflow-y:auto;
-      padding:44px 36px 36px; position:relative;
-    }
-    /* Кнопка закрытия — вне прокручиваемого описания, не уезжает */
-    .modal-close {
-      position:absolute; top:18px; right:18px; z-index:3;
-      width:34px; height:34px; background:#fff; border:1px solid var(--border);
-      cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center;
-    }
-    .modal-num { font-family:var(--pixel); font-size:20px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
-    .modal-name { font-family:var(--serif); font-size:22px; font-weight:400; line-height:1.3; margin-bottom:22px; }
-    .modal-divider { height:1px; background:var(--border); margin-bottom:22px; }
-    .modal-text { font-size:13px; color:var(--muted); line-height:1.95; flex:1; white-space:pre-line; }
-    .modal-footer { margin-top:36px; }
-    .modal-made { font-family:var(--pixel); font-size:16px; letter-spacing:0.13em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-    .modal-disclaimer {
-      font-size:11px; color:var(--muted); line-height:1.7;
-      padding:12px 14px; border:1px solid var(--border); margin-bottom:20px;
-    }
-    .modal-order {
-      display:block; width:100%; padding:15px; background:var(--ink); color:#fff;
-      border:none; font-family:var(--sans); font-size:11px; letter-spacing:0.2em;
-      text-transform:uppercase; cursor:pointer; text-align:center; transition:opacity .3s;
-    }
-    .modal-order:hover { opacity:.72; }
+    .hud { position:fixed; z-index:20; bottom:24px; display:flex; align-items:center; gap:8px; transition:opacity .3s ease; }
+    .hint { left:32px; font-size:12px; color:var(--muted); }
+    .tools { right:32px; }
+    .btn { min-height:48px; padding:0 22px; display:inline-flex; align-items:center; gap:10px; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; border:1px solid var(--ink); transition:background-color .2s ease, color .2s ease, transform .16s ease; }
+    .btn:active { transform:scale(.97); }
+    .btn-ink { background:var(--ink); color:#fff; }
+    .btn-ink:hover { background:#2a2a2a; }
+    .btn-line { background:#fff; }
+    .btn-line:hover { background:var(--soft); }
+    :focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
 
-    footer {
-      padding:36px 48px; border-top:1px solid var(--border);
-      display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+    /* подпись разложенной вещи */
+    .panel {
+      position:fixed; z-index:700; left:32px; right:32px; bottom:24px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+      pointer-events:none; opacity:0; transform:translateY(8px); transition:opacity .3s var(--ease), transform .4s var(--ease);
     }
-    .footer-logo { font-family:var(--pixel); font-size:26px; letter-spacing:0.1em; }
-    .footer-links { display:flex; flex-wrap:wrap; gap:24px; }
-    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
-    .footer-links a:hover { color:var(--ink); }
+    .panel.on { opacity:1; transform:none; pointer-events:auto; }
+    .panel-info { max-width:560px; display:grid; gap:10px; }
+    .panel-meta { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+    .panel-name { font:400 32px/1 var(--pixel); }
+    .panel-desc { font-size:14px; line-height:1.55; color:#444; white-space:pre-line; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .panel-more { justify-self:start; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); text-decoration:underline; text-underline-offset:3px; min-height:32px; }
+    .panel-extra { display:none; gap:10px; }
+    .panel-note { font-size:11px; line-height:1.7; color:var(--muted); padding:10px 12px; border:1px solid #dcdcd8; }
+    .share-link { justify-self:start; width:auto; margin:0; padding:0; text-align:left; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); min-height:32px; }
+    .share-link:hover { color:var(--ink); }
+    /* «Подробнее»: описание целиком, оговорка о пошиве и ссылка; длинное — прокручивается */
+    .panel.full .panel-info { max-height:min(56vh, 520px); overflow-y:auto; background:rgba(239,239,237,.96); padding:16px 16px 8px; margin:-16px -16px -8px; }
+    .panel.full .panel-desc { display:block; -webkit-line-clamp:unset; overflow:visible; }
+    .panel.full .panel-extra { display:grid; }
+    body.open .hud, body.open .filters { opacity:0; pointer-events:none; }
 
-    @media(max-width:900px) {
+    @media (max-width:900px) {
+      :root { --navH:61px; }
       nav { padding:16px 20px; }
-      .lb-grid { grid-template-columns:repeat(2,1fr); }
-
-      /* Modal: галерея сверху на 58% экрана, инфо снизу */
-      .modal { flex-direction:column; height:100dvh; margin:0; }
-      .modal-gallery { flex:0 0 58dvh; height:58dvh; min-height:0; }
-      .modal-slides { height:100%; }
-      .modal-slide { height:100%; }
-      .modal-slide img { width:100%; height:100%; object-fit:contain; object-position:center; }
-      .modal-dots-row { padding:10px; }
-      #arrPrev, #arrNext { display:none; }
-      .modal-info { flex:1; width:100%; min-height:0; overflow-y:auto; padding:20px 20px 32px; }
-      .modal-close { top:12px; right:12px; }  /* над фото: при прокрутке описания не наезжает на текст */
-      footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
+      .filters { left:0; right:0; top:var(--navH); flex-wrap:nowrap; overflow-x:auto; padding:8px 12px; gap:4px; scrollbar-width:none; }
+      .filters::-webkit-scrollbar { display:none; }
+      .filters button { min-height:44px; white-space:nowrap; }
+      .hint { display:none; }
+      .tools { right:16px; bottom:16px; }
+      .panel { left:16px; right:16px; bottom:16px; flex-direction:column; align-items:stretch; gap:14px; }
+      .panel-info { background:rgba(239,239,237,.94); padding:8px 0; }
+      .panel.full .panel-info { max-height:52vh; margin:0; padding:12px 0; }
+      .panel-name { font-size:21.33px; }
+      .panel-actions .btn { flex:1; justify-content:center; padding:0 12px; }
+      .print { padding:4px 4px 14px; }
+      .tape { font-size:8px; padding:2px 7px 1px; top:-7px; }
+      .count { display:none; }
     }
-    @media(max-width:500px) {
-      .lb-grid { grid-template-columns:1fr 1fr; gap:2px; padding:2px; }
-    }
-    .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
-
-    /* ── Filter bar ── */
-    .lb-filters {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .lb-filter {
-      padding: 7px 16px; border: 1px solid var(--border);
-      background: none; font-family: var(--sans); font-size: 10px;
-      letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
-      cursor: pointer; transition: all .2s;
-    }
-    .lb-filter:hover { border-color: var(--ink); color: var(--ink); }
-    .lb-filter.active { background: var(--ink); color: white; border-color: var(--ink); }
-    .lb-title {
-      font-family:var(--pixel); font-size:clamp(22px,3.5vw,40px); font-weight:normal;
-      letter-spacing:0.08em; padding:32px 24px 0;
-    }
-    .lb-count { font-size: 9px; color: var(--muted); margin-left: 4px; opacity: .6; }
-    .section-label, .capsule-items, .capsule-tag,
-    .modal-num, .modal-made, .items-label,
-    .checkout-label, .breadcrumb, .offer-wrap h2 {
-      font-family: var(--pixel);
-    }
+    .panel-actions { display:flex; gap:8px; flex-shrink:0; }
+    @media (prefers-reduced-motion:reduce) { .deal, .panel, .stack { transition:none !important; } }
   </style>
   <link rel="stylesheet" href="site.css">
   <script src="site.js" defer></script>
@@ -243,8 +180,10 @@
   <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
   <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
+  <a class="mm-small" href="offer.html">Публичная оферта</a>
+  <a class="mm-small" href="privacy.html">Политика конфиденциальности</a>
 </div>
-<nav>
+<nav id="topNav">
   <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
@@ -253,59 +192,36 @@
       </svg>
       <span class="cbadge" id="cartBadge"></span>
     </a>
-    <button class="burger" id="burgerBtn" aria-label="Menu">
+    <button class="burger" id="burgerBtn" aria-label="Меню">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
-<main>
-<h1 class="lb-title">Lookbook</h1>
-<div class="lb-filters" id="filters" role="group" aria-label="Фильтр по категориям">
-  <button class="lb-filter active" data-cat="all" aria-pressed="true">Все</button>
-  <button class="lb-filter" data-cat="tops" aria-pressed="false">Верх</button>
-  <button class="lb-filter" data-cat="bottoms" aria-pressed="false">Низ</button>
-  <button class="lb-filter" data-cat="bags" aria-pressed="false">Сумки</button>
-  <button class="lb-filter" data-cat="accessories" aria-pressed="false">Аксессуары</button>
-  <button class="lb-filter" data-cat="special" aria-pressed="false">Особые</button>
-</div>
-<div class="lb-grid" id="grid"></div>
-</main>
+<h1 class="sr">Lookbook</h1>
+<main class="table" id="table" aria-label="Стол со стопками фотографий: каждая стопка — одна вещь"></main>
+<div class="filters" id="filters" role="group" aria-label="Фильтр по категориям"></div>
+<nav class="sr" aria-label="Вещи лукбука"><ul id="srList"></ul></nav>
 
-<footer>
-  <span class="footer-logo">accinthecloud</span>
-  <div class="footer-links">
-    <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
-  </div>
-  <span class="footer-copy">© 2026 accinthecloud</span>
-</footer>
+<p class="hud hint">Стопку можно схватить и бросить · нажми — разложится</p>
+<div class="hud tools"><button type="button" class="btn btn-line" id="shuffle">Перемешать стол</button></div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="overlay">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
-    <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
-    <div class="modal-gallery">
-      <button class="marr" id="arrPrev" aria-label="Предыдущее фото">&#8592;</button>
-      <button class="marr" id="arrNext" aria-label="Следующее фото">&#8594;</button>
-      <div class="modal-slides" id="mSlides" data-morph></div>
-      <div class="modal-dots-row" id="mDots"></div>
-    </div>
-    <div class="modal-info">
-      <p class="modal-num" id="mNum"></p>
-      <h2 class="modal-name" id="mName"></h2>
-      <div class="modal-divider"></div>
-      <p class="modal-text" id="mText"></p>
-      <div class="modal-footer">
-        <p class="modal-made">Индивидуальный пошив</p>
-        <div class="modal-disclaimer">Точное повторение не гарантируется — материалы, фурнитура и поставки могут отличаться. Каждое изделие создаётся заново под ваши параметры.</div>
-        <button class="modal-order" id="mOrderBtn">Заказать похожее →</button>
-        <button type="button" class="share-link" id="mShare">Поделиться ссылкой</button>
-      </div>
+<section class="panel" id="panel" aria-live="polite" aria-labelledby="pName">
+  <div class="panel-info">
+    <p class="panel-meta" id="pMeta"></p>
+    <h2 class="panel-name" id="pName"></h2>
+    <p class="panel-desc" id="pDesc"></p>
+    <button type="button" class="panel-more" id="pMore" aria-expanded="false">Подробнее</button>
+    <div class="panel-extra">
+      <p class="panel-note">Индивидуальный пошив. Точное повторение не гарантируется — материалы, фурнитура и поставки могут отличаться. Каждое изделие создаётся заново под ваши параметры.</p>
+      <button type="button" class="share-link" id="mShare">Поделиться ссылкой</button>
     </div>
   </div>
-</div>
+  <div class="panel-actions">
+    <button type="button" class="btn btn-line" id="pClose">Собрать в стопку</button>
+    <button type="button" class="btn btn-ink" id="pOrder">Заказать похожее <span aria-hidden="true">→</span></button>
+  </div>
+</section>
 
 <script src="/api/site"></script>
 <script src="/js/site-data.js?v=2"></script>
@@ -386,225 +302,309 @@ const ITEMS = ACC_SITE.lookbook() || [
   },
 ].map(i => i.images ? i : { ...i, images: Array.from({ length: i.photos }, (_, n) => `images/lookbook/${i.folder}/${String(n + 1).padStart(2, '0')}.jpeg`) });
 
-// Shuffle
-for (let i = ITEMS.length - 1; i > 0; i--) {
-  const j = Math.floor(Math.random() * (i + 1));
-  [ITEMS[i], ITEMS[j]] = [ITEMS[j], ITEMS[i]];
-}
+/* Лукбук как стол мастера: каждая вещь — стопка отпечатков. Стопку хватают и бросают —
+   она скользит по столу, толкает соседние и останавливается. Нажал — фото раскладываются
+   веером посреди стола, остальные стопки отъезжают к краям. Esc или «Собрать» — обратно. */
+(async function () {
+  const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const EN = window.ACC_LANG === 'en';
+  const T = s => (window.ACC_T ? ACC_T(s) : s);
+  const CAT = { all: 'Все', tops: 'Верх', bottoms: 'Низ', bags: 'Сумки', accessories: 'Аксессуары', special: 'Особые' };
+  // пропорции своих фото посчитаны заранее; у загруженных из админки — узнаём, когда фото загрузится
+  const AR = await fetch('js/lookbook-ar.json?v=1').then(r => r.json()).catch(() => ({}));
+  const key = u => { try { return decodeURI(u).replace(/^\//, ''); } catch (e) { return u; } };
+  ITEMS.forEach(it => { it.ars = it.images.map(u => AR[key(u)] || 0.75); });
+  const learn = (it, k, im) => { if (im.naturalWidth) it.ars[k] = im.naturalWidth / im.naturalHeight; };
 
-const grid = document.getElementById('grid');
+  // стол начинается под шапкой
+  const nav = document.getElementById('topNav');
+  const setNav = () => document.documentElement.style.setProperty('--navH', nav.offsetHeight + 'px');
+  setNav();
 
-// ── Filter logic ──
-let activeFilter = 'all';
-document.querySelectorAll('.lb-filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    activeFilter = btn.dataset.cat;
-    document.querySelectorAll('.lb-filter').forEach(b => {
-      b.classList.toggle('active', b === btn);
-      b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
-    });
-    document.querySelectorAll('.lb-card').forEach(card => {
-      const cat = card.dataset.cat;
-      const isSpecial = card.dataset.special === 'true';
-      const show = activeFilter === 'all'
-        || cat === activeFilter
-        || (activeFilter === 'special' && isSpecial);
-      card.style.display = show ? '' : 'none';
-    });
+  const table = document.getElementById('table');
+  const W = () => table.clientWidth, H = () => table.clientHeight;
+  const mob = () => innerWidth <= 900;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  /* ── стопки ── */
+  const stacks = ITEMS.map((it, n) => {
+    const el = document.createElement('div');
+    el.className = 'stack';
+    el.style.setProperty('--r2', rnd(-7, 7).toFixed(1) + 'deg');
+    el.style.setProperty('--r3', rnd(-7, 7).toFixed(1) + 'deg');
+    // снизу вверх: третье фото, второе, сверху обложка
+    const prints = it.images.slice(0, 3).map((src, k) =>
+      `<div class="print${k ? ' under' + k : ''}"><img alt="" decoding="async" ${n < 8 ? 'fetchpriority="high"' : ''} src="${ACC_SITE.sm(src)}"></div>`).reverse().join('');
+    el.innerHTML = `${prints}<span class="tape">${it.num}</span><span class="count">${it.images.length}</span>`;
+    const cover = el.querySelector('.print:not([class*=under]) img');
+    cover.addEventListener('load', () => learn(it, 0, cover), { once: true });
+    table.appendChild(el);
+    return { it, el, x: 0, y: 0, vx: 0, vy: 0, a: rnd(-9, 9), va: 0, w: 0, h: 0, z: n };
   });
-});
-
-// Остальные фото каруселей грузим, только когда карточка почти на экране
-const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
-const restObserver = 'IntersectionObserver' in window
-  ? new IntersectionObserver(entries => entries.forEach(en => {
-      if (en.isIntersecting) { loadRest(en.target); restObserver.unobserve(en.target); }
-    }), { rootMargin: '200px 0px' })
-  : { observe: loadRest, unobserve() {} };
-
-ITEMS.forEach((item, cardIndex) => {
-  const card = document.createElement('div');
-  card.className = 'lb-card';
-  card.tabIndex = 0;
-  card.setAttribute('role', 'button');
-  card.setAttribute('aria-label', `${item.name} — открыть`);
-  card.dataset.cat = item.cat;
-  card.dataset.special = item.special ? 'true' : 'false';
-
-  // slides
-  const slidesEl = document.createElement('div');
-  slidesEl.className = 'lb-card-slides';
-  slidesEl.tabIndex = -1;  // с клавиатуры фото листаются в окне стрелками
-  for (let i = 1; i <= item.photos; i++) {
-    const slide = document.createElement('div');
-    slide.className = 'lb-card-slide';
-    const img = document.createElement('img');
-    // loading задаётся до src, иначе браузер начинает качать сразу
-    const eager = cardIndex < 4 && i === 1;
-    img.loading = eager ? 'eager' : 'lazy';
-    img.decoding = 'async';
-    if (eager) img.fetchPriority = 'high';
-    img.alt = item.name;
-    const src = ACC_SITE.sm(item.images[i - 1]);
-    // первое фото карточки — сразу (лениво), остальные — когда карточка рядом с экраном
-    if (i === 1) img.src = src; else img.dataset.src = src;
-    slide.appendChild(img);
-    slidesEl.appendChild(slide);
+  // фото вещи подгружаем заранее, как только за стопку взялись, — к раскладке знаем их пропорции
+  function preload(it) {
+    if (it.pre) return;
+    it.pre = it.images.map((src, k) => { const im = new Image(); im.onload = () => learn(it, k, im); im.src = ACC_SITE.sm(src); return im; });
   }
-  if (item.photos > 1) restObserver.observe(card);
 
-  // dots
-  const dotsEl = document.createElement('div');
-  dotsEl.className = 'lb-card-dots';
-  if (item.photos > 1) {
-    for (let i = 0; i < item.photos; i++) {
+  function sizeStacks() {
+    const area = W() * H(), n = stacks.length;
+    // ширина отпечатка — чтобы все стопки свободно поместились на столе
+    const base = Math.max(74, Math.min(190, Math.sqrt(area / n) * (mob() ? 0.52 : 0.46)));
+    stacks.forEach(s => {
+      const ar = s.it.ars[0];
+      s.w = base; s.h = Math.min(base / ar, base * 1.35) + (mob() ? 18 : 28);
+      s.r = Math.hypot(s.w, s.h) * 0.36;
+      s.el.style.width = s.w + 'px'; s.el.style.height = s.h + 'px';
+      s.el.querySelectorAll('.print').forEach(p => { p.style.width = s.w + 'px'; p.style.height = s.h + 'px'; });
+    });
+  }
+  // разложить по столу сеткой с разбросом
+  function scatter(throwIt) {
+    const n = stacks.length, top = mob() ? 72 : 80, bottom = mob() ? 80 : 90;
+    const cols = Math.max(3, Math.round(Math.sqrt(n * W() / Math.max(1, H() - top - bottom))));
+    const rows = Math.ceil(n / cols), cw = W() / cols, ch = (H() - top - bottom) / rows;
+    const order = [...stacks].sort(() => Math.random() - 0.5);
+    order.forEach((s, i) => {
+      const tx = cw * (i % cols + 0.5) + rnd(-cw, cw) * 0.18, ty = top + ch * (Math.floor(i / cols) + 0.5) + rnd(-ch, ch) * 0.16;
+      if (throwIt && !REDUCE) { s.vx = (tx - s.x) * 0.09; s.vy = (ty - s.y) * 0.09; s.va = rnd(-6, 6); }
+      else { s.x = tx; s.y = ty; }
+    });
+  }
+  sizeStacks(); scatter(false);
+  // вступление: стопки падают на стол сверху
+  if (!REDUCE) stacks.forEach((s, i) => { s.drop = 0; s.dropDelay = i * 0.035; });
+
+  /* ── физика: скольжение с трением, края стола, стопки толкают друг друга ── */
+  let held = null, open = null;
+  function step(dt) {
+    const k = dt * 60, w = W(), h = H();
+    for (const s of stacks) {
+      if (s === held || s.parked) continue;
+      s.x += s.vx * k; s.y += s.vy * k; s.a += s.va * k;
+      const fr = Math.pow(0.9, k);
+      s.vx *= fr; s.vy *= fr; s.va *= Math.pow(0.86, k);
+      // край стола — мягкий отскок
+      const mx = s.w * 0.5, my = s.h * 0.5;
+      if (s.x < mx) { s.x = mx; s.vx = Math.abs(s.vx) * 0.45; }
+      if (s.x > w - mx) { s.x = w - mx; s.vx = -Math.abs(s.vx) * 0.45; }
+      if (s.y < my + 50) { s.y = my + 50; s.vy = Math.abs(s.vy) * 0.45; }
+      if (s.y > h - my) { s.y = h - my; s.vy = -Math.abs(s.vy) * 0.45; }
+    }
+    // соседи расталкиваются, если наехали друг на друга
+    for (let i = 0; i < stacks.length; i++) for (let j = i + 1; j < stacks.length; j++) {
+      const a = stacks[i], b = stacks[j];
+      if (a.parked || b.parked || a.el.classList.contains('gone') || b.el.classList.contains('gone')) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = (a.r + b.r) * 0.82;
+      if (d >= min) continue;
+      const push = (min - d) / d * 0.5, px = dx * push, py = dy * push;
+      const ah = a === held, bh = b === held;
+      if (!ah) { a.x -= px * (bh ? 2 : 1); a.y -= py * (bh ? 2 : 1); a.vx -= px * 0.08; a.vy -= py * 0.08; a.va -= (Math.random() - .5) * 0.6; }
+      if (!bh) { b.x += px * (ah ? 2 : 1); b.y += py * (ah ? 2 : 1); b.vx += px * 0.08; b.vy += py * 0.08; b.va += (Math.random() - .5) * 0.6; }
+    }
+  }
+  function draw(dt) {
+    for (const s of stacks) {
+      let lift = 0, sc = 1;
+      if (s.drop !== undefined) {
+        s.dropDelay -= dt;
+        if (s.dropDelay <= 0) { s.drop = Math.min(1, s.drop + dt * 2.6); }
+        const e = 1 - Math.pow(1 - s.drop, 3);
+        lift = (1 - e) * -40; sc = 1 + (1 - e) * 0.25;
+        s.el.style.opacity = Math.min(1, s.drop * 2);
+        if (s.drop >= 1) { delete s.drop; s.el.style.opacity = ''; }
+      }
+      if (s === held) sc *= 1.04;
+      s.el.style.transform = `translate3d(${(s.x - s.w / 2).toFixed(1)}px, ${(s.y - s.h / 2 + lift).toFixed(1)}px, 0) rotate(${s.a.toFixed(2)}deg) scale(${sc})`;
+    }
+  }
+  // кадры рисуем, только пока вкладка открыта
+  let last = performance.now(), raf = 0;
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 1 / 20); last = now;
+    step(dt); draw(dt);
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+  document.addEventListener('visibilitychange', () => {
+    cancelAnimationFrame(raf);
+    if (!document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  });
+
+  /* ── хватать, бросать, нажимать ── */
+  let zTop = stacks.length;
+  table.addEventListener('pointerdown', e => {
+    if (open) return;
+    const el = e.target.closest('.stack'); if (!el) return;
+    const s = stacks.find(q => q.el === el);
+    preload(s.it);
+    table.setPointerCapture(e.pointerId);
+    held = s; s.pid = e.pointerId; s.moved = 0;
+    s.ox = e.clientX - s.x; s.oy = e.clientY - s.y; s.lx = e.clientX; s.ly = e.clientY; s.lt = performance.now();
+    // где схватили относительно центра — от этого стопка поворачивается при броске
+    s.gy = (e.clientY - table.getBoundingClientRect().top - s.y) / s.h;
+    s.vx = s.vy = s.va = 0;
+    el.style.zIndex = ++zTop; el.classList.add('held');
+  });
+  table.addEventListener('pointermove', e => {
+    const s = held; if (!s || e.pointerId !== s.pid) return;
+    const now = performance.now(), dx = e.clientX - s.lx, dy = e.clientY - s.ly, dt = Math.max(now - s.lt, 8);
+    s.moved += Math.abs(dx) + Math.abs(dy);
+    s.x = e.clientX - s.ox; s.y = e.clientY - s.oy;
+    s.vx = dx / dt * 16; s.vy = dy / dt * 16;
+    s.a += dx * 0.04 * (s.gy || 0.3);
+    s.lx = e.clientX; s.ly = e.clientY; s.lt = now;
+  });
+  const up = e => {
+    const s = held; if (!s || e.pointerId !== s.pid) return;
+    held = null; s.el.classList.remove('held');
+    if (s.moved < 6) { s.vx = s.vy = 0; deal(s); return; }
+    if (performance.now() - s.lt > 90) { s.vx = s.vy = 0; }
+    s.va = (s.vx * (s.gy || 0.3)) * 0.5;
+    if (REDUCE) s.vx = s.vy = s.va = 0;
+  };
+  table.addEventListener('pointerup', up);
+  table.addEventListener('pointercancel', up);
+
+  /* ── разложить вещь ── */
+  let deals = [], openedAt = 0, lastFocus = null;
+  const panel = document.getElementById('panel'), more = document.getElementById('pMore');
+  function layout(list) {
+    const left = mob() ? 16 : 120, right = left, top = mob() ? 70 : 60, bottom = mob() ? 230 : 150, gap = mob() ? 10 : 22;
+    const pad = mob() ? 26 : 36; // белые поля отпечатка
+    const bw = W() - left - right, bh = H() - top - bottom;
+    let best = null;
+    for (let rows = 1; rows <= list.length; rows++) {
+      const per = Math.ceil(list.length / rows), lines = [];
+      for (let i = 0; i < list.length; i += per) lines.push(list.slice(i, i + per));
+      let h = (bh - (lines.length - 1) * gap) / lines.length - pad;
+      lines.forEach(l => { h = Math.min(h, (bw - gap * (l.length - 1) - l.length * 16) / l.reduce((s, p) => s + p.ar, 0)); });
+      if (!best || h > best.h) best = { h, lines };
+    }
+    const { h, lines } = best, total = lines.length * (h + pad) + (lines.length - 1) * gap;
+    let y = top + (bh - total) / 2, out = [];
+    lines.forEach(l => {
+      const ws = l.map(p => p.ar * h + 16), w = ws.reduce((a, b) => a + b, 0) + gap * (l.length - 1);
+      let x = left + (bw - w) / 2;
+      l.forEach((p, i) => { out.push({ ...p, x: x + ws[i] / 2, y: y + (h + pad) / 2, w: ws[i], ih: h }); x += ws[i] + gap; });
+      y += h + pad + gap;
+    });
+    return out;
+  }
+  function setFull(on) {
+    panel.classList.toggle('full', on);
+    more.setAttribute('aria-expanded', String(on));
+    more.textContent = T(on ? 'Свернуть' : 'Подробнее');
+  }
+  function deal(s) {
+    if (open) return;
+    open = s; openedAt = performance.now(); document.body.classList.add('open');
+    lastFocus = document.activeElement;
+    const it = s.it;
+    // остальные стопки отъезжают к краям стола
+    stacks.forEach(o => {
+      if (o === s) return;
+      const dx = o.x - W() / 2, dy = o.y - H() / 2, d = Math.hypot(dx, dy) || 1;
+      if (!REDUCE) { o.vx += dx / d * 14; o.vy += dy / d * 10; o.va += rnd(-5, 5); }
+      o.el.classList.add('off');
+    });
+    s.el.classList.add('gone'); s.parked = true;
+    const spots = layout(it.images.map((src, k) => ({ src, k, ar: it.ars[k] })));
+    deals = spots.map((p, i) => {
       const d = document.createElement('div');
-      d.className = 'lb-dot' + (i === 0 ? ' active' : '');
-      dotsEl.appendChild(d);
-    }
-    slidesEl.addEventListener('scroll', () => {
-      const idx = Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth);
-      dotsEl.querySelectorAll('.lb-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
-    }, {passive:true});
+      d.className = 'deal';
+      d.innerHTML = `<div class="print" style="width:${p.w}px;height:${p.ih + (mob() ? 26 : 36)}px"><img alt="${it.name} — фото ${p.k + 1}" src="${ACC_SITE.sm(p.src)}"><span class="cap">${it.num} · ${p.k + 1}/${it.images.length}</span></div>`;
+      d.style.width = p.w + 'px';
+      // из стопки — с её места и наклона
+      const from = `translate(${s.x - p.w / 2}px, ${s.y - (p.ih + 30) / 2}px) rotate(${s.a + rnd(-8, 8)}deg) scale(${s.w / p.w})`;
+      const to = `translate(${p.x - p.w / 2}px, ${p.y - (p.ih + 30) / 2}px) rotate(${rnd(-2.5, 2.5).toFixed(2)}deg)`;
+      d.style.transform = from; d.style.transitionDelay = REDUCE ? '0s' : (i * 0.045) + 's';
+      d.dataset.to = to; d.dataset.from = from;
+      table.appendChild(d);
+      // полное фото подменит уменьшенное, когда загрузится
+      const full = new Image(); full.onload = () => { const im = d.querySelector('img'); if (im) im.src = p.src; }; full.src = p.src;
+      // на телефоне тот же тап, что разложил стопку, долетает до фото под пальцем — его пропускаем
+      d.addEventListener('click', () => { if (performance.now() - openedAt > 450) zoomPrint(d, p); });
+      return d;
+    });
+    requestAnimationFrame(() => requestAnimationFrame(() => deals.forEach(d => { d.style.transform = d.dataset.to; })));
+    document.getElementById('pMeta').textContent = [it.num, T(CAT[it.cat] || ''), it.special ? T('Особые') : '', EN ? it.images.length + ' photos' : it.images.length + ' фото'].filter(Boolean).join(' · ');
+    document.getElementById('pName').textContent = it.name;
+    const pd = document.getElementById('pDesc'); pd.textContent = it.desc || ''; pd.hidden = !it.desc;
+    setFull(false);
+    panel.classList.add('on');
+    document.getElementById('pClose').focus({ preventScroll: true });
+    ACC_LINK.set(it.id);
   }
-
-  card.appendChild(slidesEl);
-  card.appendChild(dotsEl);
-
-  // drag scroll
-  let isDown = false, startX, sl;
-  slidesEl.addEventListener('mousedown', e => { isDown=true; startX=e.pageX; sl=slidesEl.scrollLeft; slidesEl.style.cursor='grabbing'; });
-  window.addEventListener('mouseup', () => { isDown=false; slidesEl.style.cursor=''; });
-  slidesEl.addEventListener('mousemove', e => { if(!isDown) return; e.preventDefault(); slidesEl.scrollLeft = sl-(e.pageX-startX); });
-
-  // click card → modal (not swipe)
-  let moved = false;
-  slidesEl.addEventListener('mousedown', () => moved = false);
-  slidesEl.addEventListener('mousemove', () => moved = true);
-  card.addEventListener('click', e => {
-    if (moved) return;
-    const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-    ACC_MORPH(card, () => openModal(item, idx));
-  });
-
-  // touch tap: открываем только если палец почти не двигался — свайп по ленте не считается
-  let tx = 0, ty = 0;
-  card.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
-  card.addEventListener('touchend', e => {
-    const t = e.changedTouches[0];
-    if (Math.abs(t.clientX - tx) < 10 && Math.abs(t.clientY - ty) < 10) {
-      e.preventDefault(); // без двойного открытия от последующего click
-      const idx = item.photos > 1 ? Math.round(slidesEl.scrollLeft / slidesEl.offsetWidth) : 0;
-      ACC_MORPH(card, () => openModal(item, idx));
-    }
-  });
-
-  card.addEventListener('keydown', e => {
-    if (e.target !== card || (e.key !== 'Enter' && e.key !== ' ')) return;
-    e.preventDefault();
-    openModal(item, 0);
-  });
-
-  grid.appendChild(card);
-});
-
-// Modal
-let cur = null, curSlide = 0, lastFocus = null;
-const mSlides = document.getElementById('mSlides');
-const mDots   = document.getElementById('mDots');
-
-function openModal(item, startIndex) {
-  cur = item; curSlide = startIndex || 0;
-  ACC_LINK.set(item.id);
-
-  mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
-    const src = item.images[i];
-    const sm  = ACC_SITE.sm(src);
-    const load = Math.abs(i - curSlide) <= 1 ? 'eager' : 'lazy';
-    return `<div class="modal-slide" style="background-image:url('${sm}')"><img src="${src}" loading="${load}" decoding="async" alt=""></div>`;
-  }).join('');
-
-  mDots.innerHTML = Array.from({length: item.photos}, (_, i) =>
-    `<div class="mdot${i===curSlide?' active':''}" data-i="${i}"></div>`
-  ).join('');
-
-  mDots.querySelectorAll('.mdot').forEach(d =>
-    d.addEventListener('click', () => goSlide(+d.dataset.i))
-  );
-
-  mSlides.addEventListener('scroll', onScroll, {passive:true});
-
-  document.getElementById('mNum').textContent = item.num;
-  document.getElementById('mName').textContent = item.name;
-  const mText = document.getElementById('mText');
-  mText.textContent = item.desc || '';
-  mText.hidden = !item.desc;  // без описания абзац не показываем
-
-  lastFocus = document.activeElement;
-  document.getElementById('overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.getElementById('mClose').focus({preventScroll:true});
-
-  if (curSlide > 0) {
-    requestAnimationFrame(() => { mSlides.scrollLeft = curSlide * mSlides.offsetWidth; });
-  } else {
-    mSlides.scrollLeft = 0;
+  // нажал на разложенное фото — оно встаёт крупно посреди стола
+  let zoomed = null;
+  function zoomPrint(d, p) {
+    if (zoomed && zoomed !== d) { zoomed.classList.remove('zoom'); zoomed.style.transform = zoomed.dataset.to; }
+    if (zoomed === d) { d.classList.remove('zoom'); d.style.transform = d.dataset.to; zoomed = null; return; }
+    const k = Math.min((W() - 40) / p.w, (H() - (mob() ? 240 : 170)) / (p.ih + 36));
+    d.classList.add('zoom');
+    d.style.transitionDelay = '0s';
+    d.style.transform = `translate(${W() / 2 - p.w / 2}px, ${(H() - (mob() ? 200 : 110)) / 2 - (p.ih + 30) / 2}px) rotate(0deg) scale(${k.toFixed(3)})`;
+    zoomed = d;
   }
-}
-
-function onScroll() {
-  const idx = Math.round(mSlides.scrollLeft / mSlides.offsetWidth);
-  if (idx !== curSlide) {
-    curSlide = idx;
-    mDots.querySelectorAll('.mdot').forEach((d,i) => d.classList.toggle('active', i===idx));
+  function collect() {
+    if (!open) return;
+    const s = open; open = null; zoomed = null;
+    document.body.classList.remove('open');
+    panel.classList.remove('on');
+    setFull(false);
+    deals.forEach((d, i, arr) => { d.style.transitionDelay = REDUCE ? '0s' : ((arr.length - i) * 0.03) + 's'; d.style.transform = d.dataset.from; d.style.opacity = '0'; });
+    const old = deals; deals = [];
+    setTimeout(() => old.forEach(d => d.remove()), REDUCE ? 0 : 750);
+    setTimeout(() => { s.el.classList.remove('gone'); s.parked = false; s.el.style.zIndex = ++zTop; }, REDUCE ? 0 : 380);
+    stacks.forEach(o => o.el.classList.remove('off'));
+    applyFilter();
+    ACC_LINK.clear();
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
   }
-}
-
-function goSlide(i) {
-  mSlides.scrollTo({left: i * mSlides.offsetWidth, behavior:'smooth'});
-}
-
-document.getElementById('arrPrev').addEventListener('click', () => goSlide(Math.max(0, curSlide-1)));
-document.getElementById('arrNext').addEventListener('click', () => { if(cur) goSlide(Math.min(cur.photos-1, curSlide+1)); });
-
-function closeModal() {
-  const ov = document.getElementById('overlay');
-  if (!ov.classList.contains('open')) return;
-  ov.classList.remove('open');
-  ACC_LINK.clear();
-  document.body.style.overflow = '';
-  mSlides.removeEventListener('scroll', onScroll);
-  if (lastFocus) lastFocus.focus({preventScroll:true});
-}
-document.getElementById('mClose').addEventListener('click', closeModal);
-document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
-/* ссылка вида ?item=bag-n03 сразу открывает вещь */
-document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(ITEMS, it => it.id, openModal));
-document.getElementById('overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('overlay')) closeModal();
-});
-document.addEventListener('keydown', e => {
-  if (!document.getElementById('overlay').classList.contains('open')) return;
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'ArrowLeft') goSlide(Math.max(0, curSlide-1));
-  if (e.key === 'ArrowRight' && cur) goSlide(Math.min(cur.photos-1, curSlide+1));
-});
-
-document.getElementById('mOrderBtn').addEventListener('click', () => {
-  if (!cur) return;
-  ACC.add({
-    id: 'lb-' + Date.now(),
-    capsule: 'Lookbook',
-    name: cur.name,
-    price: 'По запросу',
-    priceNum: 0,
-    size: '', color: '',
-    notes: 'Похожее изделие — индивидуальный пошив',
-    qty: 1,
-    bg: `url('${ACC_SITE.sm(cur.images[0])}') center/cover`
+  more.addEventListener('click', () => setFull(!panel.classList.contains('full')));
+  document.getElementById('pClose').addEventListener('click', collect);
+  document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(open && open.it.name));
+  table.addEventListener('click', e => { if (open && performance.now() - openedAt > 400 && !e.target.closest('.deal')) collect(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { if (zoomed) zoomed.click(); else collect(); } });
+  document.getElementById('pOrder').addEventListener('click', () => {
+    if (!open) return;
+    const it = open.it;
+    ACC.add({ id: 'lb-' + Date.now(), capsule: 'Lookbook', name: it.name, price: 'По запросу', priceNum: 0, size: '', color: '',
+      notes: 'Похожее изделие — индивидуальный пошив', qty: 1, bg: `url('${ACC_SITE.sm(it.images[0])}') center/cover` });
+    location.href = 'cart.html';
   });
-  window.location.href = 'cart.html';
-});
+  document.getElementById('shuffle').addEventListener('click', () => { collect(); scatter(true); });
+
+  /* ── фильтры ── */
+  let filter = 'all';
+  const count = c => c === 'all' ? ITEMS.length : ITEMS.filter(i => c === 'special' ? i.special : i.cat === c).length;
+  const fBox = document.getElementById('filters');
+  fBox.innerHTML = Object.entries(CAT).filter(([c]) => count(c)).map(([c, l]) => `<button type="button" data-cat="${c}" aria-pressed="${c === 'all'}">${l}</button>`).join('');
+  function applyFilter() {
+    stacks.forEach(s => s.el.classList.toggle('off', filter !== 'all' && !(filter === 'special' ? s.it.special : s.it.cat === filter)));
+  }
+  fBox.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    filter = b.dataset.cat;
+    fBox.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    applyFilter();
+    // подходящие стопки чуть подпрыгивают, чтобы их было видно
+    if (!REDUCE) stacks.forEach(s => { if (!s.el.classList.contains('off')) { s.va += rnd(-3, 3); s.vy -= 1.5; } });
+  });
+
+  // с клавиатуры и для экранного диктора — обычный список вещей
+  document.getElementById('srList').innerHTML = ITEMS.map((it, n) => `<li><button type="button" data-n="${n}">${it.num} ${it.name}</button></li>`).join('');
+  document.getElementById('srList').addEventListener('click', e => { const b = e.target.closest('button'); if (b) deal(stacks[+b.dataset.n]); });
+  addEventListener('resize', () => { setNav(); sizeStacks(); if (open) collect(); });
+
+  /* ссылка вида ?item=bag-n03 сразу раскладывает вещь */
+  const slug = new URLSearchParams(location.search).get('item');
+  if (slug) {
+    const s = stacks.find(q => q.it.id === slug);
+    if (s) { preload(s.it); setTimeout(() => deal(s), REDUCE ? 0 : 900); } else ACC_LINK.clear();
+  }
+})();
 
 (function(){
   const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
@@ -623,7 +623,6 @@ function closeMobileMenu() {
   burgerBtn.classList.remove('open');
   mobileMenu.classList.remove('visible');
   setTimeout(() => mobileMenu.classList.remove('open'), 300);
-  document.body.style.overflow = '';
 }
 burgerBtn.addEventListener('click', () => {
   const isOpen = mobileMenu.classList.contains('open');
@@ -631,7 +630,6 @@ burgerBtn.addEventListener('click', () => {
   else {
     burgerBtn.classList.add('open');
     mobileMenu.classList.add('open');
-    document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => mobileMenu.classList.add('visible'));
   }
 });
