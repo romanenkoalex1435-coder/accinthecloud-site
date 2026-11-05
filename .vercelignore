@@ -4,3 +4,5 @@ _показ
 tools
 js/logo-shape.json
 ВОПРОСЫ_*.md
+.env*
+node_modules

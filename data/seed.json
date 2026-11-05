@@ -1,0 +1,452 @@
+{
+ "hero": {
+  "mode": "mark",
+  "drop": {
+   "title": "",
+   "subtitle": "",
+   "media": "",
+   "mediaType": "image",
+   "startAt": "",
+   "endAt": "",
+   "countdown": true,
+   "ctaBefore": "Подписаться на канал",
+   "ctaBeforeHref": "https://t.me/accinthecloud1",
+   "ctaLabel": "Смотреть",
+   "ctaHref": ""
+  }
+ },
+ "capsules": {
+  "a1": {
+   "title": "Капсула a1 · Access",
+   "items": [
+    {
+     "id": "a1-camo",
+     "name": "CAMO",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 7500,
+     "usd": 100,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/camo.jpeg"
+     ]
+    },
+    {
+     "id": "a1-grey-trouser",
+     "name": "GREY TROUSER",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 7500,
+     "usd": 100,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/grey_trouser.jpeg"
+     ]
+    },
+    {
+     "id": "a1-beige",
+     "name": "BEIGE",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 4500,
+     "usd": 60,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/beige.jpeg"
+     ]
+    },
+    {
+     "id": "a1-black",
+     "name": "BLACK",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 4500,
+     "usd": 60,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/black.jpeg"
+     ]
+    },
+    {
+     "id": "a1-jeans",
+     "name": "JEANS",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 7500,
+     "usd": 100,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/jeans.jpeg"
+     ]
+    },
+    {
+     "id": "a1-stripe",
+     "name": "STRIPE",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 4500,
+     "usd": 60,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/stripe.jpeg"
+     ]
+    },
+    {
+     "id": "a1-limestone",
+     "name": "LIMESTONE",
+     "kind": "item",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 4500,
+     "usd": 60,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a1/limestone.jpeg"
+     ]
+    },
+    {
+     "id": "a1-unique",
+     "name": "Unique",
+     "kind": "unique",
+     "typeLabel": "Сумка через плечо",
+     "priceNum": 0,
+     "usd": 0,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": []
+    }
+   ]
+  },
+  "a2": {
+   "title": "Капсула a2 · Accept",
+   "items": [
+    {
+     "id": "a2-texas",
+     "name": "TEXAS jacket",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 20000,
+     "usd": 255,
+     "specs": "",
+     "temp": "до −10…−20 °C",
+     "desc": "Только под заказ.",
+     "status": "order",
+     "images": [
+      "images/a2/taxes/01.jpeg",
+      "images/a2/taxes/02.jpeg",
+      "images/a2/taxes/03.jpeg",
+      "images/a2/taxes/04.jpeg",
+      "images/a2/taxes/05.jpeg"
+     ]
+    },
+    {
+     "id": "a2-firework",
+     "name": "FIREWORK jacket",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 17890,
+     "usd": 230,
+     "specs": "",
+     "temp": "от 0 до −20 °C (по запросу)",
+     "desc": "Доступна только в чёрном цвете. Только под заказ.",
+     "status": "order",
+     "images": [
+      "images/a2/FIREWORK/01.jpeg",
+      "images/a2/FIREWORK/02.jpeg",
+      "images/a2/FIREWORK/03.jpeg",
+      "images/a2/FIREWORK/04.jpeg",
+      "images/a2/FIREWORK/05.jpeg"
+     ]
+    },
+    {
+     "id": "a2-knight",
+     "name": "KNIGHT jacket",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 0,
+     "usd": 0,
+     "specs": "",
+     "temp": "",
+     "desc": "",
+     "status": "sold",
+     "images": [
+      "images/a2/KNIGHT/01.jpeg",
+      "images/a2/KNIGHT/02.jpeg",
+      "images/a2/KNIGHT/03.jpeg",
+      "images/a2/KNIGHT/04.jpeg",
+      "images/a2/KNIGHT/05.jpeg"
+     ]
+    },
+    {
+     "id": "a2-redtusk",
+     "name": "RED TUSK jacket",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 24590,
+     "usd": 300,
+     "specs": "",
+     "temp": "до −15…−20 °C",
+     "desc": "Только под заказ.",
+     "status": "order",
+     "images": [
+      "images/a2/RED_TUSK/01.jpeg",
+      "images/a2/RED_TUSK/02.jpeg",
+      "images/a2/RED_TUSK/03.jpeg",
+      "images/a2/RED_TUSK/04.jpeg",
+      "images/a2/RED_TUSK/05.jpeg",
+      "images/a2/RED_TUSK/06.jpeg"
+     ]
+    },
+    {
+     "id": "a2-facer",
+     "name": "FACER double-sided",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 24590,
+     "usd": 300,
+     "specs": "",
+     "temp": "до −10 °C (по запросу до −15…−25 °C)",
+     "desc": "Двусторонняя. Только под заказ.",
+     "status": "order",
+     "images": [
+      "images/a2/FACER/01.jpeg",
+      "images/a2/FACER/02.jpeg",
+      "images/a2/FACER/03.jpeg",
+      "images/a2/FACER/04.jpeg",
+      "images/a2/FACER/05.jpeg",
+      "images/a2/FACER/06.jpeg",
+      "images/a2/FACER/07.jpeg"
+     ]
+    },
+    {
+     "id": "a2-chevy",
+     "name": "CHEVY jacket",
+     "kind": "item",
+     "typeLabel": "Куртка",
+     "priceNum": 20000,
+     "usd": 255,
+     "specs": "",
+     "temp": "до −10 °C (по запросу до −15…−25 °C)",
+     "desc": "Только под заказ.",
+     "status": "order",
+     "images": [
+      "images/a2/CHEVY/01.jpeg",
+      "images/a2/CHEVY/02.jpeg",
+      "images/a2/CHEVY/03.jpeg",
+      "images/a2/CHEVY/04.jpeg",
+      "images/a2/CHEVY/05.jpeg"
+     ]
+    },
+    {
+     "id": "a2-classic",
+     "name": "ACCORD Classic",
+     "kind": "classic",
+     "typeLabel": "Предзаказ · 4 цвета",
+     "priceNum": 14590,
+     "usd": 185,
+     "specs": "",
+     "temp": "до −15 °C (до −25 °C по запросу) · водонепроницаемая основа",
+     "desc": "Предзаказ. Изготавливается по вашим параметрам. Возможность добавить детали по запросу без изменения стоимости.",
+     "status": "order",
+     "images": [
+      "images/a2/classic/01.jpeg",
+      "images/a2/classic/02.jpeg",
+      "images/a2/classic/03.jpeg",
+      "images/a2/classic/04.jpeg",
+      "images/a2/classic/05.jpeg"
+     ]
+    },
+    {
+     "id": "a2-unique",
+     "name": "ACCORD Unique",
+     "kind": "unique",
+     "typeLabel": "Ваш дизайн",
+     "priceNum": 24590,
+     "usd": 300,
+     "specs": "",
+     "temp": "до −15 °C (до −25 °C по запросу)",
+     "desc": "Предзаказ. Ваш дизайн — мой крой. Изготавливается по вашим параметрам.",
+     "status": "order",
+     "images": []
+    }
+   ]
+  },
+  "a3": {
+   "title": "Капсула a3 · Accent",
+   "items": [
+    {
+     "id": "a3-rivet",
+     "name": "RIVET jeans",
+     "kind": "item",
+     "typeLabel": "Джинсы",
+     "priceNum": 12790,
+     "usd": 170,
+     "specs": "Японский raw деним · Bootcut крой",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/RIVET/01.jpeg",
+      "images/a3/RIVET/02.jpeg",
+      "images/a3/RIVET/03.jpeg",
+      "images/a3/RIVET/04.jpeg",
+      "images/a3/RIVET/05.jpeg",
+      "images/a3/RIVET/06.jpeg"
+     ]
+    },
+    {
+     "id": "a3-classic",
+     "name": "CLASSIC jeans",
+     "kind": "item",
+     "typeLabel": "Джинсы",
+     "priceNum": 11390,
+     "usd": 150,
+     "specs": "Итальянский деним натурального окрашивания · Wide leg крой",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/CLASSIC/01.jpeg",
+      "images/a3/CLASSIC/02.jpeg",
+      "images/a3/CLASSIC/03.jpeg",
+      "images/a3/CLASSIC/04.jpeg",
+      "images/a3/CLASSIC/05.jpeg",
+      "images/a3/CLASSIC/06.jpeg"
+     ]
+    },
+    {
+     "id": "a3-utility",
+     "name": "UTILITY workpants",
+     "kind": "item",
+     "typeLabel": "Рабочие брюки",
+     "priceNum": 15790,
+     "usd": 210,
+     "specs": "Extra wide · Canvas 12/14/16 oz · Only for work",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/UTILITY/01.jpeg",
+      "images/a3/UTILITY/02.jpeg",
+      "images/a3/UTILITY/03.jpeg",
+      "images/a3/UTILITY/04.jpeg",
+      "images/a3/UTILITY/05.jpeg",
+      "images/a3/UTILITY/06.jpeg"
+     ]
+    },
+    {
+     "id": "a3-herdsman",
+     "name": "HERDSMAN jeans",
+     "kind": "item",
+     "typeLabel": "Джинсы",
+     "priceNum": 12790,
+     "usd": 170,
+     "specs": "Wide straight · Raw-washed denim · Italian denim",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/HERDSMAN/01.jpeg",
+      "images/a3/HERDSMAN/02.jpeg",
+      "images/a3/HERDSMAN/03.jpeg",
+      "images/a3/HERDSMAN/04.jpeg",
+      "images/a3/HERDSMAN/05.jpeg",
+      "images/a3/HERDSMAN/06.jpeg"
+     ]
+    },
+    {
+     "id": "a3-bolt",
+     "name": "BOLT jeans",
+     "kind": "item",
+     "typeLabel": "Джинсы",
+     "priceNum": 12790,
+     "usd": 170,
+     "specs": "Baggy · Raw-washed denim · Italian fittings",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/BOLT/01.jpeg",
+      "images/a3/BOLT/02.jpeg",
+      "images/a3/BOLT/03.jpeg",
+      "images/a3/BOLT/04.jpeg"
+     ]
+    },
+    {
+     "id": "a3-tube",
+     "name": "TUBE jeans",
+     "kind": "item",
+     "typeLabel": "Джинсы",
+     "priceNum": 11890,
+     "usd": 150,
+     "specs": "Huge cut · Italian denim · One-piece trousers",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/TUBE/01.jpeg",
+      "images/a3/TUBE/02.jpeg",
+      "images/a3/TUBE/03.jpeg",
+      "images/a3/TUBE/04.jpeg",
+      "images/a3/TUBE/05.jpeg",
+      "images/a3/TUBE/06.jpeg"
+     ]
+    },
+    {
+     "id": "a3-builder",
+     "name": "BUILDER workpants",
+     "kind": "item",
+     "typeLabel": "Рабочие брюки",
+     "priceNum": 15790,
+     "usd": 210,
+     "specs": "Extra wide · Canvas · A lot of rivets · Only for work",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": [
+      "images/a3/BUILDER/01.jpeg",
+      "images/a3/BUILDER/02.jpeg",
+      "images/a3/BUILDER/03.jpeg",
+      "images/a3/BUILDER/04.jpeg",
+      "images/a3/BUILDER/05.jpeg"
+     ]
+    },
+    {
+     "id": "a3-unique",
+     "name": "Unique / Уникальные",
+     "kind": "unique",
+     "typeLabel": "Ваш дизайн",
+     "priceNum": 0,
+     "usd": 0,
+     "specs": "Ваш дизайн · Ваши параметры · Изготавливается индивидуально",
+     "temp": "",
+     "desc": "",
+     "status": "order",
+     "images": []
+    }
+   ]
+  }
+ }
+}

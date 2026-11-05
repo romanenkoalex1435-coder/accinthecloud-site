@@ -302,8 +302,11 @@
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=1"></script>
 <script>
-const PRODUCTS = [
+// товары из админки; если данных нет — встроенный список
+const PRODUCTS = ACC_SITE.products('a1') || [
   { id:'a1-camo',         name:'CAMO',         price:'7 500 ₽', priceUsd:'100$',          priceNum:7500, img:'images/a1/camo.jpeg' },
   { id:'a1-grey-trouser', name:'GREY TROUSER',  price:'7 500 ₽', priceUsd:'100$',            priceNum:7500, img:'images/a1/grey_trouser.jpeg' },
   { id:'a1-beige',        name:'BEIGE',         price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/beige.jpeg' },
@@ -311,13 +314,13 @@ const PRODUCTS = [
   { id:'a1-jeans',        name:'JEANS',         price:'7 500 ₽', priceUsd:'100$',          priceNum:7500, img:'images/a1/jeans.jpeg' },
   { id:'a1-stripe',       name:'STRIPE',        price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/stripe.jpeg' },
   { id:'a1-limestone',    name:'LIMESTONE',     price:'4 500 ₽', priceUsd:'60$',           priceNum:4500, img:'images/a1/limestone.jpeg' },
-  { id:'a1-unique',       name:'Unique',        price:'По запросу', priceUsd:'', priceNum:0, img:'' },
+  { id:'a1-unique', type:'unique', name:'Unique',        price:'По запросу', priceUsd:'', priceNum:0, img:'' },
 ];
 
 const grid = document.getElementById('grid');
 
 /* sm-копия для карточек: images/a1/camo.jpeg → images/a1/sm/camo.jpeg */
-function sm(src){ return src.replace(/\/([^/]+)\.jpe?g$/i,'/sm/$1.jpeg'); }
+function sm(src){ if (/^https?:/.test(src)) return src; return src.replace(/\/([^/]+)\.jpe?g$/i,'/sm/$1.jpeg'); }
 
 PRODUCTS.forEach((p, n) => {
   const card = document.createElement('div');
@@ -335,7 +338,7 @@ PRODUCTS.forEach((p, n) => {
       <div class="avail-tag">Под заказ</div>
     </div>
     <div class="card-info">
-      <p class="card-type">Сумка через плечо</p>
+      <p class="card-type">${p.typeLabel || 'Сумка через плечо'}</p>
       <p class="card-name">${p.name}</p>
       <p class="card-price">${priceStr}</p>
       <p class="card-made">Индивидуальный пошив</p>
@@ -371,8 +374,8 @@ function openModal(p) {
   }
 
   const secUnique = document.getElementById('secUnique');
-  secUnique.style.display = p.id === 'a1-unique' ? 'block' : 'none';
-  if (p.id === 'a1-unique') document.getElementById('inputUnique').value = '';
+  secUnique.style.display = p.type === 'unique' ? 'block' : 'none';
+  if (p.type === 'unique') document.getElementById('inputUnique').value = '';
 
   /* повторное открытие — снова сверху */
   const box = document.querySelector('#overlay .modal');
@@ -406,7 +409,7 @@ document.getElementById('qPlus').addEventListener('click', () => {
 
 document.getElementById('btnCart').addEventListener('click', () => {
   const notes = document.getElementById('inputNotes').value.trim();
-  const unique = cur.id === 'a1-unique' ? document.getElementById('inputUnique').value.trim() : '';
+  const unique = cur.type === 'unique' ? document.getElementById('inputUnique').value.trim() : '';
   ACC.add({
     id: cur.id, capsule: 'Капсула a1 · Access', name: cur.name,
     price: cur.price, priceUsd: cur.priceUsd, priceNum: cur.priceNum,

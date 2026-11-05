@@ -149,6 +149,31 @@
       .mobile-menu { gap: 18px; }
     }
 
+    /* ─── Дроп на первом экране (включается в админке) ───── */
+    .has-drop #hero { height: 100vh; height: 100svh; justify-content: flex-end; align-items: stretch; }
+    .has-drop .hero-3d { display: none; }
+    .drop-media { position: absolute; top: 84px; left: 48px; right: 48px; bottom: 24px; overflow: hidden; background: var(--soft, #f5f5f5); }
+    .drop-media img, .drop-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .drop-media.has-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0) 58%); }
+    .drop-copy { position: relative; z-index: 1; margin: 0 48px 24px; padding: 0 32px 32px; display: grid; gap: 16px; justify-items: start; color: var(--ink); }
+    .drop-media.has-media + .drop-copy { color: #fff; }
+    .has-drop .hero-brand { position: static; opacity: 1; font-size: 21.33px; text-align: left; color: inherit; }
+    .drop-title { font-family: var(--pixel); font-size: 85.33px; line-height: .9; margin: 0; max-width: 14ch; text-wrap: balance; }
+    .drop-sub { font-size: 16px; line-height: 1.5; margin: 0; max-width: 46ch; opacity: .86; }
+    .drop-timer { font-family: var(--pixel); font-size: 32px; line-height: 1; display: flex; gap: 12px; align-items: baseline; }
+    .drop-timer .drop-timer-label { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+    .drop-cta { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 24px; background: var(--ink); color: #fff; font: 14px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; transition: background-color .2s ease, color .2s ease; }
+    .drop-cta:hover { background: #333; }
+    .drop-media.has-media + .drop-copy .drop-cta { background: #fff; color: var(--ink); }
+    .drop-media.has-media + .drop-copy .drop-cta:hover { background: #e6e6e6; }
+    .drop-cta:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+    @media (max-width: 900px) {
+      .drop-media { top: 60px; left: 0; right: 0; bottom: 0; }
+      .drop-copy { margin: 0; padding: 0 20px 28px; }
+      .drop-title { font-size: 42.67px; }
+      .drop-timer { font-size: 21.33px; }
+    }
+
 
     /* ─── Section Shared ─────────────────────────────────── */
     .section { padding: 120px 48px; }
@@ -349,6 +374,8 @@
 
 <main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=1"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
     <img class="hero-still" src="images/mark-still.webp" alt="" width="1219" height="584" fetchpriority="high">
@@ -360,6 +387,7 @@
 /* Знак и надпись — одна группа по центру экрана: знак чуть выше середины, надпись сразу под ним.
    Размер знака считается как в js/scene3d.js (0.462 — высота знака к ширине). */
 window.accHeroLayout = function () {
+  if (document.documentElement.classList.contains('has-drop')) return 0;
   const hero = document.getElementById('hero'), brand = hero.querySelector('.hero-brand');
   const w = hero.clientWidth, h = hero.clientHeight;
   const markH = 0.462 * Math.min(1.35 * w, (w > h && h < 500 ? 0.96 : 1.31) * h);
@@ -373,6 +401,55 @@ addEventListener('resize', accHeroLayout);
 document.fonts && document.fonts.ready.then(accHeroLayout);
 </script>
 
+<script>
+/* Дроп из админки: вместо знака — вещь, таймер до старта и кнопка. После даты окончания снова знак. */
+(function () {
+  const d = window.ACC_SITE && ACC_SITE.drop();
+  if (!d) return;
+  document.documentElement.classList.add('has-drop');
+  const hero = document.getElementById('hero'), brand = hero.querySelector('.hero-brand');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const media = document.createElement('div');
+  media.className = 'drop-media' + (d.media ? ' has-media' : '');
+  if (d.media) media.innerHTML = d.mediaType === 'video'
+    ? `<video src="${esc(d.media)}" autoplay muted loop playsinline aria-hidden="true"></video>`
+    : `<img src="${esc(d.media)}" alt="${esc(d.title)}" fetchpriority="high">`;
+  const copy = document.createElement('div');
+  copy.className = 'drop-copy';
+  copy.innerHTML = `<p class="drop-title">${esc(d.title)}</p>` +
+    (d.subtitle ? `<p class="drop-sub">${esc(d.subtitle)}</p>` : '') +
+    `<p class="drop-timer" hidden></p><a class="drop-cta" hidden></a>`;
+  copy.prepend(brand);
+  hero.append(media, copy);
+
+  const start = Date.parse(d.startAt), timer = copy.querySelector('.drop-timer'), cta = copy.querySelector('.drop-cta');
+  const pad = n => String(n).padStart(2, '0');
+  function setCta(label, href) {
+    cta.hidden = !(label && href);
+    if (cta.hidden) return;
+    cta.textContent = label; cta.href = href;
+    const ext = /^https?:/.test(href);
+    cta.target = ext ? '_blank' : ''; cta.rel = ext ? 'noopener' : '';
+  }
+  function tick() {
+    const left = start - Date.now();
+    if (!isNaN(start) && left > 0) {
+      setCta(d.ctaBefore, d.ctaBeforeHref);
+      if (!d.countdown) { timer.hidden = true; return; }
+      const s = Math.floor(left / 1000), days = Math.floor(s / 86400);
+      timer.hidden = false;
+      timer.innerHTML = `<span class="drop-timer-label">До старта</span>` +
+        (days ? `<span>${days}</span><span class="drop-timer-label">д</span>` : '') +
+        `<span>${pad(Math.floor(s % 86400 / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}</span>`;
+      setTimeout(tick, 1000 - Date.now() % 1000);
+    } else {
+      timer.hidden = true;
+      setCta(d.ctaLabel, d.ctaHref);
+    }
+  }
+  tick();
+})();
+</script>
 <!-- ─── DROP ─────────────────────────────────────────────── -->
 
 <!-- ─── CAPSULES ─────────────────────────────────────────── -->
@@ -610,7 +687,8 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 <script>
 // 3D (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
-addEventListener('load', () => setTimeout(() => import('./js/scene3d.js?v=4').catch(() => {}), 1400), { once: true });
+if (!document.documentElement.classList.contains('has-drop'))
+  addEventListener('load', () => setTimeout(() => import('./js/scene3d.js?v=4').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>

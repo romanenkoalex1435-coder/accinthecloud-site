@@ -304,6 +304,8 @@
   </div>
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=1"></script>
 <script>
 const CAPSULE = "Капсула a3 · Accent";
 
@@ -311,7 +313,8 @@ function imgs(folder, n){
   return Array.from({length:n}, (_,i) => `images/a3/${folder}/${String(i+1).padStart(2,'0')}.jpeg`);
 }
 
-const PRODUCTS = [
+// товары из админки; если данных нет — встроенный список
+const PRODUCTS = ACC_SITE.products('a3') || [
   {
     id:'a3-rivet', type:'jeans',
     name:'RIVET jeans',
@@ -379,7 +382,7 @@ const PRODUCTS = [
 ];
 
 /* sm-копия для карточек: images/x/01.jpeg → images/x/sm/01.jpeg */
-function sm(src){ return src.replace(/\/([^/]+)\.jpe?g$/i,'/sm/$1.jpeg'); }
+function sm(src){ if (/^https?:/.test(src)) return src; return src.replace(/\/([^/]+)\.jpe?g$/i,'/sm/$1.jpeg'); }
 /* lazy: false — первые карточки грузятся сразу; high — самая первая с приоритетом */
 function makeSlide(src, cls, alt, eager, high, later){
   // later: фото карусели, которое подгрузится, когда карточка окажется рядом с экраном
