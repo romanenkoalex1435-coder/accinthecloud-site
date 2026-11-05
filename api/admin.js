@@ -1,6 +1,7 @@
 // API админки: вход по паролю, чтение и сохранение данных сайта, история версий, загрузка фото и видео.
 // Пароль — переменная окружения ADMIN_PASSWORD в Vercel (ставится скриптом tools/set-admin.sh).
 // Вход — подписанная cookie на 30 дней; смена пароля выкидывает всех.
+// Пока пароль не задан, админка открыта всем (временно, на время показа механики).
 const crypto = require('crypto');
 const { load, save, versions, upload } = require('./_lib/store');
 
@@ -13,6 +14,7 @@ const sign = (exp, key) => crypto.createHmac('sha256', key).update('admin:' + ex
 
 function authed(req) {
   const key = process.env.ADMIN_PASSWORD;
+  if (!key) return true;
   const m = (req.headers.cookie || '').match(new RegExp(COOKIE + '=(\\d+)\\.([a-f0-9]{64})'));
   if (!key || !m || Number(m[1]) < Date.now()) return false;
   const want = Buffer.from(sign(m[1], key)), got = Buffer.from(m[2]);
@@ -75,7 +77,7 @@ module.exports = async (req, res) => {
   try {
     if (a === 'login' && req.method === 'POST') {
       const key = process.env.ADMIN_PASSWORD;
-      if (!key) return res.status(503).json({ ok: false, error: 'not_configured' });
+      if (!key) return res.json({ ok: true });
       const body = JSON.parse((await readBody(req)).toString() || '{}');
       const given = Buffer.from(String(body.password || '')), want = Buffer.from(key);
       if (given.length !== want.length || !crypto.timingSafeEqual(given, want)) {
