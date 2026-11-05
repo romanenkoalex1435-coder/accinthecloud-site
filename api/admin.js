@@ -3,12 +3,16 @@
 // Вход — подписанная cookie на 30 дней; смена пароля выкидывает всех.
 // Пока пароль не задан, админка открыта всем (временно, на время показа механики).
 const crypto = require('crypto');
-const { load, save, versions, upload } = require('./_lib/store');
+const { load, save, versions, upload, mediaPath } = require('./_lib/store');
+const { generateClientTokenFromReadWriteToken } = require('@vercel/blob/client');
 
 const COOKIE = 'acc_admin';
 const DAYS = 30;
 const MAX_UPLOAD = 4 * 1024 * 1024;
 const TYPES = /^(image\/(jpeg|png|webp|avif)|video\/(mp4|webm|quicktime))$/;
+const VIDEO = /^video\/(mp4|webm|quicktime)$/;
+const KEY = /^[a-z0-9][a-z0-9-]{7,79}$/;
+const MAX_VIDEO = 200 * 1024 * 1024;
 
 const sign = (exp, key) => crypto.createHmac('sha256', key).update('admin:' + exp).digest('hex');
 
@@ -41,33 +45,48 @@ function clean(d) {
   const s = (v, n = 400) => String(v ?? '').slice(0, n);
   const num = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
   const url = v => { v = s(v, 600); return /^(https:\/\/|images\/|[a-z0-9-]+\.html|\?)/i.test(v) || v === '' ? v : ''; };
+  // английские варианты текстов: только перечисленные поля
+  const en = (o, keys) => Object.fromEntries(keys.map(([k, n]) => [k, s((o || {})[k], n)]));
+  const ids = (list, prefix) => { const seen = new Set(); return list.map(i => {
+    let id = s(i.id, 60).replace(/[^a-z0-9-]/gi, '').toLowerCase() || prefix + '-item';
+    while (seen.has(id)) id += '-2';
+    seen.add(id); return id;
+  }); };
   const h = d.hero || {}, dr = h.drop || {};
+  const models = (dr.models || []).slice(0, 12);
   const out = {
     hero: { mode: h.mode === 'drop' ? 'drop' : 'mark', drop: {
-      title: s(dr.title, 80), subtitle: s(dr.subtitle, 200), media: url(dr.media),
+      title: s(dr.title, 80), subtitle: s(dr.subtitle, 200), kicker: s(dr.kicker, 60), media: url(dr.media),
       mediaType: dr.mediaType === 'video' ? 'video' : 'image',
       startAt: s(dr.startAt, 40), endAt: s(dr.endAt, 40), countdown: !!dr.countdown,
       ctaBefore: s(dr.ctaBefore, 40), ctaBeforeHref: url(dr.ctaBeforeHref),
-      ctaLabel: s(dr.ctaLabel, 40), ctaHref: url(dr.ctaHref),
+      ctaLabel: s(dr.ctaLabel, 40), ctaHref: url(dr.ctaHref), voteHref: url(dr.voteHref),
+      models: models.map(m => ({ name: s(m.name, 60), image: url(m.image), en: en(m.en, [['name', 60]]) })).filter(m => m.image),
+      en: en(dr.en, [['title', 80], ['subtitle', 200], ['kicker', 60], ['ctaBefore', 40], ['ctaLabel', 40]]),
     } },
     capsules: {},
+    lookbook: { items: [] },
   };
   for (const c of ['a1', 'a2', 'a3']) {
     const cap = (d.capsules || {})[c] || {};
-    const seen = new Set();
-    out.capsules[c] = { title: s(cap.title, 60), items: (cap.items || []).slice(0, 60).map(i => {
-      let id = s(i.id, 60).replace(/[^a-z0-9-]/gi, '').toLowerCase() || c + '-item';
-      while (seen.has(id)) id += '-2';
-      seen.add(id);
-      return {
-        id, name: s(i.name, 60), kind: ['item', 'classic', 'unique'].includes(i.kind) ? i.kind : 'item',
-        typeLabel: s(i.typeLabel, 60), priceNum: num(i.priceNum), usd: num(i.usd),
-        specs: s(i.specs), temp: s(i.temp), desc: s(i.desc, 1200),
-        status: ['order', 'sold', 'hidden'].includes(i.status) ? i.status : 'order',
-        images: (i.images || []).slice(0, 12).map(url).filter(Boolean),
-      };
-    }) };
+    const list = (cap.items || []).slice(0, 60), id = ids(list, c);
+    out.capsules[c] = { title: s(cap.title, 60), items: list.map((i, n) => ({
+      id: id[n], name: s(i.name, 60), kind: ['item', 'classic', 'unique'].includes(i.kind) ? i.kind : 'item',
+      typeLabel: s(i.typeLabel, 60), priceNum: num(i.priceNum), usd: num(i.usd),
+      specs: s(i.specs), temp: s(i.temp), desc: s(i.desc, 1200),
+      status: ['order', 'sold', 'hidden'].includes(i.status) ? i.status : 'order',
+      images: (i.images || []).slice(0, 12).map(url).filter(Boolean),
+      en: en(i.en, [['name', 60], ['typeLabel', 60], ['specs', 400], ['temp', 400], ['desc', 1200]]),
+    })) };
   }
+  const lb = ((d.lookbook || {}).items || []).slice(0, 120), lid = ids(lb, 'lb');
+  out.lookbook.items = lb.map((i, n) => ({
+    id: lid[n], num: s(i.num, 12), name: s(i.name, 80),
+    cat: ['tops', 'bottoms', 'bags', 'accessories'].includes(i.cat) ? i.cat : 'tops', special: !!i.special,
+    desc: s(i.desc, 2000), status: i.status === 'hidden' ? 'hidden' : 'order',
+    images: (i.images || []).slice(0, 12).map(url).filter(Boolean),
+    en: en(i.en, [['name', 80], ['desc', 2000]]),
+  }));
   return out;
 }
 
@@ -118,10 +137,23 @@ module.exports = async (req, res) => {
     if (a === 'upload' && req.method === 'POST') {
       const type = String(req.headers['content-type'] || '').split(';')[0];
       if (!TYPES.test(type)) return res.status(415).json({ ok: false, error: 'type' });
+      const key = String(req.headers['x-key'] || '');
+      if (!KEY.test(key)) return res.status(400).json({ ok: false, error: 'key' });
       const body = await readBody(req);
       if (!body.length) return res.status(400).json({ ok: false, error: 'empty' });
-      const url = await upload(decodeURIComponent(req.headers['x-filename'] || 'file'), type, body);
+      const url = await upload(key, type, body, req.headers['x-variant'] === 'sm');
       return res.json({ ok: true, url });
+    }
+    // большое видео браузер грузит прямо в Blob, минуя функцию (у неё предел 4,5 МБ) — выдаём ему разовый ключ
+    if (a === 'token' && req.method === 'POST') {
+      const body = JSON.parse((await readBody(req)).toString() || '{}');
+      if (!VIDEO.test(body.type || '') || !KEY.test(body.key || '')) return res.status(400).json({ ok: false, error: 'type' });
+      const pathname = mediaPath(body.key, body.type);
+      const token = await generateClientTokenFromReadWriteToken({
+        pathname, allowedContentTypes: [body.type], maximumSizeInBytes: MAX_VIDEO,
+        validUntil: Date.now() + 30 * 60e3, addRandomSuffix: false, cacheControlMaxAge: 31536000,
+      });
+      return res.json({ ok: true, token, pathname });
     }
     return res.status(404).json({ ok: false, error: 'unknown' });
   } catch (e) {

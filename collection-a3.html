@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=8"></script>
+  <script src="/js/i18n.js?v=9"></script>
   <title>a3 ACCENT — accinthecloud</title>
   <meta name="description" content="Капсула a3 ACCENT от accinthecloud: джинсы и рабочие брюки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/collection-a3.html">
@@ -305,7 +305,7 @@
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=1"></script>
+<script src="/js/site-data.js?v=2"></script>
 <script>
 const CAPSULE = "Капсула a3 · Accent";
 
@@ -382,7 +382,7 @@ const PRODUCTS = ACC_SITE.products('a3') || [
 ];
 
 /* sm-копия для карточек: images/x/01.jpeg → images/x/sm/01.jpeg */
-function sm(src){ if (/^https?:/.test(src)) return src; return src.replace(/\/([^/]+)\.jpe?g$/i,'/sm/$1.jpeg'); }
+function sm(src){ return ACC_SITE.sm(src); }
 /* lazy: false — первые карточки грузятся сразу; high — самая первая с приоритетом */
 function makeSlide(src, cls, alt, eager, high, later){
   // later: фото карусели, которое подгрузится, когда карточка окажется рядом с экраном

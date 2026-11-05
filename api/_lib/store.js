@@ -24,7 +24,10 @@ async function load() {
   if (!last) return { data: SEED, version: null };
   const r = await fetch(last.url, { cache: 'no-store' });
   if (!r.ok) throw new Error('blob ' + r.status);
-  return { data: await r.json(), version: last.pathname };
+  const data = await r.json();
+  // версии, сохранённые до появления лукбука в админке, его не содержат — берём исходный
+  if (!data.lookbook) data.lookbook = SEED.lookbook;
+  return { data, version: last.pathname };
 }
 
 async function save(data) {
@@ -37,10 +40,13 @@ async function save(data) {
   return blob.pathname;
 }
 
-async function upload(filename, type, body) {
-  const safe = String(filename || 'file').toLowerCase().replace(/[^a-z0-9._-]+/g, '-').slice(-60);
-  const blob = await put(ROOT + 'media/' + safe, body, { access: 'public', contentType: type, addRandomSuffix: true });
+// Фото кладём парой под одним ключом: media/<ключ>.jpg и уменьшенная media/sm/<ключ>.jpg — страницы берут sm для карточек
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif', 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov' };
+const mediaPath = (key, type, small) => ROOT + 'media/' + (small ? 'sm/' : '') + key + '.' + (EXT[type] || 'bin');
+
+async function upload(key, type, body, small) {
+  const blob = await put(mediaPath(key, type, small), body, { access: 'public', contentType: type, addRandomSuffix: false, cacheControlMaxAge: 31536000 });
   return blob.url;
 }
 
-module.exports = { load, save, versions, upload, SEED };
+module.exports = { load, save, versions, upload, mediaPath, SEED };

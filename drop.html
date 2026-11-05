@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=7"></script>
+  <script src="/js/i18n.js?v=9"></script>
   <title>Winter Jackets — accinthecloud</title>
   <meta name="robots" content="noindex">
   <meta name="description" content="Семь зимних курток accinthecloud: выбери модель и забронируй пошив по своим меркам.">
@@ -151,6 +151,7 @@
       .drop-info { margin-top: 8px; }
       .drop-picks { gap: 4px; }
     }
+    .drop-vote[hidden] { display: none; }
     @media (prefers-reduced-motion: reduce) { .drop-photo { transition: none; } }
     body { display:flex; flex-direction:column; min-height:100vh; }
     .drop { min-height: calc(100svh - 69px); }
@@ -168,20 +169,20 @@
 <main class="drop-page">
 <section id="drop" class="drop" aria-labelledby="dropTitle">
   <div class="drop-head">
-    <p class="drop-kicker"><span class="drop-live" aria-hidden="true"></span>New drop · Winter</p>
+    <p class="drop-kicker"><span class="drop-live" aria-hidden="true"></span><span id="dropKicker">New drop · Winter</span></p>
     <h1 class="drop-title" id="dropTitle">WINTER<br>JACKETS</h1>
-    <p class="drop-lead">Семь курток на зиму. Выбери модель и забронируй место на пошив — сошью по твоим меркам.</p>
+    <p class="drop-lead" id="dropLead">Семь курток на зиму. Выбери модель и забронируй место на пошив — сошью по твоим меркам.</p>
   </div>
   <div class="drop-stage" id="dropStage" role="group" aria-roledescription="карусель" aria-label="Куртки зимнего дропа">
     <img class="drop-photo is-on" id="dropPhoto" src="images/drop/winter-4.jpg" alt="Зимняя куртка №4" width="800" height="800" fetchpriority="high" decoding="async">
-    <p class="drop-num" aria-hidden="true"><span id="dropNum">04</span><small>/07</small></p>
+    <p class="drop-num" aria-hidden="true"><span id="dropNum">04</span><small id="dropTotal">/07</small></p>
   </div>
   <div class="drop-info">
     <div class="drop-picks" role="group" aria-label="Модель">
       <!-- кнопки моделей добавляются скриптом -->
     </div>
     <a class="drop-cta" id="dropCta" href="https://t.me/accinthecloud" target="_blank" rel="noopener">Забронировать №4 в Telegram <span aria-hidden="true">→</span></a>
-    <a class="drop-vote" href="https://t.me/accinthecloud1/1214" target="_blank" rel="noopener">Голосование за модели в канале</a>
+    <a class="drop-vote" id="dropVote" href="https://t.me/accinthecloud1/1214" target="_blank" rel="noopener">Голосование за модели в канале</a>
   </div>
 </section>
 </main>
@@ -196,31 +197,64 @@
   <span class="footer-copy">© 2026 accinthecloud</span>
 </footer>
 
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=2"></script>
 <script>
-// ── Дроп: семь курток, выбор модели, свайп по фото, бронь в Telegram ──
+// ── Дроп: модели из админки (или встроенные семь курток), выбор модели, свайп по фото, бронь в Telegram ──
 (function(){
   const drop = document.getElementById('drop');
   if (!drop) return;
-  const N = 7, photo = document.getElementById('dropPhoto'), stage = document.getElementById('dropStage');
+  const data = window.ACC_SITE && ACC_SITE.dropPage();
+  const rawModels = (ACC_SITE.raw && ACC_SITE.raw.hero && ACC_SITE.raw.hero.drop.models) || [];
+  const MODELS = data && data.models.length ? data.models
+    : Array.from({ length: 7 }, (_, i) => ({ name: `Куртка №${i + 1}`, image: `images/drop/winter-${i + 1}.jpg` }));
+  // имя модели для сообщения в Telegram — всегда по-русски
+  const ruName = i => (rawModels[i - 1] && rawModels[i - 1].name) || MODELS[i - 1].name;
+  const ruTitle = (ACC_SITE.raw && ACC_SITE.raw.hero && ACC_SITE.raw.hero.drop.title) || 'Winter Jackets';
+  // уменьшенная копия: у своих фото дропа — файл с -sm, у загруженных — общий помощник
+  const thumb = u => /^images\/drop\//.test(u) ? u.replace(/\.jpe?g$/i, '-sm.jpg') : ACC_SITE.sm(u);
+
+  if (data && data.models.length) {
+    if (data.title) { document.getElementById('dropTitle').textContent = data.title; document.title = data.title + ' — accinthecloud'; }
+    if (data.kicker) document.getElementById('dropKicker').textContent = data.kicker;
+    if (data.subtitle) document.getElementById('dropLead').textContent = data.subtitle;
+    const vote = document.getElementById('dropVote');
+    if (data.voteHref) vote.href = data.voteHref; else vote.hidden = true;
+  }
+
+  const N = MODELS.length, photo = document.getElementById('dropPhoto'), stage = document.getElementById('dropStage');
   const num = document.getElementById('dropNum'), cta = document.getElementById('dropCta');
   const picks = drop.querySelector('.drop-picks');
   const pad = n => String(n).padStart(2, '0');
-  for (let i = 1; i <= N; i++) {
-    picks.insertAdjacentHTML('beforeend', `<button type="button" class="drop-pick" data-i="${i}" aria-pressed="${i === 4}" aria-label="Куртка №${i}" style="background-image:url('images/drop/winter-${i}-sm.jpg')"></button>`);
+  const tg = i => 'https://t.me/accinthecloud?text=' + encodeURIComponent(`Здравствуйте! Хочу забронировать пошив: ${ruName(i)} (дроп «${ruTitle}») с сайта.`);
+  let cur = Math.ceil(N / 2);
+  picks.style.gridTemplateColumns = `repeat(${Math.min(N, 7)}, minmax(0, 1fr))`;
+  MODELS.forEach((m, n) => {
+    const i = n + 1;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'drop-pick'; b.dataset.i = i;
+    b.setAttribute('aria-pressed', String(i === cur)); b.setAttribute('aria-label', m.name);
+    b.style.backgroundImage = `url('${thumb(m.image)}')`;
+    picks.appendChild(b);
+  });
+  document.getElementById('dropTotal').textContent = '/' + pad(N);
+  function paint() {
+    num.textContent = pad(cur);
+    cta.firstChild.textContent = `Забронировать №${cur} в Telegram `;
+    cta.href = tg(cur);
   }
-  let cur = 4;
+  photo.src = MODELS[cur - 1].image; photo.alt = MODELS[cur - 1].name;
+  paint();
   function show(i, dir) {
     if (i === cur) return;
     cur = i;
     picks.querySelectorAll('.drop-pick').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
-    num.textContent = pad(i);
-    cta.firstChild.textContent = `Забронировать №${i} в Telegram `;
-    cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent(`Здравствуйте! Хочу забронировать пошив зимней куртки №${i} с сайта.`);
+    paint();
     // новое фото въезжает с той стороны, куда листают, старое растворяется
     const next = photo.cloneNode();
     next.classList.remove('is-on');
-    next.src = `images/drop/winter-${i}.jpg`;
-    next.alt = `Зимняя куртка №${i}`;
+    next.src = MODELS[i - 1].image;
+    next.alt = MODELS[i - 1].name;
     next.removeAttribute('id');
     next.style.setProperty('--dx', (dir || 1) * 24 + 'px');
     stage.insertBefore(next, num.parentNode);
@@ -230,7 +264,6 @@
       old.forEach(o => { o.classList.remove('is-on'); setTimeout(() => o.remove(), 600); });
     }));
   }
-  cta.href = 'https://t.me/accinthecloud?text=' + encodeURIComponent('Здравствуйте! Хочу забронировать пошив зимней куртки №4 с сайта.');
   picks.addEventListener('click', e => {
     const b = e.target.closest('.drop-pick');
     if (b) show(+b.dataset.i, +b.dataset.i > cur ? 1 : -1);
@@ -250,7 +283,7 @@
   new IntersectionObserver((es, io) => {
     if (!es[0].isIntersecting) return;
     io.disconnect();
-    for (let i = 1; i <= N; i++) new Image().src = `images/drop/winter-${i}.jpg`;
+    MODELS.forEach(m => { new Image().src = m.image; });
   }, { rootMargin: '400px' }).observe(drop);
 })();
 </script>

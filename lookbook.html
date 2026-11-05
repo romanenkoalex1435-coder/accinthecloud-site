@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=8"></script>
+  <script src="/js/i18n.js?v=9"></script>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
@@ -307,8 +307,11 @@
   </div>
 </div>
 
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=2"></script>
 <script>
-const ITEMS = [
+// вещи — из админки; встроенный список — запасной, если данных нет
+const ITEMS = ACC_SITE.lookbook() || [
   {
     id: 'jeans-n01', num: 'n01', name: '«plaid» jeans', cat: 'bottoms', photos: 8, folder: 'jeans-n01',
     desc: `Рваные синие джинсы с вставками из клетчатой ткани.\n\nКлассический винтажный силуэт дополнен декоративными вставками на коленях и задних карманах. Брюки сшиты по выкройке прямых джинсов, после чего расширены внутренними вставками.`,
@@ -381,7 +384,7 @@ const ITEMS = [
     id: 'olive-maverick', num: 'n18', name: '«OLIVE MAVERICK» work jacket', cat: 'tops', photos: 6, folder: 'olive-maverick',
     desc: ``,
   },
-];
+].map(i => i.images ? i : { ...i, images: Array.from({ length: i.photos }, (_, n) => `images/lookbook/${i.folder}/${String(n + 1).padStart(2, '0')}.jpeg`) });
 
 // Shuffle
 for (let i = ITEMS.length - 1; i > 0; i--) {
@@ -442,7 +445,7 @@ ITEMS.forEach((item, cardIndex) => {
     img.decoding = 'async';
     if (eager) img.fetchPriority = 'high';
     img.alt = item.name;
-    const src = `images/lookbook/${item.folder}/sm/${String(i).padStart(2,'0')}.jpeg`;
+    const src = ACC_SITE.sm(item.images[i - 1]);
     // первое фото карточки — сразу (лениво), остальные — когда карточка рядом с экраном
     if (i === 1) img.src = src; else img.dataset.src = src;
     slide.appendChild(img);
@@ -515,9 +518,8 @@ function openModal(item, startIndex) {
   ACC_LINK.set(item.id);
 
   mSlides.innerHTML = Array.from({length: item.photos}, (_, i) => {
-    const nn = String(i+1).padStart(2,'0');
-    const src = `images/lookbook/${item.folder}/${nn}.jpeg`;
-    const sm  = `images/lookbook/${item.folder}/sm/${nn}.jpeg`;
+    const src = item.images[i];
+    const sm  = ACC_SITE.sm(src);
     const load = Math.abs(i - curSlide) <= 1 ? 'eager' : 'lazy';
     return `<div class="modal-slide" style="background-image:url('${sm}')"><img src="${src}" loading="${load}" decoding="async" alt=""></div>`;
   }).join('');
@@ -599,7 +601,7 @@ document.getElementById('mOrderBtn').addEventListener('click', () => {
     size: '', color: '',
     notes: 'Похожее изделие — индивидуальный пошив',
     qty: 1,
-    bg: `url('images/lookbook/${cur.folder}/sm/01.jpeg') center/cover`
+    bg: `url('${ACC_SITE.sm(cur.images[0])}') center/cover`
   });
   window.location.href = 'cart.html';
 });
