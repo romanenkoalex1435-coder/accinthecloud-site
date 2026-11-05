@@ -279,3 +279,13 @@ nav > a.btn-back { display: inline-flex; align-items: center; min-height: 44px; 
 /* Карточка «Unique» без фото: пиксельный рисунок капсулы на светлой плитке, как на главной */
 .ph-art { background: #f2f1ee !important; display: flex !important; align-items: center; justify-content: center; container-type: inline-size; }
 .ph-art .ph-pixel { position: static !important; width: auto !important; height: 52cqw !important; max-width: 84%; min-height: 0 !important; object-fit: contain !important; transform: none !important; image-rendering: pixelated; }
+
+/* Значки и кнопки-символы — в той же шкале, что и текст (12 / 14 / 16) */
+.qty-btn, .faq-icon, .modal-close { font-size: 16px !important; }
+.empty-icon { font-size: 32px !important; }
+
+/* FAQ: на телефоне hover «залипает» после тапа и открытый вопрос выглядит серым */
+@media (hover: none) { .faq-q:hover { color: inherit !important; } }
+
+/* Шапка на телефоне одинаковая на всех страницах */
+@media (max-width: 900px) { nav { padding: 16px 20px !important; } }
