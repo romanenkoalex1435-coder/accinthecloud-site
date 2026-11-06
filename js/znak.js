@@ -10,7 +10,7 @@
    Кубики запечены заранее: node tools/bake-voxels.mjs → js/znak-voxels.json. */
 import * as THREE from '/js/three.module.min.js';
 import { haptic } from './znak-haptics.js?v=1';
-import { drop as rainDrop } from './pixel-rain.js?v=1';
+import { drop as rainDrop } from './pixel-rain.js?v=3';
 
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const meshData = fetch('/js/logo-mesh.json?v=2').then(r => r.json());

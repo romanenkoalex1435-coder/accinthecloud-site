@@ -688,7 +688,7 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // 3D-знак из пикселей (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
 if (!document.documentElement.classList.contains('has-drop'))
-  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=3').catch(() => {}), 1400), { once: true });
+  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=5').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>
