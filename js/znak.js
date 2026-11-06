@@ -2,13 +2,15 @@
    Тот же @, что был в js/scene3d.js: запечённая сетка, сланцевый цвет (тень под знаком убрана),
    постоянный оборот, наклон за курсором, вращение пальцем. Сверху добавлено:
    — нажатие выбивает из знака кубики-«пиксели» там, куда попал палец, знак качается от удара,
-     а пиксели осыпаются по всей фигуре и улетают вниз за край экрана;
+     а пиксели осыпаются по всей фигуре; у нижнего края кадра их подхватывает js/pixel-rain.js —
+     дальше они падают по странице до подвала и копятся там кучей, а знак тем временем собирается заново;
    — чем чаще бьёшь, тем крупнее куски; на 7-м ударе знак рушится целиком;
    — через паузу всё «бам» — пиксели влетают обратно на свои места.
    Знак пиксельный всегда: гладкая сетка задаёт только размер и служит основой для запекания.
    Кубики запечены заранее: node tools/bake-voxels.mjs → js/znak-voxels.json. */
 import * as THREE from '/js/three.module.min.js';
 import { haptic } from './znak-haptics.js?v=1';
+import { drop as rainDrop } from './pixel-rain.js?v=1';
 
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const meshData = fetch('/js/logo-mesh.json?v=2').then(r => r.json());
@@ -140,8 +142,9 @@ async function initMark() {
   const slotOf = new Int32Array(N).fill(-1), slotId = new Int32Array(N);
   let looseCount = 0, attachedCount = N;
 
-  // ниже этой высоты кубик уже за нижним краем экрана (считается в resize)
-  let dropY = -3;
+  // ниже этой высоты кубик уже за нижним краем экрана (считается в resize);
+  // edgeY — нижний край кадра на глубине знака, pxu — сколько пикселей экрана в единице сцены
+  let dropY = -3, edgeY = -2, pxu = 300;
 
   function writeLoose(id) {
     const o = slotOf[id] * 16, p = id * 3, q = id * 4;
@@ -404,6 +407,8 @@ async function initMark() {
     const lift = window.accHeroLayout ? window.accHeroLayout() : 0;
     // нижний край кадра на глубине знака и запас — ближние к камере кубики уходят за край раньше
     dropY = -visH / 2 - lift * visH / h - visH * 0.3;
+    edgeY = -visH / 2 - lift * visH / h;
+    pxu = h / visH;
     camera.setViewOffset(w, h, 0, lift, w, h);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
@@ -538,7 +543,21 @@ async function initMark() {
   /* ─────────── Физика пикселей ───────────
    Двигаем только тех, кто в движении; лежащие на полу не трогаем вовсе. */
   let active = 0, returning = 0, physMs = 0;
+  // кубик у нижнего края кадра? тогда отдаём его дождю (экранные координаты, px/с)
+  const hv = new THREE.Vector3();
+  let hostRect = null;
+  function handOff(p) {
+    hv.set(pos[p], pos[p + 1], pos[p + 2]).project(camera);
+    const w = host.clientWidth, h = host.clientHeight, s = ST * pxu;
+    const sy = (1 - hv.y) / 2 * h;
+    if (sy < h - s * 0.5) return false;
+    if (!hostRect) hostRect = host.getBoundingClientRect();
+    rainDrop(hostRect.left + (hv.x + 1) / 2 * w, hostRect.top + sy, vel[p] * pxu, -vel[p + 1] * pxu, GRAVITY * pxu, s);
+    return true;
+  }
+
   function physics(dt) {
+    hostRect = null;
     // цели возврата — текущее место в знаке (знак может крутиться)
     for (let s = 0; s < looseCount; s++) { const id = slotId[s]; if (mode[id] === RETURNING) homeWorld(id, tgt, id * 3); }
     const n = Math.max(1, Math.ceil(dt / (1 / 120))), h = dt / n;
@@ -563,8 +582,10 @@ async function initMark() {
         if (mode[id] === FALLING) {
           vel[p + 1] -= GRAVITY * h;
           pos[p] += vel[p] * h; pos[p + 1] += vel[p + 1] * h; pos[p + 2] += vel[p + 2] * h;
-          // пола нет: кубик проваливается вниз за край экрана и ждёт там
-          if (pos[p + 1] < dropY) { vel.fill(0, p, p + 3); mode[id] = GONE; break; }
+          // пола нет: у нижнего края кадра кубик передаётся дождю на странице, а сам ждёт возврата далеко внизу
+          if (pos[p + 1] < dropY || (pos[p + 1] < edgeY + ST * 3 && handOff(p))) {
+            vel.fill(0, p, p + 3); pos[p + 1] = dropY - 1; mode[id] = GONE; break;
+          }
           // кувырок: q += ½·ω·q·dt
           const wx = spinW[p], wy = spinW[p + 1], wz = spinW[p + 2];
           const x = rot[q], y = rot[q + 1], z = rot[q + 2], w = rot[q + 3], hh = 0.5 * h;
