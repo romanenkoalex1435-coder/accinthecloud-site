@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=10"></script>
+  <script src="/js/i18n.js?v=11"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -175,6 +175,33 @@
       .drop-copy { margin: 0; padding: 0 20px 28px; }
       .drop-title { font-size: 42.67px; }
       .drop-timer { font-size: 21.33px; }
+    }
+    .drop-media img { object-position: center 20%; }
+    .has-drop .hero-brand { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .drop-date { font-family: var(--pixel); font-size: 21.33px; line-height: 1; display: flex; gap: 10px; align-items: baseline; margin: 0; }
+    .drop-date .drop-timer-label, .drop-timer .drop-timer-label { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+
+    /* Дроп из нескольких моделей: слева текст, справа все вещи сеткой (на телефоне — лентой сверху) */
+    .has-lineup #hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 48px; padding: 84px 48px 48px; }
+    .has-lineup .drop-copy { margin: 0; padding: 0; color: var(--ink); }
+    .has-lineup .drop-title { font-size: 64px !important; line-height: 1; }
+    .drop-lineup { --cell: min(calc((100vw - 96px - 48px - 380px - 6px) / 4), calc((100svh - 132px - 2px) / 2)); display: grid; grid-template-columns: repeat(4, var(--cell)); grid-auto-rows: var(--cell); gap: 2px; margin: 0; padding: 0; list-style: none; }
+    .drop-lineup a { position: relative; display: block; height: 100%; background: #ececec; overflow: hidden; }
+    .drop-lineup img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s cubic-bezier(.23, 1, .32, 1); }
+    .drop-lineup a:hover img { transform: scale(1.04); }
+    .drop-lineup a:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+    .drop-num { position: absolute; left: 10px; bottom: 8px; font-family: var(--pixel); font-size: 21.33px; line-height: 1; color: var(--ink); }
+    .drop-all { display: flex !important; align-items: flex-end; padding: 12px; font: 14px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); text-decoration: none; background: transparent !important; border: 1px solid var(--border, #e5e5e5); }
+    .drop-all:hover { background: #f5f5f5 !important; }
+    @media (max-width: 1100px) and (min-width: 901px) { .has-lineup .drop-title { font-size: 42.67px !important; } .drop-lineup { --cell: min(calc((100vw - 96px - 48px - 300px - 4px) / 3), calc((100svh - 132px - 4px) / 3)); grid-template-columns: repeat(3, var(--cell)); } .drop-all { display: none !important; } }
+    @media (max-width: 900px) {
+      .has-lineup #hero { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 24px; padding: 76px 0 48px; height: auto; }
+      .has-lineup .drop-copy { padding: 0 20px; }
+      .has-lineup .drop-title { font-size: 42.67px !important; }
+      .drop-lineup { order: -1; --cell: min(68vw, 44svh); display: flex; gap: 2px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 20px; padding: 0 20px; scrollbar-width: none; overscroll-behavior-x: contain; }
+      .drop-lineup::-webkit-scrollbar { display: none; }
+      .drop-lineup li { flex: 0 0 var(--cell); height: var(--cell); scroll-snap-align: start; }
+      .drop-all { display: none !important; }
     }
 
 
@@ -410,18 +437,29 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
   document.documentElement.classList.add('has-drop');
   const hero = document.getElementById('hero'), brand = hero.querySelector('.hero-brand');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-  const media = document.createElement('div');
+  const models = (d.models || []).filter(m => m.image);
+  const lineup = models.length >= 3 && d.mediaType !== 'video';
+  const media = document.createElement(lineup ? 'ul' : 'div');
+  if (lineup) {
+    document.documentElement.classList.add('has-lineup');
+    media.className = 'drop-lineup';
+    media.setAttribute('aria-label', d.title);
+    media.innerHTML = models.map((m, i) =>
+      `<li><a href="drop.html"><img src="${esc(m.image)}" alt="${esc(m.name)}" width="800" height="800"${i < 4 ? ' fetchpriority="high"' : ' loading="lazy"'}><span class="drop-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span></a></li>`).join('') +
+      (models.length % 4 ? `<li><a class="drop-all" href="drop.html">Все модели →</a></li>` : '');
+  } else {
   media.className = 'drop-media' + (d.media ? ' has-media' : '');
   if (d.media) media.innerHTML = d.mediaType === 'video'
     ? `<video src="${esc(d.media)}" autoplay muted loop playsinline aria-hidden="true"></video>`
     : `<img src="${esc(d.media)}" alt="${esc(d.title)}" fetchpriority="high">`;
+  }
   const copy = document.createElement('div');
   copy.className = 'drop-copy';
   copy.innerHTML = `<p class="drop-title">${esc(d.title)}</p>` +
     (d.subtitle ? `<p class="drop-sub">${esc(d.subtitle)}</p>` : '') +
-    `<p class="drop-timer" hidden></p><a class="drop-cta" hidden></a>`;
+    `<p class="drop-date" hidden></p><p class="drop-timer" hidden></p><a class="drop-cta" hidden></a>`;
   copy.prepend(brand);
-  hero.append(media, copy);
+  if (lineup) hero.append(copy, media); else hero.append(media, copy);
 
   const start = Date.parse(d.startAt), timer = copy.querySelector('.drop-timer'), cta = copy.querySelector('.drop-cta');
   const pad = n => String(n).padStart(2, '0');
@@ -431,6 +469,14 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
     cta.textContent = label; cta.href = href;
     const ext = /^https?:/.test(href);
     cta.target = ext ? '_blank' : ''; cta.rel = ext ? 'noopener' : '';
+  }
+  // дата старта по Москве, цифрами — одинаково на обоих языках
+  const date = copy.querySelector('.drop-date');
+  if (!isNaN(start) && start > Date.now()) {
+    const f = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(start));
+    const g = t => f.find(x => x.type === t).value;
+    date.innerHTML = `<span class="drop-timer-label">Старт</span><span>${g('day')}.${g('month')} · ${g('hour')}:${g('minute')}</span><span class="drop-timer-label">МСК</span>`;
+    date.hidden = false;
   }
   function tick() {
     const left = start - Date.now();
@@ -444,7 +490,7 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
         `<span>${pad(Math.floor(s % 86400 / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}</span>`;
       setTimeout(tick, 1000 - Date.now() % 1000);
     } else {
-      timer.hidden = true;
+      timer.hidden = true; date.hidden = true;
       setCta(d.ctaLabel, d.ctaHref);
     }
   }
