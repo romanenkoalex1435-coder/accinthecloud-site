@@ -193,16 +193,33 @@ button, input, textarea, select { font-family: inherit; }
   font-family: var(--f-pixel) !important; font-size: var(--d-1) !important;
   font-weight: 400; line-height: 1; letter-spacing: 0 !important;
 }
-h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .capsules-header h2, .lb-title {
+h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .lb-title {
   font-family: var(--f-pixel) !important; font-size: var(--d-2) !important;
   font-weight: 400; line-height: 1.05; letter-spacing: 0 !important;
 }
-.order-cta-text h2, .modal-name, .carousel-name, .capsule-name, #fallbackScreen h2, .form-success h3, .faq-section-title {
+.modal-name, .carousel-name, .capsule-name, #fallbackScreen h2, .form-success h3, .faq-section-title {
   font-family: var(--f-pixel) !important; font-size: var(--d-3) !important;
   font-weight: 400; line-height: 1.1; letter-spacing: 0 !important; text-transform: none;
 }
 .footer-logo {
   font-family: var(--f-pixel) !important; font-size: var(--d-4) !important; letter-spacing: 0 !important;
+}
+
+/* Заголовки разделов главной: тот же пиксельный шрифт, что у знака, но в 2–3 раза крупнее.
+   Кегли — ступени сетки шрифта (кратны 32/3 px), иначе пиксели мылятся */
+.capsules-header h2, .order-cta-text h2 {
+  font-family: var(--f-pixel) !important; font-weight: 400; line-height: 1.05;
+  letter-spacing: 0 !important; text-transform: none;
+}
+.capsules-header h2 { font-size: 42.67px !important; }
+.order-cta-text h2 { font-size: 32px !important; }
+@media (min-width: 768px) {
+  .capsules-header h2 { font-size: 64px !important; }
+  .order-cta-text h2 { font-size: 42.67px !important; }
+}
+@media (min-width: 1200px) {
+  .capsules-header h2 { font-size: 106.67px !important; }
+  .order-cta-text h2 { font-size: 64px !important; }
 }
 
 /* Подписи: Inter 12, прописные, лёгкая разрядка */

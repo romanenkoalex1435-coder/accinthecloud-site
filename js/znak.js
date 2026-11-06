@@ -1,8 +1,8 @@
 /* Знак @ на первом экране — из пикселей.
-   Тот же @, что был в js/scene3d.js: запечённая сетка, сланцевый цвет, тень на полу,
+   Тот же @, что был в js/scene3d.js: запечённая сетка, сланцевый цвет (тень под знаком убрана),
    постоянный оборот, наклон за курсором, вращение пальцем. Сверху добавлено:
-   — нажатие выбивает из знака кубики-«пиксели» там, куда попал палец; они падают на пол,
-     подпрыгивают и складываются в горку;
+   — нажатие выбивает из знака кубики-«пиксели» там, куда попал палец, знак качается от удара,
+     а пиксели осыпаются по всей фигуре и улетают вниз за край экрана;
    — чем чаще бьёшь, тем крупнее куски; на 7-м ударе знак рушится целиком;
    — через паузу всё «бам» — пиксели влетают обратно на свои места.
    Знак пиксельный всегда: гладкая сетка задаёт только размер и служит основой для запекания.
@@ -21,11 +21,10 @@ const MARK_TURN = Math.PI * 2 / 9.375;
 const HIT_RADII = [1.05, 1.5, 2.1, 2.9, 3.8, 4.8]; // радиус выбоины в кубиках: 1-й удар, 2-й, ...
 const COLLAPSE_AT = 7;          // на этом ударе знак рушится целиком
 const HIT_WINDOW = 3.5;         // удары чаще этого (с) считаются серией
-const PARTIAL_WAIT = 4;         // после мелкой выбоины пиксели возвращаются через столько секунд тишины
-const FULL_WAIT = 1.2;          // после полного обрушения — через столько после того, как всё легло
+const PARTIAL_WAIT = 2.5;       // после мелкой выбоины пиксели возвращаются через столько секунд тишины
+const FULL_WAIT = 0.45;         // после полного обрушения — через столько после того, как всё улетело вниз
 const GRAVITY = 14;
-const BOUNCE = 0.32, FRICTION = 0.55;
-const BACK_K = 240, BACK_C = 2 * 0.5 * Math.sqrt(240); // пружина возврата: резкая, с перелётом
+const BACK_K = 240, BACK_C = 2 * 0.72 * Math.sqrt(240); // пружина возврата: резкая, с небольшим перелётом
 
 function makeRenderer(canvas) {
   const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -57,21 +56,13 @@ async function initMark() {
   const hint = document.getElementById('hint');
   const canvas = host.querySelector('canvas');
   const renderer = makeRenderer(canvas);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.VSMShadowMap;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 60);
 
-  // свет и тень — один в один с первым экраном
+  // свет — как на первом экране; тени нет
   scene.add(new THREE.HemisphereLight(0xe4eaf4, 0x262b36, 1.6));
   const key = new THREE.DirectionalLight(0xffffff, 2.3);
   key.position.set(-0.3, 7, -0.45);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.radius = 14;
-  key.shadow.blurSamples = 20;
-  key.shadow.bias = -0.002;
-  Object.assign(key.shadow.camera, { left: -1.8, right: 1.8, top: 1.8, bottom: -1.8, near: 0.5, far: 10 });
   const fill = new THREE.DirectionalLight(0xc8d2e6, 0.9);
   fill.position.set(3, 0.5, 2);
   scene.add(key, fill);
@@ -85,7 +76,6 @@ async function initMark() {
 
   const mat = new THREE.MeshStandardMaterial({ color: 0x4b5262, roughness: 0.7, metalness: 0, flatShading: true });
   const mark = new THREE.Mesh(geo, mat);
-  mark.castShadow = true;
 
   // слои: наклон за курсором → свободный поворот пальцем → обычный оборот вокруг оси
   const pivot = new THREE.Group();
@@ -97,17 +87,12 @@ async function initMark() {
   scene.add(tilt);
 
   const floorY = -size.y / 2 - 0.01;
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ color: 0x34426a, opacity: 0.34 }));
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = floorY;
-  floor.receiveShadow = true;
-  scene.add(floor);
 
   /* ─────────── Пиксели ───────────
    Два набора одинаковых кубиков. fixed живёт внутри знака и крутится вместе с ним;
    выбитый кубик там «гасится» (нулевая матрица) и переходит в loose — в мировые координаты,
    где его двигает физика. Возвращаясь на место, он снова переходит в fixed. */
-  const N = V.count, ST = V.step, HALF = ST / 2;
+  const N = V.count, ST = V.step;
   const [NX, NY, NZ] = V.dims, O = V.origin;
   const home = new Float32Array(N * 3), ijk = new Int16Array(N * 3);
   const occ = new Int32Array(NX * NY * NZ).fill(-1);
@@ -126,7 +111,6 @@ async function initMark() {
   const cube = new THREE.BoxGeometry(ST, ST, ST);
   const vmat = new THREE.MeshStandardMaterial({ color: 0x4b5262, roughness: 0.7, metalness: 0, flatShading: true });
   const fixed = new THREE.InstancedMesh(cube, vmat, N);
-  fixed.castShadow = true;
   fixed.frustumCulled = false;
   const FA = fixed.instanceMatrix.array;
   const placeFixed = id => {
@@ -140,26 +124,24 @@ async function initMark() {
 
   const loose = new THREE.InstancedMesh(cube, vmat, N);
   loose.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  loose.castShadow = true;
   loose.frustumCulled = false;
   loose.count = 0;
   scene.add(loose);
   const LA = loose.instanceMatrix.array;
 
   // состояние каждого кубика
-  const ATTACHED = 0, FALLING = 1, SETTLING = 2, RESTING = 3, RETURNING = 4;
+  // GONE — упал вниз за край экрана и ждёт там возврата
+  const ATTACHED = 0, FALLING = 1, GONE = 2, RETURNING = 3;
   const mode = new Uint8Array(N);                 // 0 — на месте в знаке
   const pos = new Float32Array(N * 3), vel = new Float32Array(N * 3);
   const rot = new Float32Array(N * 4), spinW = new Float32Array(N * 3);
-  const tgt = new Float32Array(N * 3), tgtQ = new Float32Array(N * 4);
+  const tgt = new Float32Array(N * 3);
   const delay = new Float32Array(N), age = new Float32Array(N);
-  const bounces = new Uint8Array(N), restCell = new Int32Array(N), restLevel = new Int16Array(N);
   const slotOf = new Int32Array(N).fill(-1), slotId = new Int32Array(N);
   let looseCount = 0, attachedCount = N;
 
-  // пол — сетка высот: каждый лёгший кубик поднимает свою клетку, поэтому они складываются в горку
-  const FX0 = -2.6, FZ0 = -2.2, FW = Math.ceil(5.2 / ST), FD = Math.ceil(4 / ST);
-  const height = new Int16Array(FW * FD);
+  // ниже этой высоты кубик уже за нижним краем экрана (считается в resize)
+  let dropY = -3;
 
   function writeLoose(id) {
     const o = slotOf[id] * 16, p = id * 3, q = id * 4;
@@ -197,7 +179,6 @@ async function initMark() {
   function exitVoxel() {
     voxelMode = false;
     hits = 0; collapsed = false;
-    height.fill(0);
   }
 
   // текущая скорость оборота знака — выбитый кубик уносит её с собой
@@ -215,7 +196,6 @@ async function initMark() {
     rot.set([pivotQ.x, pivotQ.y, pivotQ.z, pivotQ.w], id * 4);
     const a = 4 + Math.random() * 8;
     spinW.set([(Math.random() - 0.5) * a, (Math.random() - 0.5) * a, (Math.random() - 0.5) * a], p);
-    bounces[id] = 0;
     addLoose(id);
     writeLoose(id);
     looseDirty = true;
@@ -227,54 +207,6 @@ async function initMark() {
     fixedDirty = true;
     removeLoose(id);
     looseDirty = true;
-  }
-  // кубик поднимают с пола — его клетка в горке опускается
-  function liftOff(id) {
-    if (mode[id] === SETTLING || mode[id] === RESTING) {
-      const c = restCell[id];
-      height[c] = Math.min(height[c], restLevel[id]);
-    }
-  }
-
-  /* лёг: скатываемся с горки, пока в пределах трёх клеток есть место ниже больше чем на кубик,
-     затем занимаем клетку. Склон выходит ~1:3 — горка низкая и широкая, а не гора выше знака. */
-  const DX = [1, -1, 0, 0, 1, -1, 1, -1], DZ = [0, 0, 1, -1, 1, 1, -1, -1];
-  const REACH = 3;
-  const PILE_X = 1.9, PILE_FRONT = 0.45, PILE_BACK = -1.95;  // где может лежать горка; ближе к камере пол уходит за кадр
-  const cxMin = Math.floor((-PILE_X - FX0) / ST), cxMax = Math.floor((PILE_X - FX0) / ST);
-  const czMin = Math.floor((PILE_BACK - FZ0) / ST), czMax = Math.floor((PILE_FRONT - FZ0) / ST);
-  function settle(id) {
-    const p = id * 3;
-    let cx = clamp(Math.floor((pos[p] - FX0) / ST), cxMin, cxMax), cz = clamp(Math.floor((pos[p + 2] - FZ0) / ST), czMin, czMax);
-    for (let it = 0; it < 60; it++) {
-      const start = (Math.random() * 8) | 0, hc = height[cz * FW + cx];
-      let bestN = -1, bestScore = hc - 1;
-      for (let n = 0; n < 8; n++) {
-        const d = (start + n) & 7;
-        for (let k = 1; k <= REACH; k++) {
-          const x = cx + DX[d] * k, z = cz + DZ[d] * k;
-          if (x < cxMin || x > cxMax || z < czMin || z > czMax) break;
-          const hh = height[z * FW + x];
-          if (hh > hc) break;                       // дальше выше — туда не катится
-          const score = hh + k * 0.01;
-          if (hh < hc - 1 && score < bestScore) { bestScore = score; bestN = d; }
-        }
-      }
-      if (bestN < 0) break;
-      cx += DX[bestN]; cz += DZ[bestN];
-    }
-    const c = cz * FW + cx;
-    restCell[id] = c;
-    restLevel[id] = height[c];
-    height[c]++;
-    tgt[p] = FX0 + ((c % FW) + 0.5) * ST;
-    tgt[p + 1] = floorY + (restLevel[id] + 0.5) * ST;
-    tgt[p + 2] = FZ0 + (Math.floor(c / FW) + 0.5) * ST;
-    // лежит ровно, повёрнут только вокруг вертикали
-    const yaw = (Math.random() - 0.5) * 0.6;
-    tgtQ.set([0, Math.sin(yaw / 2), 0, Math.cos(yaw / 2)], id * 4);
-    vel.fill(0, p, p + 3);
-    mode[id] = SETTLING;
   }
 
   /* ─────────── Удары ─────────── */
@@ -367,14 +299,12 @@ async function initMark() {
       const dx = pos[p] - hp.x, dy = pos[p + 1] - hp.y, dz = pos[p + 2] - hp.z;
       const d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > R2) continue;
-      liftOff(id);
       const d = Math.sqrt(d2) || 1, f = 0.8 + Math.random();
       vel[p] = dx / d * f - rd.x * 0.5;
       vel[p + 1] = 1.4 + Math.random() * 1.6;
       vel[p + 2] = dz / d * f - rd.z * 0.5;
       const a = 4 + Math.random() * 8;
       spinW.set([(Math.random() - 0.5) * a, (Math.random() - 0.5) * a, (Math.random() - 0.5) * a], p);
-      bounces[id] = 0;
       mode[id] = FALLING;
     }
   }
@@ -385,7 +315,6 @@ async function initMark() {
     for (let s = 0; s < looseCount; s++) {
       const id = slotId[s];
       if (mode[id] === RETURNING) continue;
-      liftOff(id);
       mode[id] = RETURNING;
       delay[id] = full ? (home[id * 3] - O[0]) / (NX * ST) * 0.3 + Math.random() * 0.06 : Math.random() * 0.12;
       age[id] = 0;
@@ -473,6 +402,8 @@ async function initMark() {
     camera.position.set(0, dist * Math.sin(0.07), dist * Math.cos(0.07));
     camera.lookAt(0, 0, 0);
     const lift = window.accHeroLayout ? window.accHeroLayout() : 0;
+    // нижний край кадра на глубине знака и запас — ближние к камере кубики уходят за край раньше
+    dropY = -visH / 2 - lift * visH / h - visH * 0.3;
     camera.setViewOffset(w, h, 0, lift, w, h);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
@@ -611,12 +542,12 @@ async function initMark() {
     // цели возврата — текущее место в знаке (знак может крутиться)
     for (let s = 0; s < looseCount; s++) { const id = slotId[s]; if (mode[id] === RETURNING) homeWorld(id, tgt, id * 3); }
     const n = Math.max(1, Math.ceil(dt / (1 / 120))), h = dt / n;
-    const settleK = 1 - Math.exp(-22 * h), turnK = 1 - Math.exp(-20 * h);
+    const turnK = 1 - Math.exp(-20 * h);
     active = 0; returning = 0;
     // с конца: вернувшийся кубик уходит из списка, на его место встаёт уже посчитанный последний
     for (let s = looseCount - 1; s >= 0; s--) {
       const id = slotId[s], m = mode[id];
-      if (m === RESTING) continue;
+      if (m === GONE) continue;
       const p = id * 3, q = id * 4;
       if (m === RETURNING) {
         returning++;
@@ -632,19 +563,8 @@ async function initMark() {
         if (mode[id] === FALLING) {
           vel[p + 1] -= GRAVITY * h;
           pos[p] += vel[p] * h; pos[p + 1] += vel[p + 1] * h; pos[p + 2] += vel[p + 2] * h;
-          // стенки за краем пола, чтобы горка не уезжала из кадра
-          if (Math.abs(pos[p]) > PILE_X) { pos[p] = clamp(pos[p], -PILE_X, PILE_X); vel[p] *= -0.3; }
-          if (pos[p + 2] < PILE_BACK || pos[p + 2] > PILE_FRONT) { pos[p + 2] = clamp(pos[p + 2], PILE_BACK, PILE_FRONT); vel[p + 2] *= -0.3; }
-          const cx = clamp(Math.floor((pos[p] - FX0) / ST), 0, FW - 1), cz = clamp(Math.floor((pos[p + 2] - FZ0) / ST), 0, FD - 1);
-          const surf = floorY + height[cz * FW + cx] * ST;
-          if (pos[p + 1] - HALF <= surf && vel[p + 1] < 0) {
-            if (bounces[id] < 2 && -vel[p + 1] > 0.9) {
-              pos[p + 1] = surf + HALF;
-              vel[p + 1] *= -BOUNCE; vel[p] *= FRICTION; vel[p + 2] *= FRICTION;
-              spinW[p] *= 0.6; spinW[p + 1] *= 0.6; spinW[p + 2] *= 0.6;
-              bounces[id]++;
-            } else settle(id);
-          }
+          // пола нет: кубик проваливается вниз за край экрана и ждёт там
+          if (pos[p + 1] < dropY) { vel.fill(0, p, p + 3); mode[id] = GONE; break; }
           // кувырок: q += ½·ω·q·dt
           const wx = spinW[p], wy = spinW[p + 1], wz = spinW[p + 2];
           const x = rot[q], y = rot[q + 1], z = rot[q + 2], w = rot[q + 3], hh = 0.5 * h;
@@ -652,17 +572,6 @@ async function initMark() {
           rot[q + 1] = y + hh * (wy * w + wz * x - wx * z);
           rot[q + 2] = z + hh * (wz * w + wx * y - wy * x);
           rot[q + 3] = w - hh * (wx * x + wy * y + wz * z);
-        } else if (mode[id] === SETTLING) {
-          pos[p] += (tgt[p] - pos[p]) * settleK;
-          pos[p + 1] += (tgt[p + 1] - pos[p + 1]) * settleK;
-          pos[p + 2] += (tgt[p + 2] - pos[p + 2]) * settleK;
-          nlerp(q, tgtQ, q, settleK);
-          if (Math.abs(tgt[p] - pos[p]) + Math.abs(tgt[p + 1] - pos[p + 1]) + Math.abs(tgt[p + 2] - pos[p + 2]) < ST * 0.02) {
-            pos.set(tgt.subarray(p, p + 3), p);
-            rot.set(tgtQ.subarray(q, q + 4), q);
-            mode[id] = RESTING;
-            break;
-          }
         } else if (mode[id] === RETURNING) {
           for (let a = 0; a < 3; a++) {
             vel[p + a] += (-BACK_K * (pos[p + a] - tgt[p + a]) - BACK_C * vel[p + a]) * h;
@@ -762,10 +671,9 @@ async function initMark() {
     get tilt() { return free.quaternion.toArray(); },
     get info() { return { voxelMode, attached: attachedCount, loose: looseCount, active, returning, hits, collapsed, total: N, clock, lastBusy, lastAction, physMs, pending: pending.length }; },
     debug() {
-      const byMode = [0, 0, 0, 0, 0]; let maxH = 0, maxY = -9;
-      for (let s = 0; s < looseCount; s++) { const id = slotId[s]; byMode[mode[id]]++; if (mode[id] === RESTING) maxY = Math.max(maxY, pos[id * 3 + 1]); }
-      for (let c = 0; c < height.length; c++) maxH = Math.max(maxH, height[c]);
-      return { byMode, maxH, maxY, floorY, step: ST };
+      const byMode = [0, 0, 0, 0];
+      for (let s = 0; s < looseCount; s++) byMode[mode[slotId[s]]]++;
+      return { byMode, dropY, floorY, step: ST };
     },
     get frames() { return frames; },
   };

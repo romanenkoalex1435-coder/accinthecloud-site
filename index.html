@@ -192,8 +192,9 @@
 
     /* ─── Capsules ───────────────────────────────────────── */
     /* Карточка: светлая плитка, вещь нарисована пикселями; на телефоне — лента, листается пальцем */
-    #capsules { background: var(--bg); }
-    .capsules-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+    /* раздел начинается с тонкой линии во всю ширину — первый экран и каталог не слипаются */
+    #capsules { background: var(--bg); border-top: 1px solid var(--border); }
+    .capsules-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 56px; }
     .capsules-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
     .capsule-card { display: block; color: var(--ink); text-decoration: none; }
     .capsule-tile {
@@ -238,11 +239,8 @@
       background: var(--ink); color: white;
       display: flex; justify-content: space-between; align-items: center; gap: 32px;
     }
-    .order-cta-text h2 {
-      font-family: var(--pixel); font-size: clamp(20px,2.5vw,36px); font-weight: normal;
-      letter-spacing: 0.06em; margin-bottom: 8px; color: white;
-    }
-    .order-cta-text p { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .order-cta-text h2 { margin-bottom: 12px; color: white; }
+    .order-cta-text p { font-size: 15px; color: rgba(255,255,255,0.5); }
     .order-cta-btn {
       flex-shrink: 0; padding: 16px 36px;
       border: 1px solid rgba(255,255,255,0.3); color: white;
@@ -314,9 +312,9 @@
       .nav-links { display: none; }
       .burger { display: flex; }
       .section { padding: 36px 24px 48px; }
-      .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      #capsules { padding-top: 48px; }
+      .capsules-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 32px; }
       .order-cta { margin: 0 24px 56px; padding: 32px 28px; flex-direction: column; align-items: flex-start; }
-      .order-cta-text h2 { font-size: 28px; }
       footer { flex-wrap:wrap; flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
     }
@@ -381,7 +379,7 @@
 <script src="/js/site-data.js?v=2"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
-    <img class="hero-still" src="images/mark-still.webp?v=2" alt="" width="1219" height="584" fetchpriority="high">
+    <img class="hero-still" src="images/mark-still.webp?v=3" alt="" width="1219" height="584" fetchpriority="high">
     <canvas></canvas>
   </div>
   <h1 class="hero-brand">accinthecloud</h1>
@@ -691,7 +689,7 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // 3D-знак из пикселей (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
 if (!document.documentElement.classList.contains('has-drop'))
-  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=1').catch(() => {}), 1400), { once: true });
+  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=2').catch(() => {}), 1400), { once: true });
 </script>
 </body>
 </html>
