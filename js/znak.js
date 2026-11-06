@@ -87,7 +87,8 @@ async function initMark() {
   tilt.add(free);
   scene.add(tilt);
 
-  const floorY = -size.y / 2 - 0.01;
+  // пол — на линии под надписью, где первый экран кончается (считается в resize)
+  let floorY = -size.y / 2 - 0.01;
 
   /* ─────────── Пиксели ───────────
    Два набора одинаковых кубиков. fixed живёт внутри знака и крутится вместе с ним;
@@ -142,7 +143,7 @@ async function initMark() {
   let looseCount = 0, attachedCount = N;
 
   // пол — сетка высот: каждый лёгший кубик поднимает свою клетку, поэтому они складываются в горку
-  const FX0 = -2.6, FZ0 = -2.2, FW = Math.ceil(5.2 / ST), FD = Math.ceil(4 / ST);
+  const FX0 = -8, FZ0 = -2.2, FW = Math.ceil(16 / ST), FD = Math.ceil(4 / ST);
   const height = new Int16Array(FW * FD);
 
   function writeLoose(id) {
@@ -225,10 +226,17 @@ async function initMark() {
      низкая и широкая. Клетка — только учёт высоты: сам кубик ложится со сдвигом и креном,
      как брошенный, а не по линейке. */
   const DX = [1, -1, 0, 0, 1, -1, 1, -1], DZ = [0, 0, 1, -1, 1, 1, -1, -1];
-  const REACH = 3;
-  const PILE_X = 1.9, PILE_FRONT = 0.45, PILE_BACK = -1.95;  // где может лежать горка; ближе к камере пол уходит за кадр
+  const REACH = 4;
+  /* где может лежать горка. Глубина считается в resize: чем дальше от камеры, тем выше на экране
+     пол, и дальний край не должен заезжать на надпись. Вбок пол шире кадра — что не влезло
+     под надпись, раскатывается за края экрана. */
+  const PILE_X = 7.8, PILE_FRONT = 0.45;
+  let PILE_BACK = -0.75;
   const cxMin = Math.floor((-PILE_X - FX0) / ST), cxMax = Math.floor((PILE_X - FX0) / ST);
-  const czMin = Math.floor((PILE_BACK - FZ0) / ST), czMax = Math.floor((PILE_FRONT - FZ0) / ST);
+  let czMin = Math.floor((PILE_BACK - FZ0) / ST);
+  const czMax = Math.floor((PILE_FRONT - FZ0) / ST);
+  // выше этого слоя горка закрыла бы надпись — лишнее раскатывается в стороны (считается в resize)
+  let capLv = 99;
   function settle(id) {
     const p = id * 3;
     let cx = clamp(Math.floor((pos[p] - FX0) / ST), cxMin, cxMax), cz = clamp(Math.floor((pos[p + 2] - FZ0) / ST), czMin, czMax);
@@ -248,6 +256,21 @@ async function initMark() {
       }
       if (bestN < 0) break;
       cx += DX[bestN]; cz += DZ[bestN];
+    }
+    if (height[cz * FW + cx] >= capLv) {
+      // ближайший по ширине столбец, где во всю глубину полосы есть место
+      const sx = Math.random() < 0.5 ? 1 : -1, nz = czMax - czMin + 1;
+      found: for (let r = 1; r <= cxMax - cxMin; r++) {
+        for (const sg of [sx, -sx]) {
+          const x = cx + sg * r;
+          if (x < cxMin || x > cxMax) continue;
+          const z0 = (Math.random() * nz) | 0;
+          for (let k = 0; k < nz; k++) {
+            const z = czMin + (z0 + k) % nz;
+            if (height[z * FW + x] < capLv) { cx = x; cz = z; break found; }
+          }
+        }
+      }
     }
     const c = cz * FW + cx;
     restCell[id] = c;
@@ -465,6 +488,33 @@ async function initMark() {
     camera.setViewOffset(w, h, 0, lift, w, h);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
+    // передний край пола садится на нижний край кадра; лежащие кубики едут вместе с полом
+    const yAt = (sy, z) => {
+      const ray = new THREE.Vector3(0, 1 - 2 * sy / h, 0.5).unproject(camera).sub(camera.position);
+      return camera.position.y + ray.y * (z - camera.position.z) / ray.z;
+    };
+    const y = yAt(h - 2, PILE_FRONT + HALF);
+    // потолок горки: верх дальнего ряда не выше низа надписи
+    const brand = document.querySelector('#hero .hero-brand');
+    // по разметке, без сдвига анимации появления (host занимает весь #hero)
+    const bb = brand ? brand.offsetTop + brand.offsetHeight + 10 : 0;
+    const layers = z => Math.floor((yAt(bb, z) - y) / ST);
+    if (bb > 0 && bb < h) {
+      // самый дальний край, где под надписью помещается хотя бы 2 слоя (но не глубже -0.75)
+      let lo = -0.75, hi = PILE_FRONT - 4 * ST;
+      if (layers(lo) < 2) { for (let i = 0; i < 20; i++) { const m = (lo + hi) / 2; if (layers(m) >= 2) hi = m; else lo = m; } PILE_BACK = hi; }
+      else PILE_BACK = lo;
+      capLv = Math.max(1, layers(PILE_BACK));
+    } else { PILE_BACK = -0.75; capLv = 99; }
+    czMin = Math.floor((PILE_BACK - FZ0) / ST);
+    const dy = y - floorY;
+    floorY = y;
+    for (let s = 0; s < looseCount; s++) {
+      const id = slotId[s];
+      if (mode[id] !== SETTLING && mode[id] !== RESTING) continue;
+      pos[id * 3 + 1] += dy; tgt[id * 3 + 1] += dy;
+      writeLoose(id); looseDirty = true;
+    }
   }
   resize();
   new ResizeObserver(resize).observe(host);
@@ -754,7 +804,7 @@ async function initMark() {
       const byMode = [0, 0, 0, 0, 0]; let maxH = 0, maxY = -9;
       for (let s = 0; s < looseCount; s++) { const id = slotId[s]; byMode[mode[id]]++; if (mode[id] === RESTING) maxY = Math.max(maxY, pos[id * 3 + 1]); }
       for (let c = 0; c < height.length; c++) maxH = Math.max(maxH, height[c]);
-      return { byMode, maxH, maxY, floorY, step: ST };
+      return { byMode, maxH, maxY, floorY, capLv, back: PILE_BACK, step: ST };
     },
     get frames() { return frames; },
   };
