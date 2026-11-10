@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     const id = s(raw.id, 32), telegram = s(raw.telegram, 80), name = s(raw.name, 80);
     if (!ID.test(id) || !TG.test(telegram) || !name || raw.consent !== true) return res.status(400).json({ ok: false, error: 'bad' });
     const items = (Array.isArray(raw.items) ? raw.items : []).slice(0, 30).map(i => ({
-      name: s(i.name, 80), capsule: s(i.capsule, 40), size: s(i.size, 40), color: s(i.color, 120), notes: s(i.notes, 300),
+      name: s(i.name, 80), capsule: s(i.capsule, 40), size: s(i.size, 40), color: s(i.color, 120), notes: s(i.notes, 1500),
       price: s(i.price, 40), qty: Math.max(1, Math.min(99, Math.round(Number(i.qty) || 1))),
       refs: (Array.isArray(i.refs) ? i.refs : []).filter(u => typeof u === 'string' && REF.test(u)).slice(0, 5),
     }));

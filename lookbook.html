@@ -224,7 +224,7 @@
 </section>
 
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=4"></script>
+<script src="/js/site-data.js?v=5"></script>
 <script>
 // вещи — из админки; встроенный список — запасной, если данных нет
 const ITEMS = ACC_SITE.lookbook() || [
@@ -334,7 +334,7 @@ const ITEMS = ACC_SITE.lookbook() || [
     el.style.setProperty('--r3', rnd(-7, 7).toFixed(1) + 'deg');
     // снизу вверх: третье фото, второе, сверху обложка
     const prints = it.images.slice(0, 3).map((src, k) =>
-      `<div class="print${k ? ' under' + k : ''}"><img alt="" decoding="async" ${n < 8 ? 'fetchpriority="high"' : ''} src="${ACC_SITE.sm(src)}"></div>`).reverse().join('');
+      `<div class="print${k ? ' under' + k : ''}"><img alt="" decoding="async" ${n < 8 && !k ? 'fetchpriority="high"' : ''} src="${ACC_SITE.xs(src)}" onerror="this.onerror=null;this.src='${ACC_SITE.sm(src)}'"></div>`).reverse().join('');
     el.innerHTML = `${prints}<span class="tape">${it.num}</span><span class="count">${it.images.length}</span>`;
     const cover = el.querySelector('.print:not([class*=under]) img');
     cover.addEventListener('load', () => learn(it, 0, cover), { once: true });

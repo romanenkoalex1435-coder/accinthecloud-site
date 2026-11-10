@@ -3,9 +3,10 @@
 const { load, SEED } = require('./_lib/store');
 
 module.exports = async (req, res) => {
-  let data;
-  try { data = (await load()).data; } catch (e) { data = SEED; }
+  let data, failed = false;
+  try { data = (await load()).data; } catch (e) { data = SEED; failed = true; }
   res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=5, stale-while-revalidate=600');
+  // хранилище не ответило — запасные данные не кешируем, следующий посетитель спросит заново
+  res.setHeader('Cache-Control', failed ? 'no-store' : 'public, max-age=0, s-maxage=30, stale-while-revalidate=600');
   res.status(200).send('window.ACC_SITE_RAW=' + JSON.stringify(data).replace(/</g, '\\u003c') + ';');
 };

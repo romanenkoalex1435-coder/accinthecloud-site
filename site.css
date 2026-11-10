@@ -195,7 +195,7 @@ button, input, textarea, select { font-family: inherit; }
 }
 h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .lb-title {
   font-family: var(--f-pixel) !important; font-size: var(--d-2) !important;
-  font-weight: 400; line-height: 1.05; letter-spacing: 0 !important;
+  font-weight: 400; line-height: .9; letter-spacing: 0 !important;
 }
 .modal-name, .carousel-name, .capsule-name, #fallbackScreen h2, .form-success h3, .faq-section-title {
   font-family: var(--f-pixel) !important; font-size: var(--d-3) !important;
@@ -288,7 +288,7 @@ footer {
 @media (hover: hover) { .footer-links a:hover { color: var(--ink, #0d0d0d); } }
 @media (max-width: 900px) {
   footer { flex-direction: column !important; justify-content: center !important; padding: 40px 24px !important; gap: 12px !important; text-align: center; }
-  .footer-links { flex-direction: column; gap: 0 !important; }
+  .footer-links { flex-direction: column; align-items: center; gap: 0 !important; }
 }
 
 /* «← Назад» в шапке оферты и политики: подпись Inter 12, зона нажатия 44 px */
@@ -308,3 +308,6 @@ nav > a.btn-back { display: inline-flex; align-items: center; min-height: 44px; 
 
 /* Шапка на телефоне одинаковая на всех страницах */
 @media (max-width: 900px) { nav { padding: 16px 20px !important; } }
+
+/* Поле, на которое перевели фокус после ошибки, не уходит под фиксированную шапку */
+input, textarea, select, .consent-label { scroll-margin-top: calc(var(--navH, 64px) + 24px); }

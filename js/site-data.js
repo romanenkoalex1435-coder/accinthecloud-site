@@ -9,20 +9,28 @@
   } catch (e) {}
 
   const EN = window.ACC_LANG === 'en';
-  const t = (o, k) => (EN && o.en && o.en[k]) || o[k] || '';
+  // тексты из админки идут в разметку: угловые скобки и прямые кавычки меняем на типографские — никакой HTML не пройдёт
+  const safe = v => String(v ?? '').replace(/</g, '‹').replace(/>/g, '›').replace(/"/g, '”');
+  const t = (o, k) => safe((EN && o.en && o.en[k]) || o[k] || '');
   const money = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  const src = u => /^https?:/.test(u) ? u : encodeURI(u);
+  // адрес с кавычкой, скобкой или пробелом (кроме своих путей к файлам) — отбрасываем
+  const src = u => { u = String(u || ''); return /^https?:/.test(u) ? (/["'<>\s`]/.test(u) ? '' : u) : encodeURI(u).replace(/'/g, '%27'); };
+  // ссылка баннера: только https, свои страницы и якоря
+  const link = u => { u = String(u || ''); return /["'<>\s`]/.test(u) || !/^(https:\/\/|[a-z0-9-]+\.html|\?|#)/i.test(u) ? '' : u; };
   // уменьшенная копия фото: у своих файлов — папка sm/ рядом, у загруженных из админки — media/sm/
   const sm = u => /^https?:/.test(u)
     ? u.replace(/\/media\/(?!sm\/)([^/]+\.(jpg|jpeg|png|webp|avif))$/i, '/media/sm/$1')
     : u.replace(/\/([^/]+)\.jpe?g$/i, '/sm/$1.jpeg');
+
+  // крошечная копия для стопок лукбука (360 px, webp) — только у своих фото лукбука, у остальных — sm
+  const xs = u => /^images\/lookbook\/[a-z0-9-]+\/[^/]+\.jpe?g$/i.test(u) ? u.replace(/\/([^/]+)\.jpe?g$/i, '/xs/$1.webp') : sm(u);
 
   function products(c) {
     const cap = raw && raw.capsules && raw.capsules[c];
     if (!cap || !Array.isArray(cap.items)) return null;
     return cap.items.filter(i => i.status !== 'hidden').map(i => {
       const sold = i.status === 'sold';
-      const images = (i.images || []).map(src);
+      const images = (i.images || []).map(src).filter(Boolean);
       return {
         id: i.id, type: i.kind, name: t(i, 'name'), typeLabel: t(i, 'typeLabel'),
         price: i.priceNum ? money(i.priceNum) + ' ₽' : (sold ? '—' : 'По запросу'),
@@ -38,8 +46,8 @@
     const lb = raw && raw.lookbook;
     if (!lb || !Array.isArray(lb.items)) return null;
     return lb.items.filter(i => i.status !== 'hidden' && (i.images || []).length).map(i => ({
-      id: i.id, num: i.num, name: t(i, 'name'), cat: i.cat, special: !!i.special, desc: t(i, 'desc'),
-      images: i.images.map(src), photos: i.images.length,
+      id: i.id, num: safe(i.num), name: t(i, 'name'), cat: i.cat, special: !!i.special, desc: t(i, 'desc'),
+      images: i.images.map(src).filter(Boolean), photos: i.images.length,
     }));
   }
 
@@ -76,7 +84,8 @@
   const banners = place => (raw && Array.isArray(raw.banners) ? raw.banners : [])
     .filter(b => !b.hidden && b.image && (b.place || 'top') === place)
     .map(b => ({ id: b.id, image: src(b.image), imageMobile: b.imageMobile ? src(b.imageMobile) : '',
-      title: t(b, 'title'), text: t(b, 'text'), cta: t(b, 'cta'), href: b.href || '', size: b.size === 'half' ? 'half' : 'wide' }));
+      title: t(b, 'title'), text: t(b, 'text'), cta: t(b, 'cta'), href: link(b.href), size: b.size === 'half' ? 'half' : 'wide' }))
+    .filter(b => b.image);
 
-  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm, capsule, capsules, capHref, banners };
+  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm, xs, capsule, capsules, capHref, banners };
 })();

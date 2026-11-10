@@ -304,7 +304,9 @@
   </div>
 </footer>
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=4"></script>
+<script src="/js/site-data.js?v=5"></script>
+<script>// капсула скрыта в админке — страница не открывается (кроме предпросмотра)
+(function(){var c=window.ACC_SITE&&ACC_SITE.capsule('a3');if(c&&c.hidden&&!/[?&]preview=1\b/.test(location.search))location.replace('/#capsules');})();</script>
 <script>
 const CAPSULE = "Капсула a3 · Accent";
 

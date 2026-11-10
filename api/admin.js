@@ -42,9 +42,10 @@ function readBody(req) {
 
 // Проверка формы данных: только то, что умеют показывать страницы
 function clean(d) {
-  const s = (v, n = 400) => String(v ?? '').slice(0, n);
+  // HTML в текстах не нужен: угловые скобки и прямые кавычки — типографские
+  const s = (v, n = 400) => String(v ?? '').slice(0, n).replace(/</g, '‹').replace(/>/g, '›').replace(/"/g, '”');
   const num = v => Math.max(0, Math.min(10000000, Math.round(Number(v) || 0)));
-  const url = v => { v = s(v, 600); return /^(https:\/\/|images\/|[a-z0-9-]+\.html|\?)/i.test(v) || v === '' ? v : ''; };
+  const url = v => { v = String(v ?? '').slice(0, 600); if (/["'<>\s`\\]/.test(v)) return ''; return /^(https:\/\/|images\/|[a-z0-9-]+\.html|\?)/i.test(v) || v === '' ? v : ''; };
   // английские варианты текстов: только перечисленные поля
   const en = (o, keys) => Object.fromEntries(keys.map(([k, n]) => [k, s((o || {})[k], n)]));
   const ids = (list, prefix) => { const seen = new Set(); return list.map(i => {

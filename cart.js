@@ -69,7 +69,7 @@ const ACC = {
     const link = s.match(/^(?:https?:\/\/)?(?:www\.)?(?:t|telegram)\.me\/@?([^\/?#\s]+)\/?(?:[?#].*)?$/i);
     const phoneDigits = s.replace(/\D/g, '');
     if (!link && /^\+?[\d\s()\-]+$/.test(s)) {
-      return phoneDigits.length >= 10 && phoneDigits.length <= 15 ? s.replace(/\s+/g, ' ') : null;
+      return phoneDigits.length >= 10 && phoneDigits.length <= 15 ? (s.trim().startsWith('+') ? '+' : '') + phoneDigits : null;
     }
     const user = link ? link[1] : s.replace(/^@/, '');
     return /^[A-Za-z0-9_]{5,32}$/.test(user) ? '@' + user : null;
