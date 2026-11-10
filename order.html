@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=12"></script>
+  <script src="/js/i18n.js?v=13"></script>
   <title>Индивидуальный пошив — accinthecloud</title>
   <meta name="description" content="Индивидуальный пошив accinthecloud: опиши идею, приложи референсы — обсудим детали в Telegram.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/order.html">
@@ -335,10 +335,14 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
   const itemName='Своя идея';
   const notes=[idea,comment].filter(Boolean).join('\n');
   localStorage.setItem('acc_prefill',JSON.stringify({name,telegram}));
+  // референсы — на сервер, у позиции остаются ссылки (уйдут в текст заказа и в заявку)
   const photos=selectedPhotos();
+  let refs={urls:[],failed:0};
   if(photos.length){
-    document.getElementById('submitBtn').disabled=true;
-    await ACC.savePhotos(photos);
+    const btn=document.getElementById('submitBtn');
+    btn.disabled=true;
+    btn.textContent='Загружаю фото…';
+    refs=await ACC.uploadRefs(photos);
   }
   ACC.add({
     id:'custom-'+Date.now(),
@@ -346,10 +350,13 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     name:itemName,
     price:'По запросу',
     priceNum:0,
-    size:'',color:'',notes,qty:1,bg:''
+    size:'',color:'',notes,qty:1,bg:refs.urls[0]||'',
+    refs:refs.urls,refsFailed:refs.failed
   });
   window.location.href='cart.html';
 });
+// вернулись назад из корзины — кнопка снова рабочая
+addEventListener('pageshow',e=>{ if(!e.persisted) return; const b=document.getElementById('submitBtn'); b.disabled=false; b.textContent='Добавить в корзину →'; });
 </script>
 </body>
 </html>

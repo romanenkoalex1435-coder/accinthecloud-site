@@ -61,6 +61,7 @@
     [/^(.+) — фото (\d+) из (\d+)$/, '$1 — photo $2 of $3'],
     [/^(.+) — фото (\d+)$/, '$1 — photo $2'],
     [/^Фото (\d+) из (\d+)$/, 'Photo $1 of $2'],
+    [/^Референс (\d+)$/, 'Reference $1'],
     [/^Сумка (.+)$/, '$1 bag'],
     [/^Зимняя куртка №(\d+)$/, 'Winter jacket No. $1'],
     [/^Куртка №(\d+)$/, 'Jacket No. $1'],
@@ -114,7 +115,7 @@
   }
 
   // ?v= поднимать вместе с i18n.js?v= в страницах при правке словаря: js/ браузер хранит неделю
-  const dict = fetch('/js/i18n-en.json?v=12').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
+  const dict = fetch('/js/i18n-en.json?v=13').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
   document.addEventListener('DOMContentLoaded', () => dict.then(() => {
     walk(document.documentElement);
     const t = tr(document.title); if (t) document.title = t;

@@ -164,6 +164,9 @@
     .lead-main a { color: inherit; }
     .lead-items { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted, #666); }
     .lead-tag { font-size: 12px; }
+    .lead-notes { display: block; white-space: pre-line; color: var(--ink); }
+    .lead-refs { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 4px; }
+    .lead-refs img { display: block; width: 64px; height: 64px; object-fit: cover; background: var(--line); }
     .lead-tag.draft { color: #b3261e; }
     .lead-tag.sent { color: var(--ok); }
 
@@ -372,7 +375,7 @@
       <div class="head">
         <div>
           <h2>Заявки</h2>
-          <p>Кто заполнил форму в корзине и дал согласие. «Не нажал» — до Telegram не дошёл: напиши ему первым. Хранятся 90 дней.</p>
+          <p>Кто нажал «Оформить заказ» в корзине. «Не написал в Telegram» — заказ сохранён, но чат он не открыл: напиши ему первым. Хранятся 90 дней.</p>
         </div>
       </div>
       <div class="hist" id="leads"></div>
@@ -900,9 +903,9 @@ async function loadLeads() {
   box.innerHTML = r.list.length ? r.list.map(l => `
     <div class="hist-row lead">
       <div class="lead-main">
-        <span class="lead-tag ${l.stage === 'sent' ? 'sent' : 'draft'}">${l.stage === 'sent' ? 'Открыл Telegram с заказом' : 'Не нажал «Отправить заказ»'} · ${fmt.format(new Date(l.updatedAt))}${l.lang === 'en' ? ' · EN' : ''}</span>
+        <span class="lead-tag ${l.stage === 'sent' ? 'sent' : 'draft'}">${l.stage === 'sent' ? 'Открыл Telegram с заказом' : 'Не написал в Telegram'} · ${fmt.format(new Date(l.updatedAt))}${l.lang === 'en' ? ' · EN' : ''}</span>
         <strong>${esc(l.name)} · <a href="${esc(tgHref(l.telegram))}" target="_blank" rel="noopener">${esc(l.telegram)}</a></strong>
-        <ul class="lead-items">${l.items.map(i => `<li>${esc(i.name)}${i.capsule ? ' (' + esc(i.capsule) + ')' : ''}${i.size ? ', ' + esc(i.size) : ''}${i.color ? ', ' + esc(i.color) : ''} — ${esc(i.price)} × ${i.qty}</li>`).join('')}</ul>
+        <ul class="lead-items">${l.items.map(i => `<li>${esc(i.name)}${i.capsule ? ' (' + esc(i.capsule) + ')' : ''}${i.size ? ', ' + esc(i.size) : ''}${i.color ? ', ' + esc(i.color) : ''} — ${esc(i.price)} × ${i.qty}${i.notes ? `<span class="lead-notes">${esc(i.notes)}</span>` : ''}${(i.refs || []).length ? `<span class="lead-refs">${i.refs.map((u, n) => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Референс ${n + 1}" loading="lazy" width="64" height="64"></a>`).join('')}</span>` : ''}</li>`).join('')}</ul>
         ${l.total ? `<span>Итого: ${esc(l.total)}</span>` : ''}
         ${l.comment ? `<span>Комментарий: ${esc(l.comment)}</span>` : ''}
       </div>

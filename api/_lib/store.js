@@ -71,6 +71,7 @@ async function listLeads() {
   } while (cursor);
   const old = all.filter(b => Date.now() - new Date(b.uploadedAt) > LEAD_DAYS * 864e5);
   if (old.length) await del(old.map(b => b.url));
+  await dropOldRefs();
   const fresh = all.filter(b => !old.includes(b));
   const leads = await Promise.all(fresh.map(b => fetch(b.url + '?t=' + Date.now(), { cache: 'no-store' })
     .then(r => r.ok ? r.json() : null).then(l => l && { ...l, id: b.pathname.slice(LEADS.length, -5) }).catch(() => null)));
@@ -82,4 +83,26 @@ async function deleteLead(id) {
   if (r.blobs.length) await del(r.blobs[0].url);
 }
 
-module.exports = { load, save, versions, upload, mediaPath, SEED, saveLead, listLeads, deleteLead };
+// Фото-референсы индивидуального заказа: клиент прикрепил их на странице «Индивидуальный пошив».
+// refs/<месяц>/ref-<случайный хвост>.jpg — ссылка уходит в текст заказа и в заявку; живут столько же, сколько заявки.
+const REFS = ROOT + 'refs/';
+
+async function saveRef(buf) {
+  const blob = await put(REFS + new Date().toISOString().slice(0, 7) + '/ref.jpg', buf, {
+    access: 'public', contentType: 'image/jpeg', addRandomSuffix: true, cacheControlMaxAge: 31536000,
+  });
+  return blob.url;
+}
+
+async function dropOldRefs() {
+  const old = [];
+  let cursor;
+  do {
+    const r = await list({ prefix: REFS, cursor, limit: 1000 });
+    old.push(...r.blobs.filter(b => Date.now() - new Date(b.uploadedAt) > LEAD_DAYS * 864e5).map(b => b.url));
+    cursor = r.hasMore ? r.cursor : null;
+  } while (cursor);
+  if (old.length) await del(old);
+}
+
+module.exports = { load, save, versions, upload, mediaPath, SEED, saveLead, listLeads, deleteLead, saveRef };

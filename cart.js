@@ -148,13 +148,16 @@ const ACC = {
   // ── Format cart items as plain-text order message ──
   formatTelegramMessage(name, telegram, comment) {
     // сообщение мастеру всегда на русском, даже из английской версии сайта
-    const L = { head: 'Заказ с сайта accinthecloud', size: 'Размер', color: 'Пожелания по цвету/ткани', notes: 'Доп. пожелания', price: 'Цена', pcs: 'шт.', total: 'Итого: от', name: 'Имя', comment: 'Комментарий' };
+    const L = { head: 'Заказ с сайта accinthecloud', size: 'Размер', color: 'Пожелания по цвету/ткани', notes: 'Доп. пожелания', price: 'Цена', pcs: 'шт.', total: 'Итого: от', name: 'Имя', comment: 'Комментарий', refs: 'Референсы', later: 'фото пришлю в чате' };
     const cart = ACC.get();
     const items = cart.map((item, i) => {
       const line = [`${i+1}. ${item.name} (${item.capsule})`];
       if (item.size)  line.push(`   · ${L.size}: ${item.size}`);
       if (item.color) line.push(`   · ${L.color}: ${item.color}`);
       if (item.notes) line.push(`   · ${L.notes}: ${item.notes}`);
+      // фото в чат по ссылке не передать — даём ссылки, Telegram сделает их кликабельными
+      if (item.refs && item.refs.length) line.push(`   · ${L.refs}:\n` + item.refs.map(u => `     ${u}`).join('\n'));
+      if (item.refsFailed) line.push(`   · ${L.refs}: ${item.refsFailed} ${L.later}`);
       line.push(`   · ${L.price}: ${ACC.priceLabel(item)} × ${item.qty || 1} ${L.pcs}`);
       return line.join('\n');
     }).join('\n\n');
@@ -184,18 +187,18 @@ const ACC = {
   // ── Заявка в бота, когда клиент ушёл в Telegram: если он так и не нажмёт «Отправить»,
   //    мастер всё равно увидит заказ и сможет написать первым. keepalive — запрос доживёт,
   //    даже если страница сменилась на Telegram ──
-  sendLead(text, telegram, photos) {
+  sendLead(text, telegram) {
     const lead = `🔔 Новая заявка: клиент открыл Telegram с готовым заказом.\n` +
                  `Если он не напишет — напиши первым: ${telegram}\n\n${text}`;
-    let body = JSON.stringify({ text: lead, photos: photos || [] });
-    if (body.length > 60000) body = JSON.stringify({ text: lead + '\n\n(фото-референсы клиент приложит в чате)' });
+    const body = JSON.stringify({ text: lead });
     return fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true })
       .then(r => r.json().then(d => r.ok && d.ok === true, () => false))
       .catch(() => false);
   },
 
-  // ── Незавершённый заказ (api/lead.js): форма заполнена и согласие дано — мастер увидит клиента в админке,
-  //    даже если тот не нажмёт «Отправить заказ в Telegram». Один id на оформление, живёт до отправки ──
+  // ── Заказ в базе (api/lead.js): «Оформить заказ» сохраняет его (draft), «Написать в Telegram» отмечает (sent).
+  //    Мастер увидит клиента в админке, даже если тот так и не написал. Один id на оформление, живёт до отправки.
+  //    true — сервер сохранил ──
   LEAD_KEY: 'acc_lead',
   saveLead(stage, { name, telegram, comment }) {
     let lead;
@@ -204,26 +207,26 @@ const ACC = {
       lead = { id: [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''), createdAt: Date.now() };
       try { sessionStorage.setItem(ACC.LEAD_KEY, JSON.stringify(lead)); } catch {}
     }
-    const items = ACC.get().map(i => ({ name: i.name, capsule: i.capsule, size: i.size, color: i.color, notes: i.notes, price: ACC.priceLabel(i), qty: i.qty || 1 }));
+    const items = ACC.get().map(i => ({ name: i.name, capsule: i.capsule, size: i.size, color: i.color, notes: i.notes, price: ACC.priceLabel(i), qty: i.qty || 1, refs: i.refs || [] }));
     const body = JSON.stringify({ ...lead, stage, name, telegram, comment, consent: true, items, total: ACC.totalLabel(), lang: document.documentElement.lang === 'en' ? 'en' : 'ru' });
     if (stage === 'sent') try { sessionStorage.removeItem(ACC.LEAD_KEY); } catch {}
-    return fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    return fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true })
+      .then(r => r.ok, () => false);
   },
 
-  // ── Reference photos from order.html (shrunk, kept until the order is sent) ──
-  PHOTOS_KEY: 'acc_photos',
-  getPhotos() {
-    try { return JSON.parse(localStorage.getItem(ACC.PHOTOS_KEY) || '[]'); }
-    catch { return []; }
-  },
-  async savePhotos(files) {
-    const out = [];
-    for (const f of Array.from(files).slice(0, 5)) {
-      try { out.push(await ACC._shrink(f, 1280, 0.8)); } catch {}
-    }
-    try { localStorage.setItem(ACC.PHOTOS_KEY, JSON.stringify(out)); }
-    catch { localStorage.removeItem(ACC.PHOTOS_KEY); return []; }
-    return out;
+  // ── Фото-референсы со страницы «Индивидуальный пошив»: уменьшаем до JPEG и кладём на сервер (api/ref.js).
+  //    У позиции в корзине остаются ссылки; что не загрузилось — считаем, клиент пришлёт в чате ──
+  MAX_REFS: 5,
+  async uploadRefs(files) {
+    const res = await Promise.all(Array.from(files).slice(0, ACC.MAX_REFS).map(async f => {
+      try {
+        const r = await fetch('/api/ref', { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: await ACC._shrink(f, 1600, 0.82) });
+        const d = await r.json();
+        return r.ok && d.url ? d.url : null;
+      } catch { return null; }
+    }));
+    const urls = res.filter(Boolean);
+    return { urls, failed: res.length - urls.length };
   },
   _shrink(file, max, quality) {
     return new Promise((resolve, reject) => {
@@ -235,7 +238,7 @@ const ACC = {
         c.height = Math.round(img.height * k);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(img.src);
-        resolve(c.toDataURL('image/jpeg', quality));
+        c.toBlob(b => b ? resolve(b) : reject(new Error('jpeg')), 'image/jpeg', quality);
       };
       img.onerror = reject;
       img.src = URL.createObjectURL(file);
@@ -245,7 +248,7 @@ const ACC = {
   // ── Fallback when the site can't deliver: open Telegram chat with the text ──
   CONTACT: 'accinthecloud',
   telegramLink(text) {
-    return `https://t.me/${ACC.CONTACT}?text=${encodeURIComponent(text.slice(0, 2000))}`;
+    return `https://t.me/${ACC.CONTACT}?text=${encodeURIComponent(text.slice(0, 3000))}`;
   },
 
   // ── Init: update badge on page load ──

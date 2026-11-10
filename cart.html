@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=12"></script>
+  <script src="/js/i18n.js?v=13"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -210,6 +210,19 @@
     .offer-note { font-size:10px; color:var(--muted); line-height:1.7; margin-bottom:14px; }
     .offer-note a { color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
 
+    /* ── Шаг 2: заказ сохранён, осталось написать в Telegram ── */
+    #confirmScreen { display:flex; flex-direction:column; gap:14px; }
+    #confirmScreen[hidden] { display:none; }
+    #confirmScreen h2 { font-family:var(--serif); font-size:24px; font-weight:400; }
+    #confirmScreen p { font-size:13px; color:var(--muted); line-height:1.7; }
+    .confirm-data { display:grid; grid-template-columns:auto 1fr; gap:8px 16px; margin:4px 0 8px; padding:16px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); font-size:13px; }
+    .confirm-data dt { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); padding-top:2px; }
+    .confirm-data dd { margin:0; overflow-wrap:anywhere; white-space:pre-line; }
+    #confirmScreen .btn-back { margin-top:0; background:none; cursor:pointer; font-family:inherit; color:var(--ink); }
+    /* референсы у позиции */
+    .item-refs { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .item-refs a { display:block; width:44px; height:44px; background:#e8e8e8 center/cover no-repeat; }
+
     /* ── После отправки: чат в Telegram открыт ── */
     #fallbackScreen { display:none; flex-direction:column; gap:14px; padding:24px 0; }
     #fallbackScreen.show { display:flex; }
@@ -334,9 +347,22 @@
       <p class="field-error" id="errConsent" hidden>Без согласия на обработку данных заказ не отправить</p>
     </div>
     <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
-    <button class="btn-order" id="btnOrder">Отправить заказ в Telegram</button>
-    <p class="checkout-note">Откроется чат с мастером с готовым текстом заказа — останется нажать «Отправить».</p>
+    <button class="btn-order" id="btnOrder">Оформить заказ</button>
+    <p class="checkout-note">Заказ сохранится, дальше — написать мастеру в Telegram.</p>
    </div>
+
+    <div id="confirmScreen" hidden>
+      <p class="checkout-label">Заказ сохранён</p>
+      <h2 tabindex="-1">Осталось написать мастеру</h2>
+      <p>Откроется чат в Telegram с готовым текстом заказа — нажми «Отправить». Фото-референсы будут в тексте ссылками.</p>
+      <dl class="confirm-data">
+        <dt>Имя</dt><dd id="confName"></dd>
+        <dt>Telegram</dt><dd id="confTelegram"></dd>
+        <dt id="confCommentLabel">Комментарий</dt><dd id="confComment"></dd>
+      </dl>
+      <button type="button" class="btn-order" id="btnTelegram">Написать в Telegram</button>
+      <button type="button" class="btn-back" id="btnEdit">Изменить данные</button>
+    </div>
 
     <div id="fallbackScreen" role="alert">
       <h2>Нажми «Отправить» в Telegram</h2>
@@ -415,6 +441,7 @@ function renderCart() {
           <p class="item-capsule">${esc(item.capsule)}</p>
           <p class="item-name">${name}</p>
           ${metas.length ? `<div class="item-meta">${metas.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
+          ${refsHtml(item)}
         </div>
         <div class="item-right">
           <p class="item-price">${esc(ACC.priceLabel(item))}</p>
@@ -528,28 +555,10 @@ document.getElementById('checkConsent').addEventListener('change', e => {
   if (e.target.checked) setFieldError(e.target, document.getElementById('errConsent'), false);
 });
 
-// Незавершённый заказ: сохраняем форму, как только в ней есть имя, верный Telegram и согласие
-let leadTimer = null;
-function leadForm() {
-  const name = document.getElementById('checkName').value.trim();
-  const telegram = ACC.normalizeTelegram(document.getElementById('checkTelegram').value);
-  const consent = document.getElementById('checkConsent').checked;
-  if (orderSubmitted || !ACC.get().length || !name || !telegram || !consent) return null;
-  return { name, telegram, comment: document.getElementById('checkComment').value.trim() };
-}
-function flushLead() {
-  clearTimeout(leadTimer); leadTimer = null;
-  const f = leadForm();
-  if (f) ACC.saveLead('draft', f);
-}
-['checkName', 'checkTelegram', 'checkComment', 'checkConsent'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener(id === 'checkConsent' ? 'change' : 'input', () => { clearTimeout(leadTimer); leadTimer = setTimeout(flushLead, 1500); });
-});
-// ушёл со страницы, не дождавшись паузы, — отправляем сразу
-addEventListener('pagehide', () => { if (leadTimer) flushLead(); });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && leadTimer) flushLead(); });
-
+// ── Шаг 1: «Оформить заказ» — проверяем данные и сохраняем заказ в базу (вкладка «Заявки» в админке) ──
+let orderForm = null;
+const checkoutForm  = document.getElementById('checkoutForm');
+const confirmScreen = document.getElementById('confirmScreen');
 document.getElementById('btnOrder').addEventListener('click', async () => {
   if (ACC.get().length === 0) return;
   const nameEl    = document.getElementById('checkName');
@@ -568,23 +577,58 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   }
 
   hideUndo();
+  const btn = document.getElementById('btnOrder');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняю…';
+  orderForm = { name, telegram, comment };
+  localStorage.setItem('acc_prefill', JSON.stringify({ name, telegram }));
+  // не сохранилось (нет сети) — клиента не держим: заказ всё равно уйдёт текстом в Telegram
+  await ACC.saveLead('draft', orderForm);
+  btn.disabled = false;
+  btn.textContent = 'Оформить заказ';
+
+  document.getElementById('confName').textContent = name;
+  document.getElementById('confTelegram').textContent = telegram;
+  document.getElementById('confComment').textContent = comment;
+  document.getElementById('confComment').hidden = document.getElementById('confCommentLabel').hidden = !comment;
+  checkoutForm.hidden = true;
+  confirmScreen.hidden = false;
+  confirmScreen.querySelector('h2').focus();
+});
+
+document.getElementById('btnEdit').addEventListener('click', () => {
+  confirmScreen.hidden = true;
+  checkoutForm.hidden = false;
+  document.getElementById('checkName').focus();
+});
+
+// На шаге 2 поменяли корзину — пересохраняем заказ, чтобы в базе был актуальный состав
+document.addEventListener('acc:update', () => {
+  if (!orderForm || confirmScreen.hidden || orderSubmitted) return;
+  if (!ACC.get().length) { confirmScreen.hidden = true; checkoutForm.hidden = false; return; }
+  clearTimeout(orderForm.timer);
+  orderForm.timer = setTimeout(() => ACC.saveLead('draft', orderForm), 800);
+});
+
+// ── Шаг 2: «Написать в Telegram» — открываем чат с готовым текстом ──
+document.getElementById('btnTelegram').addEventListener('click', async () => {
+  if (!orderForm || ACC.get().length === 0) return;
+  const { name, telegram, comment } = orderForm;
+  clearTimeout(orderForm.timer);
   const text = ACC.formatTelegramMessage(name, telegram, comment);
   const link = ACC.telegramLink(text);
-  const photos = ACC.getPhotos();
 
   // Чат открываем сразу, в том же нажатии, — иначе браузер заблокирует новое окно
   const win = window.open(link, '_blank');
   if (win) win.opener = null;
-  const leadSent = ACC.sendLead(text, telegram, photos);
-  clearTimeout(leadTimer); leadTimer = null;
-  ACC.saveLead('sent', { name, telegram, comment });
+  ACC.sendLead(text, telegram);
+  const saved = ACC.saveLead('sent', { name, telegram, comment });
   if (!win) location.href = link;
 
   orderSubmitted = true;
-  document.getElementById('checkoutForm').hidden = true;
+  confirmScreen.hidden = true;
   const fb = document.getElementById('fallbackScreen');
   document.getElementById('fallbackLink').href = link;
-  if (photos.length) fb.querySelector('p').textContent += ' Фото-референсы прикрепи в том же чате.';
   document.getElementById('fallbackCopy').onclick = async () => {
     const hint = document.getElementById('fallbackHint');
     try { await navigator.clipboard.writeText(text); hint.textContent = 'Скопировано'; }
@@ -594,18 +638,25 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   fb.querySelector('h2').setAttribute('tabindex', '-1');
   fb.querySelector('h2').focus();
 
-  const sent = await leadSent;
-  ACC.saveOrder({ type: 'cart', name, telegram, comment, details: text, items: ACC.get(), delivered: sent });
-  // Заявка у мастера — корзину можно очищать; не дошла — оставляем, чтобы заказ не потерялся
-  if (sent) {
+  ACC.saveOrder({ type: 'cart', name, telegram, comment, details: text, items: ACC.get() });
+  // Заказ в базе у мастера — корзину можно очищать; не сохранился — оставляем, чтобы он не потерялся.
+  // Текст и ссылка на чат остаются на экране выше
+  if (await saved) {
     ACC.clear();
     localStorage.removeItem('acc_prefill');
-    localStorage.removeItem(ACC.PHOTOS_KEY);
     renderCart();
   }
 });
 
 // ── Helpers ──
+// Миниатюры фото-референсов позиции, по нажатию — полный снимок
+function refsHtml(item) {
+  if (!item.refs || !item.refs.length) return '';
+  return `<div class="item-refs">${item.refs.map((u, i) => {
+    const url = ACC.esc(encodeURI(u).replace(/'/g, '%27'));
+    return `<a href="${url}" target="_blank" rel="noopener" style="background-image:url('${url}')" aria-label="Референс ${i + 1}"></a>`;
+  }).join('')}</div>`;
+}
 // bg бывает голым путём к фото, готовым CSS-значением или пустым
 function thumbBg(bg) {
   if (!bg) return '#e8e8e8';

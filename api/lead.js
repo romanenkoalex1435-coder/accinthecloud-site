@@ -1,11 +1,13 @@
-// Незавершённые заказы: корзина присылает форму, как только в ней есть имя, верный Telegram и согласие,
-// и ещё раз — когда клиент нажал «Отправить заказ в Telegram» (stage: sent).
+// Заказы из корзины: клиент нажал «Оформить заказ» (stage: draft — заказ сохранён),
+// и ещё раз — когда нажал «Написать в Telegram» (stage: sent).
 // Так у мастера остаётся база тех, кто дошёл до заказа, но не написал. Смотреть — в админке, вкладка «Заявки».
 const { saveLead } = require('./_lib/store');
 
 const ID = /^[a-f0-9]{32}$/;
 const TG = /^(@[A-Za-z0-9_]{5,32}|\+?[0-9 ()-]{7,20}|https:\/\/t\.me\/[A-Za-z0-9_+]{3,64})$/;
-const MAX_BODY = 16 * 1024;
+const MAX_BODY = 64 * 1024;
+// ссылки на фото-референсы — только наши, из api/ref.js
+const REF = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/(dev\/)?refs\/[\w\/.-]{1,120}\.jpg$/i;
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -26,6 +28,7 @@ module.exports = async (req, res) => {
     const items = (Array.isArray(raw.items) ? raw.items : []).slice(0, 30).map(i => ({
       name: s(i.name, 80), capsule: s(i.capsule, 40), size: s(i.size, 40), color: s(i.color, 120), notes: s(i.notes, 300),
       price: s(i.price, 40), qty: Math.max(1, Math.min(99, Math.round(Number(i.qty) || 1))),
+      refs: (Array.isArray(i.refs) ? i.refs : []).filter(u => typeof u === 'string' && REF.test(u)).slice(0, 5),
     }));
     if (!items.length) return res.status(400).json({ ok: false, error: 'empty' });
     const now = Date.now();
