@@ -194,6 +194,22 @@ const ACC = {
       .catch(() => false);
   },
 
+  // ── Незавершённый заказ (api/lead.js): форма заполнена и согласие дано — мастер увидит клиента в админке,
+  //    даже если тот не нажмёт «Отправить заказ в Telegram». Один id на оформление, живёт до отправки ──
+  LEAD_KEY: 'acc_lead',
+  saveLead(stage, { name, telegram, comment }) {
+    let lead;
+    try { lead = JSON.parse(sessionStorage.getItem(ACC.LEAD_KEY) || 'null'); } catch {}
+    if (!lead || !/^[a-f0-9]{32}$/.test(lead.id)) {
+      lead = { id: [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''), createdAt: Date.now() };
+      try { sessionStorage.setItem(ACC.LEAD_KEY, JSON.stringify(lead)); } catch {}
+    }
+    const items = ACC.get().map(i => ({ name: i.name, capsule: i.capsule, size: i.size, color: i.color, notes: i.notes, price: ACC.priceLabel(i), qty: i.qty || 1 }));
+    const body = JSON.stringify({ ...lead, stage, name, telegram, comment, consent: true, items, total: ACC.totalLabel(), lang: document.documentElement.lang === 'en' ? 'en' : 'ru' });
+    if (stage === 'sent') try { sessionStorage.removeItem(ACC.LEAD_KEY); } catch {}
+    return fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+  },
+
   // ── Reference photos from order.html (shrunk, kept until the order is sent) ──
   PHOTOS_KEY: 'acc_photos',
   getPhotos() {

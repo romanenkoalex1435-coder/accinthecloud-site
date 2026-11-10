@@ -159,6 +159,13 @@
     .hist { border-top: 1px solid var(--line); max-width: 720px; }
     .hist-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
     .hist-row .now { font-size: 12px; color: var(--ok); }
+    .lead { align-items: flex-start; }
+    .lead-main { display: grid; gap: 4px; min-width: 0; }
+    .lead-main a { color: inherit; }
+    .lead-items { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted, #666); }
+    .lead-tag { font-size: 12px; }
+    .lead-tag.draft { color: #b3261e; }
+    .lead-tag.sent { color: var(--ok); }
 
     /* нижняя панель публикации */
     .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--line);
@@ -222,6 +229,7 @@
       <button role="tab" id="tab-hero" aria-controls="pane-hero" aria-selected="true">Первый экран</button>
       <button role="tab" id="tab-products" aria-controls="pane-products" aria-selected="false">Товары</button>
       <button role="tab" id="tab-history" aria-controls="pane-history" aria-selected="false">История</button>
+      <button role="tab" id="tab-leads" aria-controls="pane-leads" aria-selected="false">Заявки</button>
     </nav>
     <div class="top-right">
       <a class="btn btn-quiet" href="/" target="_blank" rel="noopener">Сайт ↗</a>
@@ -358,6 +366,16 @@
         </div>
       </div>
       <div class="hist" id="hist"></div>
+    </section>
+
+    <section id="pane-leads" role="tabpanel" aria-labelledby="tab-leads" hidden>
+      <div class="head">
+        <div>
+          <h2>Заявки</h2>
+          <p>Кто заполнил форму в корзине и дал согласие. «Не нажал» — до Telegram не дошёл: напиши ему первым. Хранятся 90 дней.</p>
+        </div>
+      </div>
+      <div class="hist" id="leads"></div>
     </section>
   </main>
 
@@ -510,6 +528,7 @@ document.querySelectorAll('.tabs [role=tab]').forEach(tab => tab.addEventListene
   document.querySelectorAll('.tabs [role=tab]').forEach(t => t.setAttribute('aria-selected', t === tab));
   document.querySelectorAll('[role=tabpanel]').forEach(p => p.hidden = p.id !== tab.getAttribute('aria-controls'));
   if (tab.id === 'tab-history') loadHistory();
+  if (tab.id === 'tab-leads') loadLeads();
   if (tab.id === 'tab-hero') reloadFrame();
 }));
 
@@ -867,6 +886,33 @@ async function loadHistory() {
     if (!r.ok) return toast('Не получилось вернуть', true);
     localStorage.removeItem('acc_admin_draft');
     await boot(); loadHistory(); toast('Версия возвращена на сайт');
+  }));
+}
+
+async function loadLeads() {
+  const box = $('#leads');
+  box.innerHTML = '<p class="hist-row">Загружаю…</p>';
+  const r = await api('leads').catch(() => null);
+  if (r && r.error === 'no_password') { box.innerHTML = '<p class="hist-row">Заявки — личные данные клиентов, поэтому видны только после того, как у админки появится пароль (tools/set-admin.sh)</p>'; return; }
+  if (!r || !r.ok) { box.innerHTML = '<p class="hist-row">Не получилось загрузить заявки</p>'; return; }
+  const fmt = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  const tgHref = t => t.startsWith('@') ? 'https://t.me/' + t.slice(1) : t.startsWith('https://t.me/') ? t : 'tel:' + t.replace(/[^+\d]/g, '');
+  box.innerHTML = r.list.length ? r.list.map(l => `
+    <div class="hist-row lead">
+      <div class="lead-main">
+        <span class="lead-tag ${l.stage === 'sent' ? 'sent' : 'draft'}">${l.stage === 'sent' ? 'Открыл Telegram с заказом' : 'Не нажал «Отправить заказ»'} · ${fmt.format(new Date(l.updatedAt))}${l.lang === 'en' ? ' · EN' : ''}</span>
+        <strong>${esc(l.name)} · <a href="${esc(tgHref(l.telegram))}" target="_blank" rel="noopener">${esc(l.telegram)}</a></strong>
+        <ul class="lead-items">${l.items.map(i => `<li>${esc(i.name)}${i.capsule ? ' (' + esc(i.capsule) + ')' : ''}${i.size ? ', ' + esc(i.size) : ''}${i.color ? ', ' + esc(i.color) : ''} — ${esc(i.price)} × ${i.qty}</li>`).join('')}</ul>
+        ${l.total ? `<span>Итого: ${esc(l.total)}</span>` : ''}
+        ${l.comment ? `<span>Комментарий: ${esc(l.comment)}</span>` : ''}
+      </div>
+      <button class="btn btn-ghost" type="button" data-del="${esc(l.id)}">Удалить</button>
+    </div>`).join('') : '<p class="hist-row">Заявок пока нет</p>';
+  box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Удалить заявку насовсем?')) return;
+    const r = await post('lead-del', { id: b.dataset.del }).catch(() => null);
+    if (!r || !r.ok) return toast('Не получилось удалить', true);
+    loadLeads(); toast('Заявка удалена');
   }));
 }
 

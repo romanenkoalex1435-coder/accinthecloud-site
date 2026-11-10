@@ -49,4 +49,37 @@ async function upload(key, type, body, small) {
   return blob.url;
 }
 
-module.exports = { load, save, versions, upload, mediaPath, SEED };
+// Незавершённые заказы: клиент заполнил форму корзины и дал согласие, но мог не нажать «Отправить заказ в Telegram».
+// Один файл на оформление leads/<id>.json; id — 128 случайных бит от браузера, адрес не угадать.
+// Хранятся 90 дней, старые удаляются при открытии списка в админке.
+const LEADS = ROOT + 'leads/';
+const LEAD_DAYS = 90;
+
+async function saveLead(id, lead) {
+  await put(LEADS + id + '.json', JSON.stringify(lead), {
+    access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true, cacheControlMaxAge: 60,
+  });
+}
+
+async function listLeads() {
+  const all = [];
+  let cursor;
+  do {
+    const r = await list({ prefix: LEADS, cursor, limit: 1000 });
+    all.push(...r.blobs);
+    cursor = r.hasMore ? r.cursor : null;
+  } while (cursor);
+  const old = all.filter(b => Date.now() - new Date(b.uploadedAt) > LEAD_DAYS * 864e5);
+  if (old.length) await del(old.map(b => b.url));
+  const fresh = all.filter(b => !old.includes(b));
+  const leads = await Promise.all(fresh.map(b => fetch(b.url + '?t=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null).then(l => l && { ...l, id: b.pathname.slice(LEADS.length, -5) }).catch(() => null)));
+  return leads.filter(Boolean).sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+async function deleteLead(id) {
+  const r = await list({ prefix: LEADS + id + '.json', limit: 1 });
+  if (r.blobs.length) await del(r.blobs[0].url);
+}
+
+module.exports = { load, save, versions, upload, mediaPath, SEED, saveLead, listLeads, deleteLead };

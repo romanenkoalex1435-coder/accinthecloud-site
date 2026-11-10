@@ -3,7 +3,7 @@
 // Вход — подписанная cookie на 30 дней; смена пароля выкидывает всех.
 // Пока пароль не задан, админка открыта всем (временно, на время показа механики).
 const crypto = require('crypto');
-const { load, save, versions, upload, mediaPath } = require('./_lib/store');
+const { load, save, versions, upload, mediaPath, listLeads, deleteLead } = require('./_lib/store');
 const { generateClientTokenFromReadWriteToken } = require('@vercel/blob/client');
 
 const COOKIE = 'acc_admin';
@@ -154,6 +154,17 @@ module.exports = async (req, res) => {
         validUntil: Date.now() + 30 * 60e3, addRandomSuffix: false, cacheControlMaxAge: 31536000,
       });
       return res.json({ ok: true, token, pathname });
+    }
+    // заявки — личные данные клиентов: показываем только за паролем, даже пока остальная админка открыта
+    if (a === 'leads' || a === 'lead-del') {
+      if (!process.env.ADMIN_PASSWORD) return res.status(403).json({ ok: false, error: 'no_password' });
+      if (a === 'leads' && req.method === 'GET') return res.json({ ok: true, list: await listLeads() });
+      if (a === 'lead-del' && req.method === 'POST') {
+        const id = String(JSON.parse((await readBody(req)).toString() || '{}').id || '');
+        if (!/^[a-f0-9]{32}$/.test(id)) return res.status(400).json({ ok: false, error: 'id' });
+        await deleteLead(id);
+        return res.json({ ok: true });
+      }
     }
     return res.status(404).json({ ok: false, error: 'unknown' });
   } catch (e) {

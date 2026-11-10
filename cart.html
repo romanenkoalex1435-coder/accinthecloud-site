@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=11"></script>
+  <script src="/js/i18n.js?v=12"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -528,6 +528,28 @@ document.getElementById('checkConsent').addEventListener('change', e => {
   if (e.target.checked) setFieldError(e.target, document.getElementById('errConsent'), false);
 });
 
+// Незавершённый заказ: сохраняем форму, как только в ней есть имя, верный Telegram и согласие
+let leadTimer = null;
+function leadForm() {
+  const name = document.getElementById('checkName').value.trim();
+  const telegram = ACC.normalizeTelegram(document.getElementById('checkTelegram').value);
+  const consent = document.getElementById('checkConsent').checked;
+  if (orderSubmitted || !ACC.get().length || !name || !telegram || !consent) return null;
+  return { name, telegram, comment: document.getElementById('checkComment').value.trim() };
+}
+function flushLead() {
+  clearTimeout(leadTimer); leadTimer = null;
+  const f = leadForm();
+  if (f) ACC.saveLead('draft', f);
+}
+['checkName', 'checkTelegram', 'checkComment', 'checkConsent'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener(id === 'checkConsent' ? 'change' : 'input', () => { clearTimeout(leadTimer); leadTimer = setTimeout(flushLead, 1500); });
+});
+// ушёл со страницы, не дождавшись паузы, — отправляем сразу
+addEventListener('pagehide', () => { if (leadTimer) flushLead(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && leadTimer) flushLead(); });
+
 document.getElementById('btnOrder').addEventListener('click', async () => {
   if (ACC.get().length === 0) return;
   const nameEl    = document.getElementById('checkName');
@@ -554,6 +576,8 @@ document.getElementById('btnOrder').addEventListener('click', async () => {
   const win = window.open(link, '_blank');
   if (win) win.opener = null;
   const leadSent = ACC.sendLead(text, telegram, photos);
+  clearTimeout(leadTimer); leadTimer = null;
+  ACC.saveLead('sent', { name, telegram, comment });
   if (!win) location.href = link;
 
   orderSubmitted = true;
