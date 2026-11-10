@@ -95,8 +95,14 @@
 /* Своя ссылка на каждую вещь: collection-a1.html?item=camo, lookbook.html?item=bag-n03.
    Страница вызывает set/clear при открытии и закрытии карточки. */
 window.ACC_LINK = {
-  set(slug) { history.replaceState(history.state, '', '?item=' + encodeURIComponent(slug) + location.hash); },
-  clear() { if (location.search) history.replaceState(history.state, '', location.pathname + location.hash); },
+  // ?item= рядом с остальными параметрами: у новых капсул в адресе ещё ?c=a4
+  set(slug) { const u = new URL(location.href); u.searchParams.set('item', slug); history.replaceState(history.state, '', u.pathname + u.search + u.hash); },
+  clear() {
+    const u = new URL(location.href);
+    if (!u.searchParams.has('item')) return;
+    u.searchParams.delete('item');
+    history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+  },
   open(list, keyOf, openFn) {
     const slug = new URLSearchParams(location.search).get('item');
     const item = slug && list.find(x => keyOf(x) === slug);

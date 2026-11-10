@@ -61,5 +61,16 @@
     return !isNaN(end) && Date.now() > end ? null : dropData();
   }
 
-  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm };
+  // Капсулы по порядку: a1–a3 со своими страницами, новые из админки — на общей capsule.html?c=…
+  const BUILTIN = ['a1', 'a2', 'a3'];
+  const capHref = c => BUILTIN.includes(c) ? `collection-${c}.html` : `capsule.html?c=${c}`;
+  function capsule(c) {
+    const cap = raw && raw.capsules && raw.capsules[c];
+    if (!cap) return null;
+    return { key: c, href: capHref(c), builtin: BUILTIN.includes(c), hidden: !!cap.hidden,
+      title: cap.title || `Капсула ${c}${cap.name ? ' · ' + cap.name : ''}`, name: t(cap, 'name'), sub: t(cap, 'sub'), cover: cap.cover ? src(cap.cover) : '' };
+  }
+  const capsules = () => raw && raw.capsules ? Object.keys(raw.capsules).map(capsule) : null;
+
+  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm, capsule, capsules, capHref };
 })();

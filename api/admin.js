@@ -67,10 +67,17 @@ function clean(d) {
     capsules: {},
     lookbook: { items: [] },
   };
-  for (const c of ['a1', 'a2', 'a3']) {
+  // a1–a3 есть всегда (у них свои страницы), новые a4, a5… — из админки, на общей capsule.html?c=…
+  const keys = [...new Set(['a1', 'a2', 'a3', ...Object.keys(d.capsules || {}).filter(k => /^a\d{1,2}$/.test(k))])].slice(0, 20);
+  for (const c of keys) {
     const cap = (d.capsules || {})[c] || {};
     const list = (cap.items || []).slice(0, 60), id = ids(list, c);
-    out.capsules[c] = { title: s(cap.title, 60), items: list.map((i, n) => ({
+    const builtin = ['a1', 'a2', 'a3'].includes(c), name = s(cap.name, 40).trim();
+    out.capsules[c] = {
+      title: builtin ? s(cap.title, 60) : `Капсула ${c}${name ? ' · ' + name : ''}`,
+      name, sub: s(cap.sub, 120), cover: builtin ? '' : url(cap.cover), hidden: !!cap.hidden,
+      en: en(cap.en, [['name', 40], ['sub', 120]]),
+      items: list.map((i, n) => ({
       id: id[n], name: s(i.name, 60), kind: ['item', 'classic', 'unique'].includes(i.kind) ? i.kind : 'item',
       typeLabel: s(i.typeLabel, 60), priceNum: num(i.priceNum), usd: num(i.usd),
       specs: s(i.specs), temp: s(i.temp), desc: s(i.desc, 1200),

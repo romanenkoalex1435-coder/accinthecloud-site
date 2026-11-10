@@ -128,6 +128,12 @@
     .status.hidden { color: var(--muted); border-style: dashed; }
     .item-move { display: flex; gap: 4px; }
     .add-row { margin-top: 16px; }
+    #capSeg { flex-wrap: wrap; max-width: 100%; }
+    .cap-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+    .cap-box { margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .cap-cover { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .cap-cover .photo { width: 96px; }
+    .cap-box .hint { font-size: 12px; color: var(--muted); }
     .editor { position: sticky; top: 88px; max-height: calc(100vh - 176px); overflow: auto; border: 1px solid var(--line); padding: 24px; display: grid; gap: 20px; }
     .editor-empty { color: var(--muted); padding: 48px 24px; text-align: center; border: 1px dashed var(--field); }
     .editor-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -349,10 +355,14 @@
           <h2>Товары</h2>
           <p id="prodHint">Порядок в списке — порядок на странице капсулы. Первое фото — обложка карточки.</p>
         </div>
-        <div class="seg" role="group" aria-label="Капсула" id="capSeg"></div>
+        <div class="cap-head">
+          <div class="seg" role="group" aria-label="Капсула" id="capSeg"></div>
+          <button class="btn btn-ghost" type="button" id="addCap">+ Новая капсула</button>
+        </div>
       </div>
       <div class="prod-grid">
         <div>
+          <div id="capSettings"></div>
           <div class="list" id="list"></div>
           <button class="btn btn-ghost add-row" type="button" id="addItem">+ Добавить вещь</button>
         </div>
@@ -411,13 +421,17 @@ const ICON = {
   x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 4 8 8M12 4l-8 8"/></svg>',
 };
 
-// Что умеет показывать каждая капсула
-const CAPS = {
+// Что умеет показывать каждая капсула. У a1–a3 свои страницы со своим набором полей;
+// новые (a4, a5…) создаются здесь и показываются на общей странице capsule.html?c=…
+const BUILTIN = {
   a1: { name: 'a1 · Access', fields: [], kinds: ['item', 'unique'], sold: false, defType: 'Сумка через плечо' },
   a2: { name: 'a2 · Accept', fields: ['temp', 'desc'], kinds: ['item', 'classic', 'unique'], sold: true, defType: 'Куртка' },
   a3: { name: 'a3 · Accent', fields: ['specs'], kinds: ['item', 'unique'], sold: false, defType: 'Джинсы' },
-  lb: { name: 'Лукбук', lookbook: true },
 };
+const LOOKBOOK = { name: 'Лукбук', lookbook: true };
+const capCfg = c => c === 'lb' ? LOOKBOOK : BUILTIN[c] || { name: c + ' · ' + (S.data.capsules[c].name || 'без названия'), fields: ['specs', 'desc'], kinds: ['item', 'unique'], sold: true, defType: '', custom: true };
+const capHref = c => BUILTIN[c] ? `collection-${c}.html` : `capsule.html?c=${c}`;
+const capItemHref = (c, id) => capHref(c) + (BUILTIN[c] ? '?' : '&') + 'item=' + encodeURIComponent(id.startsWith(c + '-') ? id.slice(c.length + 1) : id);
 const CAT = { tops: 'Верх', bottoms: 'Низ', bags: 'Сумки', accessories: 'Аксессуары' };
 const FIELD = { specs: 'Характеристики', temp: 'Температура', desc: 'Описание' };
 const KIND = { item: 'Обычная вещь', classic: 'С выбором цвета', unique: 'Свой дизайн (по запросу)' };
@@ -478,7 +492,7 @@ function norm(d) {
   const dr = d.hero.drop;
   dr.en = dr.en || {}; dr.models = dr.models || []; dr.models.forEach(m => { m.en = m.en || {}; });
   ['kicker', 'voteHref'].forEach(k => { dr[k] = dr[k] || ''; });
-  Object.values(d.capsules).forEach(c => c.items.forEach(i => { i.en = i.en || {}; }));
+  Object.values(d.capsules).forEach(c => { c.en = c.en || {}; ['name', 'sub', 'cover'].forEach(k => { c[k] = c[k] || ''; }); c.hidden = !!c.hidden; c.items.forEach(i => { i.en = i.en || {}; }); });
   d.lookbook = d.lookbook || { items: [] };
   d.lookbook.items.forEach(i => { i.en = i.en || {}; });
   return d;
@@ -503,12 +517,14 @@ addEventListener('beforeunload', e => { if (S.data && dirty()) { e.preventDefaul
 $('#discard').addEventListener('click', () => {
   if (!confirm('Вернуть всё как на сайте сейчас?')) return;
   S.data = JSON.parse(S.saved); S.sel = null;
-  renderHero(); renderList(); renderEditor(); changed();
+  renderHero(); renderCaps(); renderList(); renderEditor(); changed();
 });
 $('#publish').addEventListener('click', () => publish(false));
 async function publish(force) {
   const bad = allItems().find(([, i]) => !i.name.trim());
   if (bad) return toast(bad[0] === 'lb' ? 'У вещи в лукбуке нет названия' : 'У вещи в капсуле ' + bad[0] + ' нет названия', true);
+  const noName = Object.keys(S.data.capsules).find(c => !BUILTIN[c] && !S.data.capsules[c].name.trim());
+  if (noName) return toast('У капсулы ' + noName + ' нет названия', true);
   if (S.data.hero.mode === 'drop' && !S.data.hero.drop.title.trim()) return toast('У дропа нет названия — он не покажется', true);
   // после публикации адрес ?item= у новой вещи больше не меняется
   allItems().forEach(([, i]) => delete i.fresh);
@@ -588,7 +604,7 @@ const HERO_EN = { dEnTitle: 'title', dEnSub: 'subtitle', dEnKicker: 'kicker', dE
 function itemLinks() {
   const out = [];
   for (const [c, cap] of Object.entries(S.data.capsules))
-    for (const i of cap.items) if (i.status !== 'hidden') out.push({ label: `${c} · ${i.name}`, href: `collection-${c}.html?item=${i.id.replace(/^a\d-/, '')}` });
+    if (!cap.hidden) for (const i of cap.items) if (i.status !== 'hidden') out.push({ label: `${c} · ${i.name}`, href: capItemHref(c, i.id) });
   return out;
 }
 function renderHero() {
@@ -602,7 +618,7 @@ function renderHero() {
   const links = itemLinks();
   for (const [id, k] of Object.entries(HERO_EN)) { $('#' + id).value = d.en[k] || ''; $('#' + id).placeholder = d[k] || ''; }
   $('#dCtaPick').innerHTML = `<option value="">Своя ссылка</option><option value="drop.html">Страница дропа</option>` +
-    ['a1', 'a2', 'a3'].map(c => `<option value="collection-${c}.html">Капсула ${c} целиком</option>`).join('') +
+    Object.keys(S.data.capsules).filter(c => !S.data.capsules[c].hidden).map(c => `<option value="${capHref(c)}">Капсула ${c} целиком</option>`).join('') +
     links.map(l => `<option value="${esc(l.href)}">${esc(l.label)}</option>`).join('');
   $('#dCtaPick').value = [...$('#dCtaPick').options].some(o => o.value === d.ctaHref) ? d.ctaHref : '';
   renderMedia(); renderModels();
@@ -706,7 +722,9 @@ addEventListener('resize', () => { clearTimeout(previewT); previewT = setTimeout
 const coll = () => S.cap === 'lb' ? S.data.lookbook : S.data.capsules[S.cap];
 const items = () => coll().items;
 function renderCaps() {
-  $('#capSeg').innerHTML = Object.entries(CAPS).map(([c, v]) => `<button type="button" data-cap="${c}" aria-pressed="${c === S.cap}">${v.name}</button>`).join('');
+  if (S.cap !== 'lb' && !S.data.capsules[S.cap]) S.cap = 'a1';
+  $('#capSeg').innerHTML = [...Object.keys(S.data.capsules), 'lb'].map(c => `<button type="button" data-cap="${c}" aria-pressed="${c === S.cap}">${esc(capCfg(c).name)}${c !== 'lb' && S.data.capsules[c].hidden ? ' · скрыта' : ''}</button>`).join('');
+  renderCapSettings();
   $('#capSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
     S.cap = b.dataset.cap; S.sel = null; renderCaps(); renderList(); renderEditor();
   }));
@@ -714,6 +732,70 @@ function renderCaps() {
     ? 'На сайте лукбук перемешивается при каждом заходе. Первое фото — обложка карточки.'
     : 'Порядок в списке — порядок на странице капсулы. Первое фото — обложка карточки.';
 }
+// Настройки выбранной капсулы: название и подпись на главной, обложка (у новых), скрыть, английский
+function renderCapSettings() {
+  const box = $('#capSettings');
+  if (S.cap === 'lb') { box.innerHTML = ''; box.dataset.cap = ''; return; }
+  const c = S.cap, cap = S.data.capsules[c], custom = !BUILTIN[c];
+  // та же капсула перерисовывается (галочка, обложка) — панель остаётся как была
+  const open = box.dataset.cap === c ? !!box.querySelector('details')?.open : custom && (!cap.items.length || !cap.name);
+  box.dataset.cap = c;
+  box.innerHTML = `
+    <details class="en-box cap-box"${open ? ' open' : ''}>
+      <summary>Капсула ${c} — название, обложка, показ</summary>
+      <div class="en-body">
+        <div class="row2">
+          <label class="field"><span>Название</span><input id="cName" maxlength="40" value="${esc(cap.name)}" placeholder="${custom ? 'Например, Arrive' : esc(BUILTIN[c].name.split('· ')[1])}"></label>
+          <label class="field"><span>Подпись</span><input id="cSub" maxlength="120" value="${esc(cap.sub)}" placeholder="${custom ? 'Например, Рубашки' : 'как сейчас на главной'}"></label>
+        </div>
+        ${custom ? `<div class="field"><span>Обложка на главной</span>
+          <div class="cap-cover">
+            ${cap.cover ? `<div class="photo"><img src="${esc(sm(cap.cover))}" alt="Обложка капсулы ${c}"></div>` : '<span class="hint">Нет фото — на главной будет пустая плитка</span>'}
+            <label class="btn btn-ghost">${cap.cover ? 'Заменить' : '+ Фото'}<input type="file" id="cCoverFile" accept="image/*" class="sr"></label>
+            ${cap.cover ? '<button class="btn btn-quiet" type="button" id="cCoverDel">Убрать</button>' : ''}
+          </div></div>`
+        : `<p class="hint">У a1–a3 название и подпись меняются только на карточке главной — у страницы капсулы своя вёрстка.</p>`}
+        <label class="check"><input type="checkbox" id="cHidden" ${cap.hidden ? 'checked' : ''}> Скрыть капсулу с сайта</label>
+        <span class="hint">${cap.hidden ? 'Капсулы нет на главной, её страница пишет «капсулы нет». Удобно, пока наполняешь.' : 'Капсула на главной, страницу видят все.'}</span>
+        <div class="row2">
+          <label class="field"><span>Название по-английски</span><input id="cEnName" maxlength="40" value="${esc(cap.en.name || '')}" placeholder="${esc(cap.name)}"></label>
+          <label class="field"><span>Подпись по-английски</span><input id="cEnSub" maxlength="120" value="${esc(cap.en.sub || '')}" placeholder="${esc(cap.sub)}"></label>
+        </div>
+        <div class="editor-foot">
+          <a class="btn btn-ghost" href="${esc(capHref(c) + (BUILTIN[c] ? '?' : '&') + 'preview=1')}" target="_blank" rel="noopener">Открыть страницу ↗</a>
+          ${custom ? '<button class="btn btn-danger" type="button" id="cDelete">Удалить капсулу</button>' : ''}
+        </div>
+      </div>
+    </details>`;
+  const seg = () => { const b = $(`#capSeg [data-cap="${c}"]`); if (b) b.textContent = capCfg(c).name + (cap.hidden ? ' · скрыта' : ''); };
+  $('#cName').addEventListener('input', e => { cap.name = e.target.value; $('#cEnName').placeholder = e.target.value; seg(); changed(false); });
+  $('#cSub').addEventListener('input', e => { cap.sub = e.target.value; $('#cEnSub').placeholder = e.target.value; changed(false); });
+  $('#cEnName').addEventListener('input', e => { cap.en.name = e.target.value; changed(false); });
+  $('#cEnSub').addEventListener('input', e => { cap.en.sub = e.target.value; changed(false); });
+  $('#cHidden').addEventListener('change', e => { cap.hidden = e.target.checked; renderCaps(); changed(false); $('#cHidden').focus(); });
+  $('#cCoverFile')?.addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try { cap.cover = (await uploadFile(f)).url; changed(false); } catch (err) { toast(err.message, true); }
+    renderCapSettings();
+  });
+  $('#cCoverDel')?.addEventListener('click', () => { cap.cover = ''; renderCapSettings(); changed(false); });
+  $('#cDelete')?.addEventListener('click', () => {
+    if (!confirm(`Удалить капсулу ${c}${cap.name ? ' «' + cap.name + '»' : ''} вместе с вещами? До публикации можно отменить.`)) return;
+    delete S.data.capsules[c];
+    S.cap = 'a1'; S.sel = null; renderCaps(); renderList(); renderEditor(); changed(false);
+  });
+}
+$('#addCap').addEventListener('click', () => {
+  const n = Math.max(3, ...Object.keys(S.data.capsules).map(k => +k.slice(1) || 0)) + 1;
+  if (n > 20) return toast('Больше 20 капсул не поместится', true);
+  const c = 'a' + n;
+  S.data.capsules[c] = { title: '', name: '', sub: '', cover: '', hidden: true, en: {}, items: [] };
+  S.cap = c; S.sel = null; renderCaps(); renderList(); renderEditor(); changed(false);
+  $('#cName').focus();
+  toast(`Капсула ${c} создана скрытой — наполни и сними галочку «Скрыть»`);
+});
+
 function priceText(i) {
   if (!i.priceNum) return i.status === 'sold' ? '—' : 'По запросу';
   return money(i.priceNum) + ' ₽' + (i.usd ? ' / ' + i.usd + '$' : '');
@@ -753,13 +835,13 @@ $('#addItem').addEventListener('click', () => {
   if (S.cap === 'lb') {
     const max = Math.max(0, ...items().map(i => parseInt(String(i.num).replace(/\D/g, ''), 10) || 0));
     items().push({ id, num: 'n' + String(max + 1).padStart(2, '0'), name: '', cat: 'tops', special: false, desc: '', status: 'hidden', images: [], en: {}, fresh: true });
-  } else items().push({ id, name: '', kind: 'item', typeLabel: CAPS[S.cap].defType, priceNum: 0, usd: 0, specs: '', temp: '', desc: '', status: 'hidden', images: [], en: {}, fresh: true });
+  } else items().push({ id, name: '', kind: 'item', typeLabel: capCfg(S.cap).defType, priceNum: 0, usd: 0, specs: '', temp: '', desc: '', status: 'hidden', images: [], en: {}, fresh: true });
   S.sel = id; renderList(); renderEditor(); changed();
   $('#eName')?.focus();
 });
 
 function renderEditor() {
-  const ed = $('#editor'), i = items().find(x => x.id === S.sel), cap = CAPS[S.cap];
+  const ed = $('#editor'), i = items().find(x => x.id === S.sel), cap = capCfg(S.cap);
   ed.classList.toggle('closed', !i);
   if (!i) { ed.innerHTML = `<p class="editor-empty">Выбери вещь в списке или добавь новую</p>`; return; }
   const f = cap.fields || [], lb = !!cap.lookbook;
@@ -815,7 +897,7 @@ function renderEditor() {
       <label class="btn btn-ghost" ${i.images.length >= 12 ? 'hidden' : ''}>+ Добавить фото<input type="file" id="ePhotoFile" accept="image/*" multiple class="sr"></label>
     </div>
     <div class="editor-foot">
-      <a class="btn btn-ghost" href="${lb ? `lookbook.html?preview=1&item=${esc(i.id)}` : `collection-${S.cap}.html?preview=1&item=${esc(i.id.replace(/^a\d-/, ''))}`}" target="_blank" rel="noopener">Посмотреть на странице ↗</a>
+      <a class="btn btn-ghost" href="${lb ? `lookbook.html?preview=1&item=${esc(i.id)}` : esc(capItemHref(S.cap, i.id) + '&preview=1')}" target="_blank" rel="noopener">Посмотреть на странице ↗</a>
       <button class="btn btn-danger" type="button" id="eDelete">Удалить вещь</button>
     </div>`;
 

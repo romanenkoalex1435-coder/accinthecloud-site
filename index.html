@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=13"></script>
+  <script src="/js/i18n.js?v=14"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/">
@@ -244,6 +244,12 @@
     }
     .capsule-card:active .capsule-tile { background: #e6e4de; }
     .capsule-count { display: none; }
+    /* новые капсулы из админки: обложка — фото на всю плитку */
+    .capsule-tile.photo { background: #e8e6e1; }
+    .capsule-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.23, 1, .32, 1); }
+    .capsule-tile.photo .capsule-tag { z-index: 1; background: var(--bg); padding: 4px 6px 3px; top: 10px; left: 10px; }
+    @media (hover: hover) { .capsule-card:hover .capsule-photo { transform: scale(1.03); } }
+    .capsules-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     @media (max-width: 900px) {
       .capsules-grid {
         display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
@@ -403,7 +409,7 @@
 <main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=2"></script>
+<script src="/js/site-data.js?v=3"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
     <img class="hero-still" src="images/mark-still.webp?v=3" alt="" width="1219" height="584" fetchpriority="high">
@@ -539,6 +545,40 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
   </div>
   <div class="capsule-count" aria-hidden="true"><b id="capsuleNum">01/03</b><span class="capsule-bars"><i class="on"></i><i></i><i></i></span></div>
 </section>
+<script>
+// ── Капсулы из админки: скрытые убираем, у a1–a3 — свои название и подпись, новые добавляем карточками ──
+(function(){
+  const grid = document.getElementById('capsulesGrid');
+  const caps = window.ACC_SITE && ACC_SITE.capsules();
+  if (!grid || !caps) return;
+  const esc = ACC.esc;
+  caps.forEach(c => {
+    const card = c.builtin && grid.querySelector(`a[href="${c.href}"]`);
+    if (card) {
+      if (c.hidden) return card.remove();
+      if (c.name) card.querySelector('.capsule-name').textContent = c.name;
+      if (c.sub) card.querySelector('.capsule-sub').textContent = c.sub;
+      return;
+    }
+    if (c.builtin || c.hidden) return;
+    grid.insertAdjacentHTML('beforeend', `
+    <a class="capsule-card reveal" href="${esc(c.href)}">
+      <div class="capsule-tile${c.cover ? ' photo' : ''}">
+        <span class="capsule-tag">${esc(c.key)}</span>
+        ${c.cover ? `<img class="capsule-photo" src="${esc(ACC_SITE.sm(c.cover))}" alt="" loading="lazy" decoding="async">` : ''}
+      </div>
+      <div class="capsule-meta">
+        <div><p class="capsule-name">${esc(c.name || c.key)}</p>${c.sub ? `<p class="capsule-sub">${esc(c.sub)}</p>` : ''}</div>
+        <span class="capsule-view">Смотреть</span>
+      </div>
+    </a>`);
+  });
+  const n = grid.children.length;
+  grid.classList.toggle('four', n % 4 === 0);
+  const bars = document.querySelector('.capsule-bars');
+  if (bars) bars.innerHTML = Array.from({ length: n }, (_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('');
+})();
+</script>
 
 <!-- ─── ORDER CTA ──────────────────────────────────────────── -->
 <div class="order-cta reveal">

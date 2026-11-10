@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/i18n.js?v=14"></script>
+  <title>Капсула — accinthecloud</title>
+  <meta name="description" content="Капсула accinthecloud: вещи ручной работы, пошив под заказ.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="accinthecloud">
+  <meta property="og:title" content="Капсула — accinthecloud">
+  <meta property="og:description" content="Капсула accinthecloud: вещи ручной работы, пошив под заказ.">
+  <meta property="og:image" content="https://accinthecloud-site.vercel.app/images/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="accinthecloud">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="fonts/PixelImpacted.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <script src="js/gsap.min.js"></script>
+  <script src="cart.js"></script>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    @font-face {
+      font-family: "PixelImpacted";
+      src: url("fonts/PixelImpacted.woff2") format("woff2");
+      unicode-range: U+0020-007E, U+00A0-00FF, U+0400-04FF, U+2010-2027, U+20BD, U+2116;
+      font-weight: normal; font-style: normal; font-display: swap;
+    }
+    :root {
+      --bg:#ffffff; --ink:#0d0d0d; --muted:#6b6b6b;
+      --border:#ebebeb; --soft:#f5f5f5;
+      --serif:'PixelImpacted',sans-serif;
+      --sans:'Inter',-apple-system,sans-serif;
+      --pixel:'PixelImpacted','Inter',-apple-system,sans-serif;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--sans); background:var(--bg); color:var(--ink); overflow-x:hidden; }
+    a { text-decoration:none; color:inherit; }
+    nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+      padding:20px 48px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+    }
+    .nav-logo { display:flex; align-items:center; }
+    .nav-logo img { height:28px; width:auto; }
+    .nav-right { display:flex; align-items:center; gap:20px; }
+    .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+    .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu {
+      display:none; position:fixed; inset:0; z-index:150;
+      background:#fff; flex-direction:column; align-items:center; justify-content:center;
+      gap:32px; opacity:0; transition:opacity .3s;
+    }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu.visible { opacity:1; }
+    .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
+    .mobile-menu a:hover { color:var(--ink); }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:white; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
+    .cbadge.show { display:flex; }
+    #cartFeedback {
+      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:var(--ink); color:white; padding:12px 28px;
+      font-size:11px; letter-spacing:0.15em; text-transform:uppercase;
+      opacity:0; transition:all .35s; z-index:9999; pointer-events:none;
+    }
+    #cartFeedback.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .hero {
+      padding:80px 48px 56px; border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:flex-end; gap:32px;
+    }
+    .breadcrumb { font-family:var(--pixel); font-size:13px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
+    .breadcrumb a { color:var(--muted); }
+    .breadcrumb a:hover { color:var(--ink); }
+    .hero-title { font-family:var(--serif); font-size:clamp(44px,7vw,84px); font-weight:400; line-height:1; text-transform:uppercase; }
+    .hero-sub { font-size:13px; color:var(--muted); margin-top:10px; font-style:italic; }
+    .hero-right { text-align:right; flex-shrink:0; }
+    .hero-info { font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); line-height:2; }
+    .hero-info strong { color:var(--ink); }
+    .products { padding:2px 48px 120px; }
+    .products-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:2px; padding-top:2px; }
+    .product-card { cursor:pointer; position:relative; }
+    .card-gallery {
+      overflow-x:auto; display:flex;
+      scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; cursor:grab;
+    }
+    .card-gallery::-webkit-scrollbar { display:none; }
+    .card-gallery .slide {
+      flex:0 0 100%; scroll-snap-align:start; aspect-ratio:3/4; overflow:hidden; background:var(--soft);
+    }
+    .card-gallery .slide img,
+    .card-gallery .slide .ph {
+      width:100%; height:100%; object-fit:cover; display:block;
+      transition:transform .8s cubic-bezier(.25,.46,.45,.94);
+    }
+    .product-card:hover .slide img,
+    .product-card:hover .slide .ph { transform:scale(1.04); }
+    .card-dots { display:flex; gap:5px; padding:8px 0 0; }
+    .card-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; flex-shrink:0; }
+    .card-dot.active { background:var(--ink); }
+    .avail-tag {
+      position:absolute; top:12px; left:12px; z-index:2;
+      font-size:9px; letter-spacing:0.18em; text-transform:uppercase;
+      background:var(--ink); color:white; padding:4px 10px; pointer-events:none;
+    }
+    .card-info { padding:14px 0 0; }
+    .card-type { font-family:var(--pixel); font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .card-name { font-size:15px; font-weight:400; margin-bottom:4px; }
+    .card-price { font-size:13px; margin-bottom:6px; }
+    .card-specs { font-size:11px; color:var(--muted); line-height:1.7; margin-bottom:6px; }
+    .card-made { font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .card-cta {
+      display:inline-block; margin-top:4px; margin-bottom:28px;
+      font-size:10px; letter-spacing:0.18em; text-transform:uppercase;
+      border-bottom:1px solid var(--ink); padding-bottom:2px; transition:opacity .2s;
+    }
+    .product-card:hover .card-cta { opacity:.5; }
+    /* modal */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.5);
+      backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s;
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal {
+      background:var(--bg); width:100%; max-width:900px; max-height:90vh;
+      overflow-y:auto; display:grid; grid-template-columns:1fr 1fr;
+      transform:translateY(32px); transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+      position:relative;
+    }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-close {
+      position:absolute; top:20px; right:20px; z-index:10;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      background:white; border:1px solid var(--border); cursor:pointer; font-size:16px;
+    }
+    .modal-left { position:sticky; top:0; min-height:400px; background:var(--soft); overflow:hidden; }
+    .modal-gallery {
+      display:flex; height:100%; min-height:540px;
+      overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    }
+    .modal-gallery::-webkit-scrollbar { display:none; }
+    .modal-gallery .mslide { flex:0 0 100%; scroll-snap-align:start; }
+    .modal-gallery .mslide img,
+    .modal-gallery .mslide .ph { width:100%; height:100%; min-height:540px; object-fit:cover; display:block; }
+    .modal-dots { display:flex; gap:6px; justify-content:center; padding:10px 0 6px; background:var(--soft); }
+    .modal-dot { width:5px; height:5px; border-radius:50%; background:var(--border); transition:background .2s; cursor:pointer; border:none; padding:0; }
+    .modal-dot.active { background:var(--ink); }
+    .modal-body { padding:40px 36px; overflow-y:auto; }
+    .modal-tag { font-family:var(--pixel); font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .modal-name { font-family:var(--serif); font-size:26px; font-weight:400; margin-bottom:6px; }
+    .modal-price { font-size:18px; margin-bottom:3px; }
+    .modal-price-usd { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .modal-specs { font-size:12px; color:var(--muted); line-height:1.8; margin-bottom:20px; }
+    .modal-divider { height:1px; background:var(--border); margin-bottom:24px; }
+    .mfield { margin-bottom:22px; }
+    .mfield label { display:block; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .mfield input, .mfield textarea {
+      width:100%; padding:11px 0; border:none; border-bottom:1px solid var(--border);
+      background:transparent; font-family:var(--sans); font-size:13px; outline:none; transition:border-color .3s;
+    }
+    .mfield input:focus, .mfield textarea:focus { border-bottom-color:var(--ink); }
+    .mfield textarea { resize:none; line-height:1.6; }
+    .qty-row { display:flex; align-items:center; margin-bottom:20px; }
+    .qty-btn { width:36px; height:36px; border:1px solid var(--border); background:transparent; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .qty-btn:hover { background:var(--soft); }
+    .qty-val { width:44px; text-align:center; font-size:14px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); height:36px; line-height:36px; }
+    .btn-cart { width:100%; padding:16px; background:var(--ink); color:white; border:none; font-family:var(--pixel); font-size:18px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:opacity .3s; }
+    .btn-cart:hover { opacity:.75; }
+    .btn-cart:disabled { opacity:.35; cursor:not-allowed; }
+    .avail-tag.sold { background:var(--muted); }
+    .modal-desc { font-size:13px; line-height:1.7; margin:-8px 0 20px; white-space:pre-line; }
+    .modal-desc:empty { display:none; }
+    .cap-empty { padding:80px 48px 120px; display:grid; gap:20px; justify-items:start; }
+    .cap-empty p { font-size:13px; color:var(--muted); line-height:1.7; max-width:46ch; }
+    .cap-empty a { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; border-bottom:1px solid var(--ink); padding-bottom:2px; }
+    .ph-plain { width:100%; height:100%; background:var(--soft); }
+    .modal-note { font-size:10px; color:var(--muted); text-align:center; margin-top:10px; }
+    footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .footer-logo { font-family:var(--pixel); font-size:26px; letter-spacing:0.1em; }
+    .footer-links { display:flex; gap:24px; }
+    .footer-links a { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); transition:color .3s; }
+    .footer-links a:hover { color:var(--ink); }
+    .reveal { opacity:0; transform:translateY(24px); }
+    @media(max-width:1100px) { .products-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media(max-width:900px) {
+      nav { padding:16px 20px; }
+      .hero { padding:60px 20px 40px; flex-direction:column; align-items:flex-start; gap:20px; }
+      .hero-right { text-align:left; }
+      .products { padding:2px 20px 80px; }
+      .products-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .modal { grid-template-columns:1fr; }
+      .modal-left { min-height:280px; position:relative; }
+      .modal-gallery { min-height:320px; }
+      .modal-gallery .mslide img, .modal-gallery .mslide .ph { min-height:320px; }
+      .modal-body { padding:28px 20px; }
+      footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
+    }
+    .insta-note { width:100%; font-size:9px; color:var(--muted); line-height:1.6; padding-top:16px; border-top:1px solid var(--border); margin-top:12px; }
+    .section-label, .capsule-items, .capsule-tag,
+    .modal-num, .modal-made, .items-label,
+    .checkout-label, .breadcrumb, .offer-wrap h2 {
+      font-family: var(--pixel);
+    }
+    /* крестик остаётся на виду, пока прокручиваешь карточку товара */
+    .modal > .modal-close {
+      position:sticky; top:12px; grid-column:1 / -1; justify-self:end;
+      margin:12px 12px -48px 0; z-index:10;
+    }
+  </style>
+  <link rel="stylesheet" href="site.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
+  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
+  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
+</div>
+<nav>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <div class="nav-right">
+    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
+    <button class="burger" id="burgerBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<main>
+<div class="hero reveal">
+  <div>
+    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / <span id="capCrumb">Капсула</span></p>
+    <h1 class="hero-title" id="capName">Капсула</h1>
+    <p class="hero-sub" id="capSub"></p>
+  </div>
+  <div class="hero-right">
+    <div class="hero-info">
+      <strong>Под заказ</strong><br>
+      Бесплатная доставка по России
+    </div>
+  </div>
+</div>
+<div class="products">
+  <div class="products-grid" id="grid"></div>
+</div>
+<div class="cap-empty" id="capEmpty" hidden>
+  <p id="capEmptyText">Такой капсулы нет на сайте — возможно, её убрали или ссылка с опечаткой.</p>
+  <a href="index.html#capsules">Все капсулы →</a>
+</div>
+</main>
+<!-- MODAL -->
+<div class="modal-overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="mClose" aria-label="Закрыть">&#10005;</button>
+    <div class="modal-left">
+      <div class="modal-gallery" id="mGallery" data-morph></div>
+      <div class="modal-dots" id="mDots"></div>
+    </div>
+    <div class="modal-body">
+      <p class="modal-tag" id="mTag"></p>
+      <h2 class="modal-name" id="mName"></h2>
+      <p class="modal-price" id="mPrice"></p>
+      <p class="modal-price-usd" id="mPriceUsd"></p>
+      <p class="modal-specs" id="mSpecs"></p>
+      <p class="modal-desc" id="mDesc"></p>
+      <div class="modal-divider"></div>
+      <div id="secUnique" style="display:none;">
+        <div class="mfield">
+          <label>Опиши свою идею</label>
+          <textarea id="inputUnique" rows="3" placeholder="Материал, крой, детали, референсы..."></textarea>
+        </div>
+      </div>
+      <div class="mfield">
+        <label>Параметры и пожелания</label>
+        <textarea id="inputNotes" rows="3" placeholder="Рост, обхват талии, бёдер, длина по шагу — или любые детали..."></textarea>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qMinus">&#8722;</button>
+        <div class="qty-val" id="qVal">1</div>
+        <button class="qty-btn" id="qPlus">+</button>
+      </div>
+      <button class="btn-cart" id="btnCart">Добавить в корзину</button>
+      <p class="modal-note">Бесплатная доставка по России</p>
+      <button type="button" class="share-link" id="mShare">Поделиться ссылкой</button>
+    </div>
+  </div>
+</div>
+<footer>
+  <span class="footer-logo">accinthecloud</span>
+  <div class="footer-links">
+    <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
+    <a href="offer.html">Публичная оферта</a>
+    <a href="privacy.html">Политика конфиденциальности</a>
+  </div>
+</footer>
+<script src="/api/site"></script>
+<script src="/js/site-data.js?v=3"></script>
+<script>
+// Общая страница капсул, созданных в админке: capsule.html?c=a4. Всё — из данных сайта (js/site-data.js)
+const KEY = (new URLSearchParams(location.search).get('c') || '').toLowerCase();
+const CAP = /^a\d{1,2}$/.test(KEY) && window.ACC_SITE && ACC_SITE.capsule(KEY);
+// старые капсулы живут на своих страницах
+if (CAP && CAP.builtin) location.replace(CAP.href + location.hash);
+const SHOW = CAP && !CAP.builtin && !CAP.hidden;
+const CAPSULE = SHOW ? CAP.title : '';
+const PRODUCTS = SHOW ? ACC_SITE.products(KEY) || [] : [];
+const slugOf = p => p.id.startsWith(KEY + '-') ? p.id.slice(KEY.length + 1) : p.id;
+
+if (SHOW) {
+  const name = CAP.name || KEY;
+  document.getElementById('capCrumb').textContent = 'Капсула ' + KEY;
+  document.getElementById('capName').textContent = name;
+  document.getElementById('capSub').textContent = CAP.sub;
+  document.title = `${KEY} ${name.toUpperCase()} — accinthecloud`;
+  const desc = `Капсула ${KEY} ${name} от accinthecloud${CAP.sub ? ': ' + CAP.sub.toLowerCase() : ''}. Пошив под заказ.`;
+  document.querySelector('meta[name=description]').content = desc;
+  document.querySelector('meta[property="og:title"]').content = document.title;
+  document.querySelector('meta[property="og:description"]').content = desc;
+  if (!PRODUCTS.length) {
+    document.getElementById('capEmptyText').textContent = 'Вещи в этой капсуле скоро появятся. Пока можно заказать индивидуальный пошив.';
+    document.getElementById('capEmpty').hidden = false;
+  }
+} else {
+  document.querySelector('.hero').style.display = 'none';
+  document.getElementById('capEmpty').hidden = false;
+  const robots = document.createElement('meta'); robots.name = 'robots'; robots.content = 'noindex';
+  document.head.appendChild(robots);
+}
+
+/* sm-копия для карточек: images/x/01.jpeg → images/x/sm/01.jpeg */
+function sm(src){ return ACC_SITE.sm(src); }
+/* lazy: false — первые карточки грузятся сразу; high — самая первая с приоритетом */
+function makeSlide(src, cls, alt, eager, high, later){
+  // later: фото карусели, которое подгрузится, когда карточка окажется рядом с экраном
+  const attr = later ? `data-src="${src}"` : `src="${src}"`;
+  return `<div class="${cls}"><img loading="${eager?'eager':'lazy'}"${high?' fetchpriority="high"':''} decoding="async" ${attr} alt="${alt}"></div>`;
+}
+const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
+const restObserver = 'IntersectionObserver' in window
+  ? new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.isIntersecting) { loadRest(en.target); restObserver.unobserve(en.target); }
+    }), { rootMargin: '200px 0px' })
+  : { observe: loadRest, unobserve() {} };
+function makePlaceholder(cls){
+  return `<div class="${cls}"><div class="ph ph-plain"></div></div>`;
+}
+const esc = ACC.esc;
+
+const grid = document.getElementById('grid');
+PRODUCTS.forEach((p, n) => {
+  const card = document.createElement('div');
+  card.className = 'product-card reveal';
+
+  const slides = p.images.length
+    ? p.images.map((s,i) => makeSlide(esc(sm(s)),'slide',esc(`${p.name} — фото ${i+1}`),n<2&&i===0,n===0&&i===0,i>0)).join('')
+    : makePlaceholder('slide');
+  const count = p.images.length || 1;
+  const dotsHtml = count > 1
+    ? `<div class="card-dots" aria-hidden="true">${Array.from({length:count},(_,i)=>`<div class="card-dot${i===0?' active':''}"></div>`).join('')}</div>`
+    : '';
+
+  card.innerHTML = `
+    <div style="position:relative;">
+      <div class="card-gallery" data-gallery tabindex="-1">${slides}</div>
+      <div class="avail-tag${p.sold ? ' sold' : ''}">${p.sold ? 'Продано' : 'Под заказ'}</div>
+    </div>
+    ${dotsHtml}
+    <div class="card-info">
+      <p class="card-type">${esc(p.typeLabel)}</p>
+      <p class="card-name">${esc(p.name)}</p>
+      <p class="card-price">${esc(p.priceUsd ? `${p.price} / ${p.priceUsd}` : p.price)}</p>
+      <p class="card-specs">${esc([p.specs, p.temp].filter(Boolean).join(' · '))}</p>
+      <p class="card-made">Индивидуальный пошив</p>
+      <span class="card-cta">Подробнее &#8594;</span>
+    </div>`;
+
+  const gallery = card.querySelector('[data-gallery]');
+  const dots = card.querySelectorAll('.card-dot');
+  if(dots.length){
+    gallery.addEventListener('scroll',()=>{
+      const idx=Math.round(gallery.scrollLeft/gallery.offsetWidth);
+      dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+    },{passive:true});
+  }
+  let isDown=false, startX, sl;
+  gallery.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX;sl=gallery.scrollLeft;gallery.style.cursor='grabbing';});
+  window.addEventListener('mouseup',()=>{isDown=false;gallery.style.cursor='grab';});
+  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();gallery.scrollLeft=sl-(e.pageX-startX);});
+
+  card.addEventListener('click',e=>{
+    if(e.target.closest('[data-gallery]')){
+      const rect=gallery.getBoundingClientRect();
+      if(e.clientX-rect.left>rect.width/2) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
+      else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
+    } else { ACC_MORPH(card, () => openModal(p)); }
+  });
+
+  grid.appendChild(card);
+  if (card.querySelector('img[data-src]')) restObserver.observe(card);
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  // без GSAP показываем всё сразу, иначе страница осталась бы пустой
+  if (!window.gsap || matchMedia('(prefers-reduced-motion: reduce)').matches) { document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; }); return; }
+  gsap.to('.reveal',{opacity:1,y:0,duration:.6,stagger:.05,ease:'power2.out'});
+});
+
+let cur=null, qty=1;
+
+function openModal(p){
+  cur=p; qty=1;
+  ACC_LINK.set(slugOf(p));
+
+  const mg=document.getElementById('mGallery');
+  const md=document.getElementById('mDots');
+
+  if(p.images.length){
+    mg.innerHTML=p.images.map((s,i)=>makeSlide(esc(s),'mslide',esc(`${p.name} — фото ${i+1} из ${p.images.length}`),i===0)).join('');
+    md.innerHTML=p.images.map((_,i)=>`<button type="button" class="modal-dot${i===0?' active':''}" data-i="${i}" aria-label="Фото ${i+1} из ${p.images.length}"${i===0?' aria-current="true"':''}></button>`).join('');
+    mg.scrollLeft=0;
+    mg.onscroll=()=>{
+      const idx=Math.round(mg.scrollLeft/mg.offsetWidth);
+      document.querySelectorAll('.modal-dot').forEach((d,i)=>{d.classList.toggle('active',i===idx);if(i===idx)d.setAttribute('aria-current','true');else d.removeAttribute('aria-current');});
+    };
+    document.querySelectorAll('.modal-dot').forEach(d=>{
+      d.addEventListener('click',()=>mg.scrollTo({left:+d.dataset.i*mg.offsetWidth,behavior:'smooth'}));
+    });
+  } else {
+    mg.innerHTML=makePlaceholder('mslide');
+    md.innerHTML='';
+  }
+
+  document.getElementById('mTag').textContent=CAPSULE;
+  document.getElementById('mName').textContent=p.name;
+  document.getElementById('mPrice').textContent=p.price;
+  document.getElementById('mPriceUsd').textContent=p.priceUsd;
+  document.getElementById('mSpecs').textContent=[p.specs, p.temp].filter(Boolean).join(' · ');
+  document.getElementById('mDesc').textContent=p.desc||'';
+  const bc=document.getElementById('btnCart');
+  bc.disabled=!!p.sold; bc.textContent=p.sold?'Продано':'Добавить в корзину';
+  document.getElementById('qVal').textContent=1;
+  document.getElementById('inputNotes').value='';
+  document.getElementById('secUnique').style.display = p.type==='unique' ? 'block' : 'none';
+  if(p.type==='unique') document.getElementById('inputUnique').value='';
+
+  /* повторное открытие — снова сверху */
+  const box=document.querySelector('#overlay .modal');
+  box.scrollTop=0; box.querySelector('.modal-body').scrollTop=0;
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  ACC_LINK.clear();
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
+/* ссылка вида ?item=camo сразу открывает вещь */
+document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(PRODUCTS, slugOf, openModal));
+document.getElementById('mClose').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('qMinus').addEventListener('click',()=>{if(qty>1){qty--;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('qPlus').addEventListener('click',()=>{if(qty<9){qty++;document.getElementById('qVal').textContent=qty;}});
+document.getElementById('btnCart').addEventListener('click',()=>{
+  if(!cur||cur.sold) return;
+  const notes=document.getElementById('inputNotes').value.trim();
+  const unique=cur.type==='unique'?document.getElementById('inputUnique').value.trim():'';
+  ACC.add({
+    id:cur.id, capsule:CAPSULE, name:cur.name,
+    price:cur.price, priceUsd:cur.priceUsd, priceNum:cur.priceNum,
+    size:'', color:unique, notes, qty,
+    bg:cur.images[0]?ACC_SITE.sm(cur.images[0]):''
+  });
+  closeModal();
+});
+
+(function(){
+  function refreshBadge(){
+    const c=JSON.parse(localStorage.getItem('acc_cart')||'[]');
+    const n=c.reduce((s,i)=>s+(i.qty||1),0);
+    const b=document.getElementById('cartBadge');
+    if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+  }
+  refreshBadge();
+  document.addEventListener('acc:update',refreshBadge);
+})();
+const burgerBtn = document.getElementById('burgerBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+function closeMobileMenu() {
+  burgerBtn.classList.remove('open');
+  mobileMenu.classList.remove('visible');
+  setTimeout(() => mobileMenu.classList.remove('open'), 300);
+  document.body.style.overflow = '';
+}
+burgerBtn.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.contains('open');
+  if (isOpen) { closeMobileMenu(); }
+  else {
+    burgerBtn.classList.add('open');
+    mobileMenu.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => mobileMenu.classList.add('visible'));
+  }
+});
+</script>
+</body>
+</html>
