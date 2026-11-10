@@ -72,5 +72,11 @@
   }
   const capsules = () => raw && raw.capsules ? Object.keys(raw.capsules).map(capsule) : null;
 
-  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm, capsule, capsules, capHref };
+  // Баннеры на главной: место — под первым экраном (top) или под капсулами (mid)
+  const banners = place => (raw && Array.isArray(raw.banners) ? raw.banners : [])
+    .filter(b => !b.hidden && b.image && (b.place || 'top') === place)
+    .map(b => ({ id: b.id, image: src(b.image), imageMobile: b.imageMobile ? src(b.imageMobile) : '',
+      title: t(b, 'title'), text: t(b, 'text'), cta: t(b, 'cta'), href: b.href || '', size: b.size === 'half' ? 'half' : 'wide' }));
+
+  window.ACC_SITE = { raw, products, lookbook, drop, dropPage: dropData, sm, capsule, capsules, capHref, banners };
 })();

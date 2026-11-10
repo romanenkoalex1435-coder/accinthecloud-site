@@ -266,6 +266,39 @@
     }
 
 
+    /* ─── Баннеры из админки ─────────────────────────────── */
+    .banners { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+    .banners[hidden] { display: none; }
+    .banners-mid { margin-bottom: 80px; }
+    .banner { grid-column: 1 / -1; position: relative; display: block; overflow: hidden; aspect-ratio: 21 / 9; background: #e8e6e1; color: #fff; text-decoration: none; }
+    .banner.half { grid-column: auto; aspect-ratio: 4 / 5; max-height: 100svh; }
+    .banner picture, .banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .banner img { transition: transform .6s cubic-bezier(.23, 1, .32, 1); }
+    .banner.has-copy::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.5), rgba(0,0,0,0) 55%); pointer-events: none; }
+    .banner-copy { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; padding: 40px 48px; display: grid; gap: 12px; justify-items: start; }
+    .banner-title { font-family: var(--pixel); font-size: 64px; line-height: .95; max-width: 16ch; text-wrap: balance; margin: 0; }
+    .banner.half .banner-title { font-size: 42.67px; }
+    .banner-text { font-size: 15px; line-height: 1.5; max-width: 44ch; margin: 0; opacity: .9; }
+    .banner-cta { margin-top: 8px; display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; background: #fff; color: var(--ink); font: 14px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; transition: background-color .2s ease, color .2s ease; }
+    .banner-cta::after { content: ' →'; white-space: pre; }
+    @media (hover: hover) {
+      a.banner:hover img { transform: scale(1.03); }
+      a.banner:hover .banner-cta { background: var(--ink); color: #fff; }
+    }
+    a.banner:active .banner-cta { background: var(--ink); color: #fff; }
+    a.banner:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+    a.banner:focus-visible .banner-cta { outline: 2px solid #fff; outline-offset: 2px; }
+    @media (max-width: 900px) {
+      .banners { grid-template-columns: minmax(0, 1fr); }
+      .banner { aspect-ratio: 16 / 10; }
+      .banner.has-copy { aspect-ratio: 1 / 1; }
+      .banner.has-mobile, .banner.half { aspect-ratio: 4 / 5; max-height: none; }
+      .banner-copy { padding: 24px 20px; gap: 10px; }
+      .banner-title, .banner.half .banner-title { font-size: 32px; }
+      .banner-text { font-size: 14px; }
+      .banners-mid { margin-bottom: 48px; }
+    }
+
     /* ─── Order CTA banner ───────────────────────────────── */
     .order-cta {
       margin: 0 48px 80px; padding: 48px 64px;
@@ -409,7 +442,7 @@
 <main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=3"></script>
+<script src="/js/site-data.js?v=4"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
     <img class="hero-still" src="images/mark-still.webp?v=3" alt="" width="1219" height="584" fetchpriority="high">
@@ -503,6 +536,30 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
   tick();
 })();
 </script>
+<!-- ─── БАННЕРЫ ИЗ АДМИНКИ ───────────────────────────────── -->
+<div class="banners" id="bannersTop" hidden></div>
+<script>
+/* Баннеры: фото на всю ширину или два рядом, по клику — куда указали в админке.
+   Половинка без пары растягивается на всю ширину. Текст и кнопка — только если заполнены. */
+window.accBanners = function (place, box) {
+  const list = window.ACC_SITE && ACC_SITE.banners ? ACC_SITE.banners(place) : [];
+  if (!box || !list.length) return;
+  const esc = ACC.esc, half = list.map(() => false);
+  for (let i = 0; i < list.length - 1; i++)
+    if (list[i].size === 'half' && list[i + 1].size === 'half') { half[i] = half[i + 1] = true; i++; }
+  box.innerHTML = list.map((b, i) => {
+    const tag = b.href ? 'a' : 'div', ext = /^https?:/.test(b.href);
+    const has = !!(b.title || b.text || b.cta);
+    // у баннера-картинки без текста имя ссылки берём из подписи к фото
+    const attrs = b.href ? ` href="${esc(b.href)}"${ext ? ' target="_blank" rel="noopener"' : ''}` : '';
+    const img = `<picture>${b.imageMobile ? `<source media="(max-width: 900px)" srcset="${esc(b.imageMobile)}">` : ''}<img src="${esc(b.image)}" alt="${has ? '' : 'accinthecloud'}"${place === 'top' && !i ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async"></picture>`;
+    const copy = has ? `<div class="banner-copy">${b.title ? `<p class="banner-title">${esc(b.title)}</p>` : ''}${b.text ? `<p class="banner-text">${esc(b.text)}</p>` : ''}${b.cta && b.href ? `<span class="banner-cta">${esc(b.cta)}</span>` : ''}</div>` : '';
+    return `<${tag} class="banner reveal${half[i] ? ' half' : ''}${has ? ' has-copy' : ''}${b.imageMobile ? ' has-mobile' : ''}"${attrs}>${img}${copy}</${tag}>`;
+  }).join('');
+  box.hidden = false;
+};
+accBanners('top', document.getElementById('bannersTop'));
+</script>
 <!-- ─── DROP ─────────────────────────────────────────────── -->
 
 <!-- ─── CAPSULES ─────────────────────────────────────────── -->
@@ -579,6 +636,9 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
   if (bars) bars.innerHTML = Array.from({ length: n }, (_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('');
 })();
 </script>
+
+<div class="banners banners-mid" id="bannersMid" hidden></div>
+<script>accBanners('mid', document.getElementById('bannersMid'));</script>
 
 <!-- ─── ORDER CTA ──────────────────────────────────────────── -->
 <div class="order-cta reveal">

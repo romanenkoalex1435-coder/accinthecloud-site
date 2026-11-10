@@ -134,6 +134,20 @@
     .cap-cover { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .cap-cover .photo { width: 96px; }
     .cap-box .hint { font-size: 12px; color: var(--muted); }
+    .b-list { display: grid; }
+    .b-list:empty { display: none; }
+    .en-box.bn > summary { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--ink); }
+    .bn > summary .b-sum { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bn > summary .b-mini { width: 40px; height: 28px; object-fit: cover; background: var(--soft); flex: none; }
+    .bn > summary small { color: var(--muted); font-size: 12px; flex: none; }
+    .b-photos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+    .b-thumb { aspect-ratio: 16 / 9; background: var(--soft); border: 1px dashed var(--field); display: grid; place-items: center; overflow: hidden; color: var(--muted); font-size: 12px; text-align: center; padding: 4px; }
+    .b-thumb.tall { aspect-ratio: 4 / 5; max-height: 160px; justify-self: start; width: auto; }
+    .b-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .b-photo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .b-seg .seg { display: flex; }
+    .b-seg .seg button { flex: 1; }
+    .b-foot { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding-bottom: 12px; }
     .editor { position: sticky; top: 88px; max-height: calc(100vh - 176px); overflow: auto; border: 1px solid var(--line); padding: 24px; display: grid; gap: 20px; }
     .editor-empty { color: var(--muted); padding: 48px 24px; text-align: center; border: 1px dashed var(--field); }
     .editor-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -235,7 +249,7 @@
   <header class="top">
     <a class="top-logo" href="/" target="_blank" rel="noopener"><img src="images/logo.png" alt="accinthecloud — открыть сайт"><span>Админка</span></a>
     <nav class="tabs" role="tablist" aria-label="Разделы">
-      <button role="tab" id="tab-hero" aria-controls="pane-hero" aria-selected="true">Первый экран</button>
+      <button role="tab" id="tab-hero" aria-controls="pane-hero" aria-selected="true">Главная</button>
       <button role="tab" id="tab-products" aria-controls="pane-products" aria-selected="false">Товары</button>
       <button role="tab" id="tab-history" aria-controls="pane-history" aria-selected="false">История</button>
       <button role="tab" id="tab-leads" aria-controls="pane-leads" aria-selected="false">Заявки</button>
@@ -331,6 +345,13 @@
                 <div id="dEnModels" class="form"></div>
               </div>
             </details>
+          </div>
+
+          <div class="group" id="bBox">
+            <h3>Баннеры на главной</h3>
+            <p class="hint">Фото во всю ширину или два рядом. Клик по баннеру ведёт, куда укажешь. Заголовок, текст и кнопка необязательны: без них будет просто картинка-ссылка.</p>
+            <div id="bList" class="b-list"></div>
+            <button class="btn btn-ghost" type="button" id="bAdd">+ Баннер</button>
           </div>
         </div>
 
@@ -490,6 +511,8 @@ async function boot() {
 // у старых версий данных нет английских полей, моделей дропа — дополняем пустыми
 function norm(d) {
   const dr = d.hero.drop;
+  d.banners = Array.isArray(d.banners) ? d.banners : [];
+  d.banners.forEach(b => { b.en = b.en || {}; ['image', 'imageMobile', 'title', 'text', 'cta', 'href'].forEach(k => { b[k] = b[k] || ''; }); b.size = b.size === 'half' ? 'half' : 'wide'; b.place = b.place === 'mid' ? 'mid' : 'top'; b.hidden = !!b.hidden; });
   dr.en = dr.en || {}; dr.models = dr.models || []; dr.models.forEach(m => { m.en = m.en || {}; });
   ['kicker', 'voteHref'].forEach(k => { dr[k] = dr[k] || ''; });
   Object.values(d.capsules).forEach(c => { c.en = c.en || {}; ['name', 'sub', 'cover'].forEach(k => { c[k] = c[k] || ''; }); c.hidden = !!c.hidden; c.items.forEach(i => { i.en = i.en || {}; }); });
@@ -525,6 +548,8 @@ async function publish(force) {
   if (bad) return toast(bad[0] === 'lb' ? 'У вещи в лукбуке нет названия' : 'У вещи в капсуле ' + bad[0] + ' нет названия', true);
   const noName = Object.keys(S.data.capsules).find(c => !BUILTIN[c] && !S.data.capsules[c].name.trim());
   if (noName) return toast('У капсулы ' + noName + ' нет названия', true);
+  const noPhoto = S.data.banners.findIndex(b => !b.image);
+  if (noPhoto >= 0) return toast(`У баннера ${noPhoto + 1} нет фото — загрузи или удали его`, true);
   if (S.data.hero.mode === 'drop' && !S.data.hero.drop.title.trim()) return toast('У дропа нет названия — он не покажется', true);
   // после публикации адрес ?item= у новой вещи больше не меняется
   allItems().forEach(([, i]) => delete i.fresh);
@@ -621,7 +646,7 @@ function renderHero() {
     Object.keys(S.data.capsules).filter(c => !S.data.capsules[c].hidden).map(c => `<option value="${capHref(c)}">Капсула ${c} целиком</option>`).join('') +
     links.map(l => `<option value="${esc(l.href)}">${esc(l.label)}</option>`).join('');
   $('#dCtaPick').value = [...$('#dCtaPick').options].some(o => o.value === d.ctaHref) ? d.ctaHref : '';
-  renderMedia(); renderModels();
+  renderMedia(); renderModels(); renderBanners();
 }
 function renderModels() {
   const ms = D().models;
@@ -714,9 +739,134 @@ function reloadFrame() {
     f.style.width = '1440px'; f.style.height = '900px'; f.style.transform = `scale(${k})`;
     wrap.style.height = Math.round(900 * k) + 'px';
   } else { f.style.width = f.style.height = f.style.transform = wrap.style.height = ''; }
+  f.onload = () => { try { const el = S.frameTo && f.contentDocument.getElementById(S.frameTo); if (el && !el.hidden) el.scrollIntoView(); } catch (e) {} };
   f.src = '/?preview=1&t=' + Date.now();
 }
 addEventListener('resize', () => { clearTimeout(previewT); previewT = setTimeout(reloadFrame, 200); });
+
+/* ── баннеры на главной ──
+   Список раскрывающихся карточек; открытые запоминаем, чтобы перерисовка (фото, порядок) их не сворачивала.
+   Пока правишь баннер, предпросмотр прокручивается к нему. */
+const B = () => S.data.banners;
+const bOpen = new Set();
+const B_PLACE = { top: 'Под первым экраном', mid: 'Под капсулами' };
+function bLinks() {
+  return [['', 'Никуда — просто картинка'], ['lookbook.html', 'Лукбук'], ['order.html', 'Индивидуальный пошив'], ['drop.html', 'Страница дропа'],
+    ['https://t.me/accinthecloud1', 'Telegram-канал'],
+    ...Object.keys(S.data.capsules).filter(c => !S.data.capsules[c].hidden).map(c => [capHref(c), `Капсула ${c} целиком`]),
+    ...itemLinks().map(l => [l.href, l.label])];
+}
+function renderBanners() {
+  const list = B(), links = bLinks();
+  $('#bAdd').hidden = list.length >= 8;
+  $('#bList').innerHTML = list.map((b, n) => {
+    const known = links.some(([v]) => v === b.href), own = b.href && !known;
+    const name = b.title || b.text || (b.image ? 'Без текста' : 'Новый баннер');
+    return `
+    <details class="en-box bn" data-n="${n}"${bOpen.has(b.id) ? ' open' : ''}>
+      <summary>${b.image ? `<img class="b-mini" src="${esc(sm(b.image))}" alt="">` : '<span class="b-mini"></span>'}<span class="b-sum">${n + 1}. ${esc(name)}</span><small>${b.hidden ? 'скрыт' : (b.size === 'half' ? 'половина · ' : '') + B_PLACE[b.place].toLowerCase()}</small></summary>
+      <div class="en-body">
+        <div class="b-photos">
+          <div class="field"><span>Фото</span>
+            <div class="b-thumb">${b.image ? `<img src="${esc(sm(b.image))}" alt="Фото баннера ${n + 1}">` : 'Нет фото'}</div>
+            <div class="b-photo-actions"><label class="btn btn-ghost">${b.image ? 'Заменить' : '+ Фото'}<input type="file" accept="image/*" class="sr" data-bf="image"></label></div>
+          </div>
+          <div class="field"><span>Для телефона</span>
+            <div class="b-thumb tall">${b.imageMobile ? `<img src="${esc(sm(b.imageMobile))}" alt="Фото баннера ${n + 1} для телефона">` : 'Необязательно'}</div>
+            <div class="b-photo-actions"><label class="btn btn-ghost">${b.imageMobile ? 'Заменить' : '+ Фото'}<input type="file" accept="image/*" class="sr" data-bf="imageMobile"></label>${b.imageMobile ? '<button class="btn btn-quiet" type="button" data-bact="noMobile">Убрать</button>' : ''}</div>
+          </div>
+        </div>
+        <p class="hint">Для телефона лучше вертикальное фото. Без него на телефоне покажется основное, обрезанное по краям.</p>
+        <div class="form b-seg">
+          <div class="field"><span>Размер</span><div class="seg" role="group" aria-label="Размер баннера ${n + 1}">
+            <button type="button" data-bset="size" data-v="wide" aria-pressed="${b.size === 'wide'}">Вся ширина</button>
+            <button type="button" data-bset="size" data-v="half" aria-pressed="${b.size === 'half'}">Половина</button></div></div>
+          <div class="field"><span>Где</span><div class="seg" role="group" aria-label="Где показывать баннер ${n + 1}">
+            <button type="button" data-bset="place" data-v="top" aria-pressed="${b.place === 'top'}">Под экраном</button>
+            <button type="button" data-bset="place" data-v="mid" aria-pressed="${b.place === 'mid'}">Под капсулами</button></div></div>
+        </div>
+        ${b.size === 'half' ? '<p class="hint">Две половины подряд встают рядом. Половина без пары растянется на всю ширину.</p>' : ''}
+        <label class="field"><span>Заголовок</span><input data-bk="title" maxlength="80" value="${esc(b.title)}" placeholder="Например, Капсула a4 уже на сайте"></label>
+        <label class="field"><span>Текст</span><textarea data-bk="text" maxlength="200" rows="2">${esc(b.text)}</textarea></label>
+        <div class="row2">
+          <label class="field"><span>Куда ведёт</span><select data-bact="pick">${links.map(([v, t]) => `<option value="${esc(v)}"${!own && v === b.href ? ' selected' : ''}>${esc(t)}</option>`).join('')}<option value="__own"${own ? ' selected' : ''}>Своя ссылка</option></select></label>
+          <label class="field"><span>Текст кнопки</span><input data-bk="cta" maxlength="40" value="${esc(b.cta)}" placeholder="Пусто — без кнопки"${b.href ? '' : ' disabled'}></label>
+        </div>
+        <label class="field"${own ? '' : ' hidden'} data-own><span>Ссылка</span><input data-bk="href" value="${esc(b.href)}" placeholder="https://… или collection-a2.html?item=texas"></label>
+        <details class="en-box"><summary>Английская версия</summary><div class="en-body">
+          <label class="field"><span>Заголовок</span><input data-ben="title" maxlength="80" value="${esc(b.en.title || '')}" placeholder="${esc(b.title)}"></label>
+          <label class="field"><span>Текст</span><textarea data-ben="text" maxlength="200" rows="2" placeholder="${esc(b.text)}">${esc(b.en.text || '')}</textarea></label>
+          <label class="field"><span>Текст кнопки</span><input data-ben="cta" maxlength="40" value="${esc(b.en.cta || '')}" placeholder="${esc(b.cta)}"></label>
+        </div></details>
+        <label class="check"><input type="checkbox" data-bact="hidden"${b.hidden ? ' checked' : ''}> Скрыть баннер с сайта</label>
+        <div class="b-foot">
+          <div class="item-move">
+            <button class="icon-btn" type="button" data-bmove="-1" aria-label="Баннер ${n + 1} выше"${n ? '' : ' disabled'}>${ICON.up}</button>
+            <button class="icon-btn" type="button" data-bmove="1" aria-label="Баннер ${n + 1} ниже"${n < list.length - 1 ? '' : ' disabled'}>${ICON.down}</button>
+          </div>
+          <button class="btn btn-danger" type="button" data-bact="del">Удалить баннер</button>
+        </div>
+      </div>
+    </details>`;
+  }).join('');
+}
+// одно делегирование на весь список: карточки перерисовываются целиком
+const bOf = el => { const d = el.closest('.bn'); const b = d && B()[+d.dataset.n]; if (b) S.frameTo = b.place === 'mid' ? 'bannersMid' : 'bannersTop'; return b; };
+const bSum = (el, b) => { const s = el.closest('.bn').querySelector('.b-sum'); s.textContent = (+el.closest('.bn').dataset.n + 1) + '. ' + (b.title || b.text || 'Без текста'); };
+$('#bList').addEventListener('toggle', e => {
+  const b = e.target.classList?.contains('bn') && bOf(e.target);
+  if (b) e.target.open ? bOpen.add(b.id) : bOpen.delete(b.id);
+}, true);
+$('#bList').addEventListener('input', e => {
+  const b = bOf(e.target); if (!b) return;
+  const k = e.target.dataset.bk, ek = e.target.dataset.ben;
+  if (k) {
+    b[k] = e.target.value;
+    const en = e.target.closest('.bn').querySelector(`[data-ben="${k}"]`); if (en) en.placeholder = e.target.value;
+    if (k === 'title' || k === 'text') bSum(e.target, b);
+  }
+  if (ek) b.en[ek] = e.target.value;
+  if (k || ek) changed();
+});
+$('#bList').addEventListener('change', async e => {
+  const b = bOf(e.target); if (!b) return;
+  const t = e.target;
+  if (t.dataset.bf) {
+    const f = t.files[0]; t.value = ''; if (!f) return;
+    const thumb = t.closest('.field').querySelector('.b-thumb'); thumb.textContent = 'Загружаю…';
+    try { b[t.dataset.bf] = (await uploadFile(f)).url; changed(); } catch (err) { toast(err.message, true); }
+    return renderBanners();
+  }
+  if (t.dataset.bact === 'hidden') { b.hidden = t.checked; renderBanners(); changed(); return; }
+  if (t.dataset.bact === 'pick') {
+    const own = t.value === '__own';
+    t.closest('.bn').querySelector('[data-own]').hidden = !own;
+    if (!own) { b.href = t.value; if (b.href && !b.cta) b.cta = 'Смотреть'; renderBanners(); changed(); }
+    else t.closest('.bn').querySelector('[data-bk="href"]').focus();
+  }
+});
+$('#bList').addEventListener('click', e => {
+  const btn = e.target.closest('button'); const b = btn && bOf(btn); if (!b) return;
+  const list = B(), n = list.indexOf(b);
+  if (btn.dataset.bset) { b[btn.dataset.bset] = btn.dataset.v; }
+  else if (btn.dataset.bmove) { const m = n + Number(btn.dataset.bmove); [list[n], list[m]] = [list[m], list[n]]; }
+  else if (btn.dataset.bact === 'noMobile') b.imageMobile = '';
+  else if (btn.dataset.bact === 'del') { if (!confirm(`Удалить баннер ${n + 1}? До публикации можно отменить.`)) return; list.splice(n, 1); }
+  else return;
+  S.frameTo = b.place === 'mid' ? 'bannersMid' : 'bannersTop';
+  renderBanners(); changed();
+});
+$('#bAdd').addEventListener('click', () => {
+  const id = 'bn-' + [...crypto.getRandomValues(new Uint8Array(4))].map(x => x.toString(16).padStart(2, '0')).join('');
+  B().push({ id, image: '', imageMobile: '', title: '', text: '', cta: '', href: '', size: 'wide', place: 'top', hidden: false, en: {} });
+  bOpen.add(id); renderBanners(); changed(false);
+  S.frameTo = 'bannersTop';
+});
+// пока правишь баннеры — предпросмотр показывает их место на главной, а не первый экран
+$('#pane-hero .hero-grid > .form').addEventListener('focusin', e => {
+  const b = bOf(e.target);
+  S.frameTo = b ? (b.place === 'mid' ? 'bannersMid' : 'bannersTop') : e.target.closest('#bBox') ? S.frameTo : null;
+});
 
 /* ── товары ── */
 const coll = () => S.cap === 'lb' ? S.data.lookbook : S.data.capsules[S.cap];

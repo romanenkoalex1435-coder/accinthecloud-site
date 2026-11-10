@@ -66,7 +66,16 @@ function clean(d) {
     } },
     capsules: {},
     lookbook: { items: [] },
+    banners: [],
   };
+  // баннеры на главной: фото (и своё для телефона), текст и кнопка необязательны, ссылка — на весь баннер
+  const bl = (d.banners || []).slice(0, 8), bid = ids(bl, 'bn');
+  out.banners = bl.map((b, n) => ({
+    id: bid[n], image: url(b.image), imageMobile: url(b.imageMobile),
+    title: s(b.title, 80), text: s(b.text, 200), cta: s(b.cta, 40), href: url(b.href),
+    size: b.size === 'half' ? 'half' : 'wide', place: b.place === 'mid' ? 'mid' : 'top', hidden: !!b.hidden,
+    en: en(b.en, [['title', 80], ['text', 200], ['cta', 40]]),
+  })).filter(b => b.image);
   // a1–a3 есть всегда (у них свои страницы), новые a4, a5… — из админки, на общей capsule.html?c=…
   const keys = [...new Set(['a1', 'a2', 'a3', ...Object.keys(d.capsules || {}).filter(k => /^a\d{1,2}$/.test(k))])].slice(0, 20);
   for (const c of keys) {
