@@ -22,8 +22,9 @@
     ? u.replace(/\/media\/(?!sm\/)([^/]+\.(jpg|jpeg|png|webp|avif))$/i, '/media/sm/$1')
     : u.replace(/\/([^/]+)\.jpe?g$/i, '/sm/$1.jpeg');
 
-  // крошечная копия для стопок лукбука (360 px, webp) — только у своих фото лукбука, у остальных — sm
-  const xs = u => /^images\/lookbook\/[a-z0-9-]+\/[^/]+\.jpe?g$/i.test(u) ? u.replace(/\/([^/]+)\.jpe?g$/i, '/xs/$1.webp') : sm(u);
+  // крошечная копия для стопок лукбука (360 px, webp; на телефоне 240 px) — только у своих фото лукбука, у остальных — sm
+  // tiny=true — ещё меньше (240 px) для телефона
+  const xs = (u, tiny) => /^images\/lookbook\/[a-z0-9-]+\/[^/]+\.jpe?g$/i.test(u) ? u.replace(/\/([^/]+)\.jpe?g$/i, `/${tiny ? 'xxs' : 'xs'}/$1.webp`) : sm(u);
 
   function products(c) {
     const cap = raw && raw.capsules && raw.capsules[c];

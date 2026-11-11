@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="/js/i18n.js?v=14"></script>
+  <link rel="preload" href="js/lookbook-ar.json?v=1" as="fetch" crossorigin>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
   <link rel="canonical" href="https://accinthecloud-site.vercel.app/lookbook.html">
@@ -224,7 +225,7 @@
 </section>
 
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=5"></script>
+<script src="/js/site-data.js?v=6"></script>
 <script>
 // вещи — из админки; встроенный список — запасной, если данных нет
 const ITEMS = ACC_SITE.lookbook() || [
@@ -327,6 +328,8 @@ const ITEMS = ACC_SITE.lookbook() || [
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   /* ── стопки ── */
+  // на телефоне стопки ~100 px — хватает превью 240 px
+  const TINY = innerWidth <= 900 && devicePixelRatio <= 3;
   const stacks = ITEMS.map((it, n) => {
     const el = document.createElement('div');
     el.className = 'stack';
@@ -334,7 +337,7 @@ const ITEMS = ACC_SITE.lookbook() || [
     el.style.setProperty('--r3', rnd(-7, 7).toFixed(1) + 'deg');
     // снизу вверх: третье фото, второе, сверху обложка
     const prints = it.images.slice(0, 3).map((src, k) =>
-      `<div class="print${k ? ' under' + k : ''}"><img alt="" decoding="async" ${n < 8 && !k ? 'fetchpriority="high"' : ''} src="${ACC_SITE.xs(src)}" onerror="this.onerror=null;this.src='${ACC_SITE.sm(src)}'"></div>`).reverse().join('');
+      `<div class="print${k ? ' under' + k : ''}"><img alt="" decoding="async" ${n < 8 && !k ? 'fetchpriority="high"' : ''} ${k ? 'data-src' : 'src'}="${ACC_SITE.xs(src, TINY)}" onerror="this.onerror=null;this.src='${ACC_SITE.sm(src)}'"></div>`).reverse().join('');
     el.innerHTML = `${prints}<span class="tape">${it.num}</span><span class="count">${it.images.length}</span>`;
     const cover = el.querySelector('.print:not([class*=under]) img');
     cover.addEventListener('load', () => learn(it, 0, cover), { once: true });
@@ -372,6 +375,9 @@ const ITEMS = ACC_SITE.lookbook() || [
     });
   }
   sizeStacks(); scatter(false);
+  // нижние листы стопок видны краешком — грузим после обложек, чтобы не мешали первому показу
+  const later = () => table.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
+  if (document.readyState === 'complete') setTimeout(later, 200); else addEventListener('load', () => setTimeout(later, 200), { once: true });
   // вступление: стопки падают на стол сверху
   if (!REDUCE) stacks.forEach((s, i) => { s.drop = 0; s.dropDelay = i * 0.035; });
 
