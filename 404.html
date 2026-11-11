@@ -35,13 +35,34 @@
       background:#fff; color:var(--ink); overflow-x:hidden;
     }
 
-    /* шапка как на сайте: логотип слева, выход на главную всегда виден */
-    .top {
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-      padding:16px 24px; border-bottom:1px solid var(--line);
+    /* ── Nav: как на остальных страницах ── */
+    nav.site-nav {
+      position:sticky; top:0; z-index:200; background:rgba(255,255,255,0.95);
+      backdrop-filter:blur(12px); border-bottom:1px solid var(--border,#ebebeb);
+      padding:20px 48px; display:flex; justify-content:space-between; align-items:center;
     }
-    .top-logo { display:inline-flex; align-items:center; min-height:44px; }
-    .top-logo img { width:120px; height:auto; display:block; }
+    .nav-logo { display:flex; align-items:center; }
+    .nav-logo img { height:28px; width:auto; }
+    .nav-right { display:flex; align-items:center; gap:20px; }
+    .cart-icon-btn { position:relative; display:flex; align-items:center; color:var(--ink); }
+    .cbadge { position:absolute; top:-5px; right:-6px; min-width:15px; height:15px; background:var(--ink); color:#fff; font-size:8px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 2px; }
+    .cbadge.show { display:flex; }
+    .burger { display:flex; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; }
+    .burger span { display:block; width:22px; height:1.5px; background:var(--ink); transition:all .3s; }
+    .burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity:0; }
+    .burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu {
+      display:none; position:fixed; inset:0; z-index:300;
+      background:#fff; flex-direction:column; align-items:center; justify-content:center;
+      gap:32px; opacity:0; transition:opacity .3s;
+    }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu.visible { opacity:1; }
+    .mobile-menu a { font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); transition:color .2s; }
+    .mobile-menu a:hover { color:var(--ink); }
+    .mobile-menu-close { position:absolute; top:24px; right:24px; background:none; border:none; cursor:pointer; font-size:20px; color:var(--muted); }
+    @media(max-width:600px) { nav.site-nav { padding:16px 20px; } }
 
     .btn {
       display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 22px;
@@ -94,8 +115,6 @@
     .rip-again:hover { color:var(--ink); }
 
     @media (max-width:700px) {
-      .top { padding:12px 16px; }
-      .top-logo img { width:96px; }
       main { padding:20px 16px 32px; gap:18px; }
       .play { height:clamp(220px, 34vh, 300px); }
       .copy { grid-template-columns:1fr; }
@@ -108,10 +127,29 @@
   </style>
 </head>
 <body>
-  <header class="top">
-    <a class="top-logo" href="/" aria-label="accinthecloud, на главную"><img src="/images/logo.png" alt="accinthecloud" width="240" height="110"></a>
-    <a class="btn" href="/">На главную</a>
-  </header>
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="menuClose">✕</button>
+  <a href="/index.html" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
+  <a href="/order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq.html" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="https://t.me/accinthecloud1" target="_blank" rel="noopener">Telegram-канал</a>
+</div>
+
+<nav class="site-nav">
+  <a href="/index.html" class="nav-logo"><img src="/images/logo.png" alt="accinthecloud — на главную"></a>
+  <div class="nav-right">
+    <a href="/cart.html" class="cart-icon-btn" aria-label="Корзина">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="cbadge" id="cartBadge"></span>
+    </a>
+    <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
 
   <main>
     <div class="play" id="play" tabindex="0" role="button"
@@ -485,5 +523,30 @@
     .catch(() => {}).then(start);
 })();
 </script>
+<script>
+(function(){
+  let c=[]; try{c=JSON.parse(localStorage.getItem('acc_cart')||'[]');}catch(e){}
+  const n=c.reduce((s,i)=>s+(i.qty||1),0);
+  const b=document.getElementById('cartBadge');
+  if(b&&n>0){b.textContent=n;b.classList.add('show');}
+})();
+const burgerBtn=document.getElementById('burgerBtn');
+const mobileMenu=document.getElementById('mobileMenu');
+function closeMobileMenu(){
+  burgerBtn.classList.remove('open');
+  mobileMenu.classList.remove('visible');
+  setTimeout(()=>mobileMenu.classList.remove('open'),300);
+  document.body.style.overflow='';
+}
+burgerBtn.addEventListener('click',()=>{
+  if(mobileMenu.classList.contains('open')){closeMobileMenu();return;}
+  burgerBtn.classList.add('open');
+  mobileMenu.classList.add('open');
+  document.body.style.overflow='hidden';
+  requestAnimationFrame(()=>mobileMenu.classList.add('visible'));
+});
+document.getElementById('menuClose').addEventListener('click',closeMobileMenu);
+</script>
+<script src="/site.js" defer></script>
 </body>
 </html>

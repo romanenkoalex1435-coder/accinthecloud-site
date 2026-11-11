@@ -495,17 +495,20 @@ PRODUCTS.forEach((p, n) => {
     },{passive:true});
   }
   let isDown=false, startX, sl;
-  gallery.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX;sl=gallery.scrollLeft;gallery.style.cursor='grabbing';});
-  window.addEventListener('mouseup',()=>{isDown=false;gallery.style.cursor='grab';});
-  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();gallery.scrollLeft=sl-(e.pageX-startX);});
+  let dragged=false;
+  gallery.addEventListener('mousedown',e=>{e.preventDefault();isDown=true;dragged=false;startX=e.pageX;sl=gallery.scrollLeft;gallery.style.cursor='grabbing';gallery.style.scrollSnapType='none';});
+  window.addEventListener('mouseup',()=>{if(!isDown)return;isDown=false;gallery.style.cursor='grab';
+    // докатываем до ближайшего фото, потом возвращаем привязку
+    const w=gallery.offsetWidth, d=gallery.scrollLeft-sl, i=Math.round(sl/w)+(d>w*.15?1:d<-w*.15?-1:0);
+    gallery.scrollTo({left:Math.max(0,i)*w,behavior:'smooth'});
+    setTimeout(()=>{gallery.style.scrollSnapType='';},400);});
+  gallery.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();if(Math.abs(e.pageX-startX)>5)dragged=true;gallery.scrollLeft=sl-(e.pageX-startX);});
 
   if(!p.sold){
-    card.addEventListener('click',e=>{
-      if(e.target.closest('[data-gallery]')){
-        const rect=gallery.getBoundingClientRect();
-        if(e.clientX-rect.left>rect.width/2) gallery.scrollBy({left:gallery.offsetWidth,behavior:'smooth'});
-        else gallery.scrollBy({left:-gallery.offsetWidth,behavior:'smooth'});
-      } else { ACC_MORPH(card, () => openModal(p)); }
+    card.addEventListener('click',()=>{
+      // как в a1: клик по фото открывает вещь; листать — свайпом, мышью или точками
+      if(dragged){dragged=false;return;}
+      ACC_MORPH(card, () => openModal(p));
     });
   }
   grid.appendChild(card);
