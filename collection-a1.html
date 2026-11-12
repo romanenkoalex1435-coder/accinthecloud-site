@@ -329,7 +329,7 @@ PRODUCTS.forEach((p, n) => {
 
   const imgHtml = p.img
     ? `<img loading="${n<2?'eager':'lazy'}"${n===0?' fetchpriority="high"':''} decoding="async" src="${sm(p.img)}" alt="Сумка ${p.name}">`
-    : `<div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png" alt="" decoding="async"></div>`;
+    : `<div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png?v=2" alt="" decoding="async"></div>`;
 
   const priceStr = p.priceUsd ? `${p.price} / ${p.priceUsd}` : p.price;
 
@@ -371,7 +371,7 @@ function openModal(p) {
   if (p.img) {
     wrap.innerHTML = `<img class="modal-img" decoding="async" src="${p.img}" alt="Сумка ${p.name}">`;
   } else {
-    wrap.innerHTML = `<div class="modal-img-ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png" alt="" decoding="async"></div>`;
+    wrap.innerHTML = `<div class="modal-img-ph ph-art"><img class="ph-pixel" src="images/capsules/a1.png?v=2" alt="" decoding="async"></div>`;
   }
 
   const secUnique = document.getElementById('secUnique');

@@ -397,7 +397,7 @@ const restObserver = 'IntersectionObserver' in window
     }), { rootMargin: '200px 0px' })
   : { observe: loadRest, unobserve() {} };
 function makePlaceholder(cls){
-  return `<div class="${cls}"><div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a3.png" alt="" decoding="async"></div></div>`;
+  return `<div class="${cls}"><div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a3.png?v=2" alt="" decoding="async"></div></div>`;
 }
 
 const grid = document.getElementById('grid');
