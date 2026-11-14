@@ -1,0 +1,46 @@
+# accinthecloud на хостинге Timeweb (Apache). Замена vercel.json и middleware.js.
+AddDefaultCharset utf-8
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+RewriteEngine On
+# всегда https
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# служебное наружу не отдаём
+RewriteRule (^|/)\. - [F]
+RewriteRule ^api/_lib/ - [F]
+RewriteRule ^_data(/|$) - [F]
+
+# API: /api/site → api/site.php и т. д.
+RewriteRule ^api/(site|lead|ref|admin|order)/?$ api/$1.php [L,QSA]
+
+# превью ссылок ?item= для мессенджеров
+RewriteCond %{QUERY_STRING} (^|&)item=
+RewriteRule ^(collection-a[123]|lookbook)\.html$ api/og.php?p=$1 [L,QSA]
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Content-Security-Policy "frame-ancestors 'self'"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # картинки, видео, шрифты и папка js/ (её файлы подключаются с ?v=) — неделю, как было на Vercel
+  <FilesMatch "\.(jpe?g|png|webp|avif|gif|svg|ico|woff2?|ttf|otf|mp4|webm|mov|glb)$">
+    Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+  </FilesMatch>
+  <If "%{REQUEST_URI} =~ m#^/js/#">
+    Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+  </If>
+  <FilesMatch "\.(html|css)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml
+</IfModule>

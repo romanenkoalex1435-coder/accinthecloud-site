@@ -18,8 +18,8 @@
   // ссылка баннера: только https, свои страницы и якоря
   const link = u => { u = String(u || ''); return /["'<>\s`]/.test(u) || !/^(https:\/\/|[a-z0-9-]+\.html|\?|#)/i.test(u) ? '' : u; };
   // уменьшенная копия фото: у своих файлов — папка sm/ рядом, у загруженных из админки — media/sm/
-  const sm = u => /^https?:/.test(u)
-    ? u.replace(/\/media\/(?!sm\/)([^/]+\.(jpg|jpeg|png|webp|avif))$/i, '/media/sm/$1')
+  const sm = u => /^https?:|^media\//.test(u)
+    ? u.replace(/(^|\/)media\/(?!sm\/)([^/]+\.(jpg|jpeg|png|webp|avif))$/i, '$1media/sm/$2')
     : u.replace(/\/([^/]+)\.jpe?g$/i, '/sm/$1.jpeg');
 
   // крошечная копия для стопок лукбука (360 px, webp; на телефоне 240 px) — только у своих фото лукбука, у остальных — sm
