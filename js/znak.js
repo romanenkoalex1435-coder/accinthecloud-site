@@ -22,7 +22,7 @@ const HIT_RADII = [1.05, 1.5, 2.1, 2.9, 3.8, 4.8]; // радиус выбоин�
 const COLLAPSE_AT = 7;          // на этом ударе знак рушится целиком
 const HIT_WINDOW = 3.5;         // удары чаще этого (с) считаются серией
 const PARTIAL_WAIT = 2.5;        // после мелкой выбоины пиксели возвращаются через столько секунд тишины
-const FULL_WAIT = 1.2;          // после полного обрушения — через столько после того, как всё легло
+const FULL_WAIT = 4;          // после полного обрушения — через столько после того, как всё легло
 /* Знак ~2,2 единицы в ширину — как скульптура около метра, поэтому g ≈ 22 ед/с².
    Пол и горка — сетка высот: кубик отскакивает с трением, скользит, тормозит, переваливается
    на грань и сам скатывается со ступенек горки; лёгший кубик поднимает свою клетку. */
@@ -395,7 +395,7 @@ async function initMark() {
     const want = 3 + hits * 5;
     for (let n = 0, tries = 0; n < want && tries < want * 40; tries++) {
       const id = (Math.random() * N) | 0;
-      if (mode[id] !== ATTACHED || !(nearHole(id) || Math.random() < 0.35)) continue;
+      if (mode[id] !== ATTACHED || !nearHole(id)) continue;   // осыпаются только края выбоины — не из ниоткуда
       pending.push([clock + 0.04 + Math.random() * 0.75, id]);
       n++;
     }
@@ -506,7 +506,7 @@ async function initMark() {
   }
   function rayLoose(ro, rd) {
     let best = Infinity, bid = -1;
-    const lim = (ST * 0.75) ** 2;
+    const lim = (ST * 1.1) ** 2;
     for (let s = 0; s < looseCount; s++) {
       const id = slotId[s], p = id * 3;
       const dx = pos[p] - ro.x, dy = pos[p + 1] - ro.y, dz = pos[p + 2] - ro.z;
@@ -533,6 +533,11 @@ async function initMark() {
     const a = rayFixed(ro, rd), b = rayLoose(ro, rd);
     if (a && (!b || a.t <= b.t)) knock(a.id, rd);
     else if (b) kick(new THREE.Vector3(pos[b.id * 3], pos[b.id * 3 + 1], pos[b.id * 3 + 2]), rd);
+    else if (looseCount && rd.y < 0) {
+      // попали в щель между кубиками — толкаем горку там, где луч касается её поверхности
+      const t = (floorY + ST * 2 - ro.y) / rd.y, hx = ro.x + rd.x * t, hz = ro.z + rd.z * t;
+      if (Math.abs(hx) < PILE_X && hz > PILE_BACK - ST && hz < PILE_FRONT + ST) kick(new THREE.Vector3(hx, floorY + ST * 2, hz), rd);
+    }
   }
 
   function resize() {
@@ -897,6 +902,7 @@ async function initMark() {
       for (let c = 0; c < height.length; c++) maxH = Math.max(maxH, height[c]);
       return { byMode, maxH, maxY, floorY, capLv, back: PILE_BACK, step: ST };
     },
+    falling() { const o = []; for (let s = 0; s < looseCount; s++) { const id = slotId[s]; if (mode[id] === FALLING) o.push([id, +(pos[id*3+1]-floorY).toFixed(2), +vel[id*3+1].toFixed(2), bounces[id]]); } return o; },
     snap() { const o = []; for (let s = 0; s < looseCount; s++) { const id = slotId[s]; o.push([id, pos[id * 3] / ST, pos[id * 3 + 2] / ST]); } return o; },
     get frames() { return frames; },
   };
