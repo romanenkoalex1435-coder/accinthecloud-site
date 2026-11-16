@@ -151,7 +151,7 @@ async function initMark() {
   let looseCount = 0, attachedCount = N;
 
   // пол — сетка высот: каждый лёгший кубик поднимает свою клетку, поэтому они складываются в горку
-  const FX0 = -8, FZ0 = -2.2, FW = Math.ceil(16 / ST), FD = Math.ceil(4 / ST);
+  const FX0 = -8, FZ0 = -3.4, FW = Math.ceil(16 / ST), FD = Math.ceil(6 / ST);
   const height = new Int16Array(FW * FD);
 
   function writeLoose(id) {
@@ -234,8 +234,8 @@ async function initMark() {
   /* где может лежать горка. Глубина считается в resize: чем дальше от камеры, тем выше на экране
      пол, и дальний край не должен заезжать на надпись. Вбок пол шире кадра — что не влезло
      под надпись, раскатывается за края экрана. */
-  const PILE_X = 7.8, PILE_FRONT = 0.45;
-  let PILE_BACK = -0.75;
+  const PILE_X = 7.8, PILE_FRONT = 0.45, PILE_DEEP = -2.2;
+  let PILE_BACK = PILE_DEEP;
   const cxMin = Math.floor((-PILE_X - FX0) / ST), cxMax = Math.floor((PILE_X - FX0) / ST);
   let czMin = Math.floor((PILE_BACK - FZ0) / ST);
   const czMax = Math.floor((PILE_FRONT - FZ0) / ST);
@@ -560,13 +560,13 @@ async function initMark() {
     // по разметке, без сдвига анимации появления (host занимает весь #hero)
     const bb = brand ? brand.offsetTop + brand.offsetHeight + 10 : 0;
     const layers = z => Math.floor((yAt(bb, z) - y) / ST);
-    if (bb > 0 && bb < h) {
-      // самый дальний край, где под надписью помещается хотя бы 2 слоя (но не глубже -0.75)
-      let lo = -0.75, hi = PILE_FRONT - 4 * ST;
+    if (false && bb > 0 && bb < h) {   // глубину больше не сужаем под надпись — горка от этого становилась узкой и высокой
+      // самый дальний край, где под надписью помещается хотя бы 2 слоя (но не глубже PILE_DEEP)
+      let lo = PILE_DEEP, hi = PILE_FRONT - 4 * ST;
       if (layers(lo) < 2) { for (let i = 0; i < 20; i++) { const m = (lo + hi) / 2; if (layers(m) >= 2) hi = m; else lo = m; } PILE_BACK = hi; }
       else PILE_BACK = lo;
       capLv = Math.max(1, layers(PILE_BACK));
-    } else { PILE_BACK = -0.75; capLv = 99; }
+    } else { PILE_BACK = PILE_DEEP; capLv = 99; }
     czMin = Math.floor((PILE_BACK - FZ0) / ST);
     const dy = y - floorY;
     floorY = y;
@@ -861,7 +861,7 @@ async function initMark() {
       while (pendAt < pending.length && pending[pendAt][0] <= clock) {
         const id = pending[pendAt++][1];
         // осыпается сам: почти без толчка и почти не крутясь — кувыркаться начнёт, ударившись о пол
-        if (mode[id] === ATTACHED) detach(id, (Math.random() - 0.5) * 0.3, Math.random() * 0.2, (Math.random() - 0.5) * 0.3, 1.2);
+        if (mode[id] === ATTACHED) detach(id, (Math.random() - 0.5) * 0.3, Math.random() * 0.2, (Math.random() - 0.5) * 1.0, 1.2);
       }
       if (pendAt >= pending.length && pending.length) { pending = []; pendAt = 0; }
       const t0 = performance.now();
