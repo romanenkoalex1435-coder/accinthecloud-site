@@ -5,6 +5,9 @@ DirectoryIndex index.html
 ErrorDocument 404 /404.html
 
 RewriteEngine On
+# главный адрес — accinthecloud.com: www, .ru, .online, .store и технический tw1.ru ведут туда же, на ту же страницу
+RewriteCond %{HTTP_HOST} !^accinthecloud\.com$ [NC]
+RewriteRule ^ https://accinthecloud.com%{REQUEST_URI} [R=301,L]
 # всегда https
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !=https
@@ -14,6 +17,11 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 RewriteRule (^|/)\. - [F]
 RewriteRule ^api/_lib/ - [F]
 RewriteRule ^_data(/|$) - [F]
+
+# админка по короткому адресу /admin; старый /admin.html перекидываем туда
+RewriteCond %{THE_REQUEST} \s/admin\.html[\s?]
+RewriteRule ^admin\.html$ https://accinthecloud.com/admin [R=301,L]
+RewriteRule ^admin/?$ admin.html [L]
 
 # API: /api/site → api/site.php и т. д.
 RewriteRule ^api/(site|lead|ref|admin|order)/?$ api/$1.php [L,QSA]

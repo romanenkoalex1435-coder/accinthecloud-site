@@ -18,4 +18,4 @@ for i in 1 2 3 4 5 6 7 8; do
 done
 # пароль идёт через stdin, в командную строку и историю не попадает
 printf %s "$P1" | $SSH "$HOST" 'mkdir -p public_html/_data && php -r '\''$p=stream_get_contents(STDIN); $f=getenv("HOME")."/public_html/_data/config.php"; file_put_contents($f, "<?php return [\"admin_password\" => ".var_export($p, true)."];\n"); chmod($f, 0640);'\'''
-echo "Готово: пароль админки сохранён. Вход: /admin.html на сайте"
+echo "Готово: пароль админки сохранён. Вход: https://accinthecloud.com/admin"
