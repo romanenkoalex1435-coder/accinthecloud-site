@@ -42,7 +42,16 @@
     else { box.classList.add('lang-switch--end'); nav.insertBefore(box, nav.lastElementChild); }
   }
 
-  if (lang !== 'en') { document.addEventListener('DOMContentLoaded', addSwitch); return; }
+  if (lang !== 'en') {
+    // переключатель ставим, как только шапка разобрана, — до первой отрисовки: иначе шапка сдвигается (CLS)
+    const mo = new MutationObserver(() => {
+      const nav = document.querySelector('nav');
+      if (nav && nav.nextElementSibling) { mo.disconnect(); addSwitch(); }
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', () => { mo.disconnect(); addSwitch(); });
+    return;
+  }
 
   html.lang = 'en';
   // прячем страницу, пока не переведена, — без мелькания русского
@@ -116,7 +125,7 @@
   }
 
   // ?v= поднимать вместе с i18n.js?v= в страницах при правке словаря: js/ браузер хранит неделю
-  const dict = fetch('/js/i18n-en.json?v=15').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
+  const dict = fetch('/js/i18n-en.json?v=16').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
   document.addEventListener('DOMContentLoaded', () => dict.then(() => {
     walk(document.documentElement);
     const t = tr(document.title); if (t) document.title = t;

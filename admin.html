@@ -30,6 +30,7 @@
     a { color: inherit; }
     [hidden] { display: none !important; }
     :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .btn:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
     /* кнопки */
@@ -46,6 +47,8 @@
     .btn-danger:hover { background: var(--danger); color: #fff; }
     .btn[disabled] { opacity: .4; pointer-events: none; }
     .icon-btn { width: 36px; height: 36px; display: inline-grid; place-items: center; border: 1px solid var(--line); background: #fff; transition: background-color .15s ease; }
+    .icon-btn { position: relative; }
+    .icon-btn::after { content: ""; position: absolute; inset: -5px; } /* зона нажатия 44x44 при видимых 36x36 */
     .icon-btn:hover { background: var(--soft); }
     .icon-btn[disabled] { opacity: .3; pointer-events: none; }
     .icon-btn svg { width: 16px; height: 16px; }
@@ -249,10 +252,10 @@
   <header class="top">
     <a class="top-logo" href="/" target="_blank" rel="noopener"><img src="images/logo.png" alt="accinthecloud — открыть сайт"><span>Админка</span></a>
     <nav class="tabs" role="tablist" aria-label="Разделы">
-      <button role="tab" id="tab-hero" aria-controls="pane-hero" aria-selected="true">Главная</button>
-      <button role="tab" id="tab-products" aria-controls="pane-products" aria-selected="false">Товары</button>
-      <button role="tab" id="tab-history" aria-controls="pane-history" aria-selected="false">История</button>
-      <button role="tab" id="tab-leads" aria-controls="pane-leads" aria-selected="false">Заявки</button>
+      <button role="tab" id="tab-hero" aria-controls="pane-hero" aria-selected="true" tabindex="0">Главная</button>
+      <button role="tab" id="tab-products" aria-controls="pane-products" aria-selected="false" tabindex="-1">Товары</button>
+      <button role="tab" id="tab-history" aria-controls="pane-history" aria-selected="false" tabindex="-1">История</button>
+      <button role="tab" id="tab-leads" aria-controls="pane-leads" aria-selected="false" tabindex="-1">Заявки</button>
     </nav>
     <div class="top-right">
       <a class="btn btn-quiet" href="/" target="_blank" rel="noopener">Сайт ↗</a>
@@ -485,7 +488,7 @@ $('#loginForm').addEventListener('submit', async e => {
   const btn = e.submitter; btn.disabled = true;
   const r = await post('login', { password: $('#pass').value }).catch(() => ({ ok: false }));
   btn.disabled = false;
-  if (r.ok) { $('#pass').value = ''; return boot(); }
+  if (r.ok) { $('#pass').value = ''; return boot(true); }
   err.textContent = r.error === 'not_configured' ? 'Пароль ещё не задан: запусти tools/set-admin.sh' : r.error === 'wrong' ? 'Неверный пароль' : 'Нет связи с сервером';
   err.hidden = false;
 });
@@ -494,7 +497,12 @@ $('#logout').addEventListener('click', async () => {
   await post('logout', {}); localStorage.removeItem('acc_admin_draft'); location.reload();
 });
 
-async function boot() {
+async function boot(checked) {
+  // без сессии не дёргаем data: иначе 401 попадает в консоль на экране входа
+  if (!checked) {
+    const me = await api('me').catch(() => null);
+    if (!me || !me.auth) return showLogin();
+  }
   const r = await api('data').catch(() => null);
   if (!r) return;
   if (!r.ok) return toast('Не удалось загрузить данные', true);
@@ -568,13 +576,24 @@ async function publish(force) {
 }
 
 /* ── вкладки ── */
-document.querySelectorAll('.tabs [role=tab]').forEach(tab => tab.addEventListener('click', () => {
-  document.querySelectorAll('.tabs [role=tab]').forEach(t => t.setAttribute('aria-selected', t === tab));
+const TABS = [...document.querySelectorAll('.tabs [role=tab]')];
+function selectTab(tab, focus) {
+  TABS.forEach(t => { const on = t === tab; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
   document.querySelectorAll('[role=tabpanel]').forEach(p => p.hidden = p.id !== tab.getAttribute('aria-controls'));
+  if (focus) tab.focus();
   if (tab.id === 'tab-history') loadHistory();
   if (tab.id === 'tab-leads') loadLeads();
   if (tab.id === 'tab-hero') reloadFrame();
-}));
+}
+TABS.forEach(tab => {
+  tab.addEventListener('click', () => selectTab(tab));
+  tab.addEventListener('keydown', e => {
+    const i = TABS.indexOf(tab);
+    const n = e.key === 'ArrowRight' ? (i + 1) % TABS.length : e.key === 'ArrowLeft' ? (i - 1 + TABS.length) % TABS.length : e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : -1;
+    if (n < 0) return;
+    e.preventDefault(); selectTab(TABS[n], true);
+  });
+});
 
 /* ── загрузка файлов ──
    Фото сжимаем в браузере и кладём парой: полное (2000 px) и уменьшенное (800 px) под одним ключом.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=15"></script>
+  <script src="/js/i18n.js?v=16"></script>
   <title>a2 ACCEPT — accinthecloud</title>
   <meta name="description" content="Капсула a2 ACCEPT от accinthecloud: куртки ручной работы, пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud.com/collection-a2.html">
@@ -231,8 +231,8 @@
       margin:12px 12px -48px 0; z-index:10;
     }
   </style>
-  <link rel="stylesheet" href="site.css?v=2">
-  <script src="site.js?v=2" defer></script>
+  <link rel="stylesheet" href="site.css?v=3">
+  <script src="site.js?v=3" defer></script>
 </head>
 <body>
 <div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
@@ -246,7 +246,7 @@
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div class="nav-right">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -254,7 +254,7 @@
       </svg>
       <span class="cbadge" id="cartBadge"></span>
     </a>
-    <button class="burger" id="burgerBtn" aria-label="Menu">
+    <button class="burger" id="burgerBtn" aria-label="Меню">
       <span></span><span></span><span></span>
     </button>
   </div>
@@ -433,19 +433,18 @@ const PRODUCTS = ACC_SITE.products('a2') || [
 function sm(src){ return ACC_SITE.sm(src); }
 /* lazy: false — первые карточки грузятся сразу; high — самая первая с приоритетом */
 function makeSlide(src, cls, alt, eager, high, later){
-  // later: фото карусели, которое подгрузится, когда карточка окажется рядом с экраном
+  // later: остальные фото карусели — подгрузятся, когда человек потянется к карточке
   const attr = later ? `data-src="${src}"` : `src="${src}"`;
   return `<div class="${cls}"><img loading="${eager?'eager':'lazy'}"${high?' fetchpriority="high"':''} decoding="async" ${attr} alt="${alt}"></div>`;
 }
-const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
-const restObserver = 'IntersectionObserver' in window
-  ? new IntersectionObserver(entries => entries.forEach(en => {
-      if (en.isIntersecting) { loadRest(en.target); restObserver.unobserve(en.target); }
-    }), { rootMargin: '200px 0px' })
-  : { observe: loadRest, unobserve() {} };
+// остальные фото карусели грузим, когда человек потянулся к карточке: мышь, фокус или первый свайп
+const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.loading = 'eager'; im.src = im.dataset.src; im.removeAttribute('data-src'); });
 function makePlaceholderSlide(cls){
   return `<div class="${cls}"><div class="ph ph-art"><img class="ph-pixel" src="images/capsules/a2.png?v=2" alt="" decoding="async"></div></div>`;
 }
+
+/* оговорка в скобках — отдельным span: на телефоне в карточке остаётся короткая часть, полная — в окне вещи */
+function tempHtml(t){ return String(t).replace(/\s*(\([^)]*\))/, ' <span class="temp-more">$1</span>'); }
 
 const grid = document.getElementById('grid');
 PRODUCTS.forEach((p, n) => {
@@ -482,7 +481,7 @@ PRODUCTS.forEach((p, n) => {
       <p class="card-name">${p.name}</p>
       ${priceHtml}
       ${!p.sold ? `<p class="card-made">Индивидуальный пошив</p>` : ''}
-      ${p.temp ? `<p class="card-temp">${p.temp}</p>` : ''}
+      ${p.temp ? `<p class="card-temp">${tempHtml(p.temp)}</p>` : ''}
       ${ctaHtml}
     </div>`;
 
@@ -512,7 +511,12 @@ PRODUCTS.forEach((p, n) => {
     });
   }
   grid.appendChild(card);
-  if (card.querySelector('img[data-src]')) restObserver.observe(card);
+  if (card.querySelector('img[data-src]')) {
+    const more = () => loadRest(card);
+    gallery.addEventListener('scroll', more, { once: true, passive: true });
+    card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') more(); });
+    card.addEventListener('focusin', more, { once: true });
+  }
 });
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -596,6 +600,7 @@ function closeModal(){
 }
 document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
 /* ссылка вида ?item=camo сразу открывает вещь */
+document.addEventListener('DOMContentLoaded', () => ACC_LD(PRODUCTS, 'collection-a2.html', 'Капсула a2 · Accept'));
 document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(PRODUCTS, p => p.id.replace(/^a\d-/, ''), openModal));
 document.getElementById('mClose').addEventListener('click',closeModal);
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
@@ -648,6 +653,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=3" defer></script>
+<script src="/js/consent.js?v=4" defer></script>
 </body>
 </html>

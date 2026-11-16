@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=15"></script>
+  <script src="/js/i18n.js?v=16"></script>
   <link rel="preload" href="js/lookbook-ar.json?v=1" as="fetch" crossorigin>
   <title>Lookbook — accinthecloud</title>
   <meta name="description" content="Lookbook accinthecloud: сумки, куртки и джинсы ручной работы. Похожую вещь можно заказать в индивидуальном пошиве.">
@@ -100,14 +100,14 @@
       padding:3px 10px 2px; background:rgba(228,224,212,.88); font:400 10.67px/1 var(--pixel); letter-spacing:.04em; color:#3a3a3a;
       white-space:nowrap;
     }
-    .count { position:absolute; right:8px; bottom:6px; z-index:5; font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .count { position:absolute; right:8px; bottom:6px; z-index:5; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
 
     /* разложенные фото вещи */
     .deal { position:absolute; left:0; top:0; z-index:400; transform-origin:50% 50%; cursor:zoom-in;
       transition:transform .62s var(--spring), opacity .3s ease; }
     .deal.zoom { cursor:zoom-out; z-index:600; }
     .deal .print { position:relative; padding:8px 8px 28px; box-shadow:0 2px 3px rgba(0,0,0,.08), 0 14px 32px rgba(0,0,0,.14); }
-    .deal .cap { position:absolute; left:10px; bottom:7px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+    .deal .cap { position:absolute; left:10px; bottom:7px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
 
     .filters { position:fixed; left:32px; top:calc(var(--navH) + 20px); z-index:20; display:flex; gap:4px; flex-wrap:wrap; transition:opacity .3s ease; }
     .filters button {
@@ -163,14 +163,14 @@
       .panel-name { font-size:21.33px; }
       .panel-actions .btn { flex:1; justify-content:center; padding:0 12px; }
       .print { padding:4px 4px 14px; }
-      .tape { font-size:8px; padding:2px 7px 1px; top:-7px; }
+      .tape { font-size:10.67px; padding:2px 7px 1px; top:-8px; }
       .count { display:none; }
     }
     .panel-actions { display:flex; gap:8px; flex-shrink:0; }
     @media (prefers-reduced-motion:reduce) { .deal, .panel, .stack { transition:none !important; } }
   </style>
-  <link rel="stylesheet" href="site.css?v=2">
-  <script src="site.js?v=2" defer></script>
+  <link rel="stylesheet" href="site.css?v=3">
+  <script src="site.js?v=3" defer></script>
 </head>
 <body>
 
@@ -186,7 +186,7 @@
   <a class="mm-small" href="privacy.html">Политика конфиденциальности</a>
 </div>
 <nav id="topNav">
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -698,6 +698,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=3" defer></script>
+<script src="/js/consent.js?v=4" defer></script>
 </body>
 </html>

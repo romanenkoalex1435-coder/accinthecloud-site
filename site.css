@@ -96,7 +96,7 @@ a, button, [role="button"], input, label { touch-action: manipulation; }
 }
 .lang-switch button::after {
   content: ""; position: absolute; left: 50%; top: 50%;
-  width: 100%; height: 44px; transform: translate(-50%, -50%);
+  width: calc(100% + 10px); height: 44px; transform: translate(-50%, -50%);
 }
 .lang-switch button[aria-pressed="true"] { color: var(--ink, #0d0d0d); }
 @media (hover: hover) { .lang-switch button:hover { color: var(--ink, #0d0d0d); } }
@@ -265,7 +265,7 @@ h1, .page-hero-title, .order-wrap h1, .offer-wrap h1, .wrap h1, .lb-title {
   transform: translateY(-26px) scale(.75);
 }
 .field.float :is(input, textarea)::placeholder { color: transparent; transition: color .2s ease; }
-.field.float :is(input, textarea):focus::placeholder { color: #9a9a9a; }
+.field.float :is(input, textarea):focus::placeholder { color: #6b6b6b; }
 /* Telegram: «@» уже стоит в начале строки, ник вводится после неё */
 .field.tg::before {
   content: "@"; position: absolute; left: 0; top: 28px; font: 16px/1.5 var(--f-text); color: var(--ink);
@@ -311,3 +311,36 @@ nav > a.btn-back { display: inline-flex; align-items: center; min-height: 44px; 
 
 /* Поле, на которое перевели фокус после ошибки, не уходит под фиксированную шапку */
 input, textarea, select, .consent-label { scroll-margin-top: calc(var(--navH, 64px) + 24px); }
+
+
+/* ── Фокус полей формы: чёрная линия 3 px под полем (раньше менялась только тонкая рамка) ── */
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible,
+.mfield input:focus-visible, .mfield textarea:focus-visible {
+  outline: none; border-bottom-color: var(--ink, #0d0d0d); box-shadow: 0 2px 0 0 var(--ink, #0d0d0d);
+}
+.field input[aria-invalid="true"]:focus-visible { border-bottom-color: #b3261e; box-shadow: 0 2px 0 0 #b3261e; }
+/* Подсказки в полях: контраст не ниже 4.5:1 */
+input::placeholder, textarea::placeholder { color: #6b6b6b; opacity: 1; }
+
+/* ── Мобильное меню: ссылки не ниже 44 px, шаг между ними прежний ── */
+.mobile-menu { gap: 10px !important; }
+.mobile-menu a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 12px; }
+.mobile-menu a:focus-visible { outline-offset: -2px; }
+
+/* ── Зона нажатия 44 px у мелких ссылок и кнопок, вид прежний ── */
+.panel-more, .lb-panel-more { position: relative; }
+.panel-more::after, .lb-panel-more::after, .panel .share-link::after {
+  content: ""; position: absolute; left: -8px; right: -8px; top: 50%; height: 44px; transform: translateY(-50%);
+}
+.panel .share-link { position: relative; }
+/* ссылки внутри текста: зона выше и ниже строки, строки не сдвигаются */
+.offer-wrap p a, .offer-wrap li a, .wrap p a, .wrap li a, .consent-label a, .offer-note a, .summary-note a, .cc-reopen { padding: 12px 2px; margin: -12px -2px; }
+
+/* ── Телефон и планшет: фото в сетке карточек не слипаются ── */
+@media (max-width: 900px) { .products-grid { gap: 0 10px !important; } }
+/* длинная оговорка в скобках в подписи температуры — только в окне вещи */
+@media (max-width: 600px) { .card-temp .temp-more { display: none; } }
+
+/* Резерв места под сетку: пока список вещей не отрисован, подвал не прыгает */
+.products:has(.products-grid:empty) { min-height: 100vh; }
+@supports (min-height: 100svh) { .products:has(.products-grid:empty) { min-height: 100svh; } }

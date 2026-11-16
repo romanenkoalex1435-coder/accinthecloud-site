@@ -84,7 +84,8 @@ html.modal-open .cc{display:none}
         '</div>' +
       '</div>';
     box.addEventListener('click', e => { const c = e.target.closest('[data-c]'); if (c) close(c.dataset.c); });
-    document.body.appendChild(box);
+    // первым в body: в порядке Tab плашка стоит в начале страницы, а на экране остаётся внизу (position:fixed); фокус не забираем
+    document.body.insertBefore(box, document.body.firstChild);
     requestAnimationFrame(() => requestAnimationFrame(() => box && box.classList.add('is-in')));
   }
 

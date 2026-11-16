@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=15"></script>
+  <script src="/js/i18n.js?v=16"></script>
   <title>Капсула — accinthecloud</title>
   <meta name="description" content="Капсула accinthecloud: вещи ручной работы, пошив под заказ.">
   <meta property="og:type" content="website">
@@ -184,7 +184,7 @@
     .modal-desc:empty { display:none; }
     .cap-empty { padding:80px 48px 120px; display:grid; gap:20px; justify-items:start; }
     .cap-empty p { font-size:13px; color:var(--muted); line-height:1.7; max-width:46ch; }
-    .cap-empty a { font-size:10px; letter-spacing:0.18em; text-transform:uppercase; border-bottom:1px solid var(--ink); padding-bottom:2px; }
+    .cap-empty a { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; border-bottom:1px solid var(--ink); padding-bottom:2px; }
     .ph-plain { width:100%; height:100%; background:var(--soft); }
     .modal-note { font-size:10px; color:var(--muted); text-align:center; margin-top:10px; }
     footer { padding:40px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
@@ -219,8 +219,8 @@
       margin:12px 12px -48px 0; z-index:10;
     }
   </style>
-  <link rel="stylesheet" href="site.css?v=2">
-  <script src="site.js?v=2" defer></script>
+  <link rel="stylesheet" href="site.css?v=3">
+  <script src="site.js?v=3" defer></script>
 </head>
 <body>
 <div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
@@ -234,7 +234,7 @@
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div class="nav-right">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -242,7 +242,7 @@
       </svg>
       <span class="cbadge" id="cartBadge"></span>
     </a>
-    <button class="burger" id="burgerBtn" aria-label="Menu">
+    <button class="burger" id="burgerBtn" aria-label="Меню">
       <span></span><span></span><span></span>
     </button>
   </div>
@@ -356,12 +356,8 @@ function makeSlide(src, cls, alt, eager, high, later){
   const attr = later ? `data-src="${src}"` : `src="${src}"`;
   return `<div class="${cls}"><img loading="${eager?'eager':'lazy'}"${high?' fetchpriority="high"':''} decoding="async" ${attr} alt="${alt}"></div>`;
 }
-const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); });
-const restObserver = 'IntersectionObserver' in window
-  ? new IntersectionObserver(entries => entries.forEach(en => {
-      if (en.isIntersecting) { loadRest(en.target); restObserver.unobserve(en.target); }
-    }), { rootMargin: '200px 0px' })
-  : { observe: loadRest, unobserve() {} };
+// остальные фото карусели грузим, когда человек потянулся к карточке: мышь, фокус или первый свайп
+const loadRest = card => card.querySelectorAll('img[data-src]').forEach(im => { im.loading = 'eager'; im.src = im.dataset.src; im.removeAttribute('data-src'); });
 function makePlaceholder(cls){
   return `<div class="${cls}"><div class="ph ph-plain"></div></div>`;
 }
@@ -417,7 +413,12 @@ PRODUCTS.forEach((p, n) => {
   });
 
   grid.appendChild(card);
-  if (card.querySelector('img[data-src]')) restObserver.observe(card);
+  if (card.querySelector('img[data-src]')) {
+    const more = () => loadRest(card);
+    gallery.addEventListener('scroll', more, { once: true, passive: true });
+    card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') more(); });
+    card.addEventListener('focusin', more, { once: true });
+  }
 });
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -527,6 +528,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=3" defer></script>
+<script src="/js/consent.js?v=4" defer></script>
 </body>
 </html>

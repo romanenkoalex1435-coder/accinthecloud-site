@@ -9,7 +9,20 @@
   if (burger && menu) {
     burger.setAttribute('aria-label', 'Меню');
     burger.setAttribute('aria-controls', 'mobileMenu');
-    const sync = () => burger.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
+    // открыли — фокус на первую ссылку; закрыли (кнопкой, ссылкой, Escape) — фокус обратно на бургер
+    let wasShown = false;
+    const sync = () => {
+      const open = menu.classList.contains('open');
+      const shown = open && menu.classList.contains('visible');
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (shown && !wasShown) {
+        const first = menu.querySelector('a[href]');
+        if (first) first.focus({ preventScroll: true });
+      } else if (!shown && wasShown && menu.contains(document.activeElement)) {
+        burger.focus({ preventScroll: true });
+      }
+      wasShown = shown;
+    };
     sync();
     new MutationObserver(sync).observe(menu, { attributes: true, attributeFilter: ['class'] });
     document.addEventListener('keydown', e => {
@@ -606,3 +619,33 @@ function accVelocity(hist) {
     });
   })).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'srcset'] });
 })();
+
+
+/* Разметка Product для поисковиков: один список (ItemList) из тех же вещей, что нарисованы на странице.
+   Страница вызывает ACC_LD(PRODUCTS, 'collection-a2.html', 'Капсула a2 · Accept') после загрузки. */
+window.ACC_LD = function (products, page, name) {
+  try {
+    const ORIGIN = 'https://accinthecloud.com/';
+    const abs = u => (/^https?:/i.test(u) ? u : ORIGIN + encodeURI(String(u).replace(/^\//, '')));
+    const slug = p => String(p.id).replace(/^a\d-/, '');
+    const list = (products || []).filter(p => p && p.name && p.status !== 'hidden');
+    if (!list.length) return;
+    const data = {
+      '@context': 'https://schema.org', '@type': 'ItemList', name: name || document.title,
+      itemListElement: list.map((p, i) => {
+        const url = ORIGIN + page + '?item=' + encodeURIComponent(slug(p));
+        const prod = { '@type': 'Product', name: String(p.name).replace(/<[^>]*>/g, ''), url };
+        if (p.img || (p.images && p.images[0])) prod.image = abs(p.img || p.images[0]);
+        if (p.desc) prod.description = String(p.desc);
+        prod.brand = { '@type': 'Brand', name: 'accinthecloud' };
+        const offer = { '@type': 'Offer', url, priceCurrency: 'RUB', availability: 'https://schema.org/' + (p.sold ? 'SoldOut' : 'InStock') };
+        if (p.priceNum > 0) offer.price = String(p.priceNum);
+        prod.offers = offer;
+        return { '@type': 'ListItem', position: i + 1, item: prod };
+      }),
+    };
+    let el = document.getElementById('ld-products');
+    if (!el) { el = document.createElement('script'); el.type = 'application/ld+json'; el.id = 'ld-products'; document.head.appendChild(el); }
+    el.textContent = JSON.stringify(data);
+  } catch (e) {}
+};

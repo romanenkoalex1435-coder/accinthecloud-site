@@ -137,6 +137,7 @@ try {
     json_out(200, ['ok' => true]);
   }
   if ($a === 'logout') { set_cookie('', 0); json_out(200, ['ok' => true]); }
+  if ($a === 'me' && !$post) json_out(200, ['auth' => authed()]);
   if (!authed()) json_out(401, ['ok' => false, 'error' => 'auth']);
 
   if ($a === 'data' && !$post) { $l = load(); json_out(200, ['ok' => true, 'data' => $l['data'], 'version' => $l['version']]); }

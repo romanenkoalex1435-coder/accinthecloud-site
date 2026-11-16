@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=15"></script>
+  <script src="/js/i18n.js?v=16"></script>
   <title>FAQ — accinthecloud</title>
   <meta name="description" content="Частые вопросы об accinthecloud: сроки, размеры, оплата, доставка и индивидуальный пошив.">
   <link rel="canonical" href="https://accinthecloud.com/faq.html">
@@ -144,13 +144,13 @@
       .footer-links { flex-wrap:wrap; justify-content:center; gap:16px; }
     }
   </style>
-  <link rel="stylesheet" href="site.css?v=2">
-  <script src="site.js?v=2" defer></script>
+  <link rel="stylesheet" href="site.css?v=3">
+  <script src="site.js?v=3" defer></script>
 </head>
 <body>
 
 <div class="mobile-menu" id="mobileMenu">
-  <button class="mobile-menu-close" id="menuClose">✕</button>
+  <button class="mobile-menu-close" id="menuClose" aria-label="Закрыть меню">✕</button>
   <a href="index.html">Главная</a>
   <a href="lookbook.html">Lookbook</a>
   <a href="index.html#capsules">Капсулы</a>
@@ -161,7 +161,7 @@
 </div>
 
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" alt="accinthecloud"></a>
+  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div class="nav-right">
     <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -169,7 +169,7 @@
       </svg>
       <span class="cbadge" id="cartBadge"></span>
     </a>
-    <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
+    <button class="burger" id="burgerBtn" aria-label="Меню"><span></span><span></span><span></span></button>
   </div>
 </nav>
 
@@ -179,7 +179,7 @@
 
   <div class="faq-list">
     <div class="faq-item">
-      <button class="faq-q" id="faq-q1" aria-expanded="false" aria-controls="faq-a1">Кто я?<span class="faq-icon" aria-hidden="true">+</span></button>
+      <button class="faq-q" id="faq-q1" aria-expanded="false" aria-controls="faq-a1">Кто шьёт вещи?<span class="faq-icon" aria-hidden="true">+</span></button>
       <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1" inert>Меня зовут Алексей, я портной.</div>
     </div>
     <div class="faq-item">
@@ -269,6 +269,6 @@ document.querySelectorAll('.faq-q').forEach(btn=>{
   });
 });
 </script>
-<script src="/js/consent.js?v=3" defer></script>
+<script src="/js/consent.js?v=4" defer></script>
 </body>
 </html>
