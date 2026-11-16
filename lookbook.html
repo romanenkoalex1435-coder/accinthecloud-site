@@ -90,6 +90,7 @@
       box-shadow:0 1px 1px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.08);
     }
     .print img { display:block; width:100%; height:100%; object-fit:cover; background:var(--soft); pointer-events:none; -webkit-user-drag:none; }
+    .stack.kb-focus .print:not([class*=under]) { outline:2px solid var(--ink); outline-offset:3px; }
     .stack .under1 { transform:rotate(var(--r2)) translate(3px, 2px); }
     .stack .under2 { transform:rotate(var(--r3)) translate(-3px, 3px); }
     .stack.held .print:not([class*=under]), .stack:hover .print:not([class*=under]) { box-shadow:0 2px 3px rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.14); }
@@ -168,8 +169,8 @@
     .panel-actions { display:flex; gap:8px; flex-shrink:0; }
     @media (prefers-reduced-motion:reduce) { .deal, .panel, .stack { transition:none !important; } }
   </style>
-  <link rel="stylesheet" href="site.css">
-  <script src="site.js" defer></script>
+  <link rel="stylesheet" href="site.css?v=2">
+  <script src="site.js?v=2" defer></script>
 </head>
 <body>
 
@@ -646,6 +647,19 @@ const ITEMS = ACC_SITE.lookbook() || [
   // с клавиатуры и для экранного диктора — обычный список вещей
   document.getElementById('srList').innerHTML = ITEMS.map((it, n) => `<li><button type="button" data-n="${n}">${it.num} ${it.name}</button></li>`).join('');
   document.getElementById('srList').addEventListener('click', e => { const b = e.target.closest('button'); if (b) deal(stacks[+b.dataset.n]); });
+  // видимый фокус: настоящая кнопка скрыта, поэтому подсвечиваем соответствующую стопку на столе
+  const srList = document.getElementById('srList');
+  srList.addEventListener('focusin', e => {
+    const b = e.target.closest('button'); if (!b || !b.matches(':focus-visible')) return;
+    const s = stacks[+b.dataset.n]; if (!s) return;
+    s.el.classList.add('kb-focus');
+    const r = s.el.getBoundingClientRect();
+    if (r.top < 0 || r.left < 0 || r.bottom > innerHeight || r.right > innerWidth) s.el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+  });
+  srList.addEventListener('focusout', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const s = stacks[+b.dataset.n]; if (s) s.el.classList.remove('kb-focus');
+  });
   addEventListener('resize', () => { setNav(); sizeStacks(); if (open) collect(); });
 
   /* ссылка вида ?item=bag-n03 сразу раскладывает вещь */
@@ -684,6 +698,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=2" defer></script>
+<script src="/js/consent.js?v=3" defer></script>
 </body>
 </html>

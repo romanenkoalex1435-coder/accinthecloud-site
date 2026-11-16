@@ -208,8 +208,8 @@
       margin:12px 12px -48px 0; z-index:10;
     }
   </style>
-  <link rel="stylesheet" href="site.css">
-  <script src="site.js" defer></script>
+  <link rel="stylesheet" href="site.css?v=2">
+  <script src="site.js?v=2" defer></script>
 </head>
 <body>
 <div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
@@ -272,12 +272,12 @@
       <div class="modal-divider"></div>
       <div id="secUnique" style="display:none;">
         <div class="mfield">
-          <label>Опиши свою идею</label>
+          <label for="inputUnique">Опиши свою идею</label>
           <textarea id="inputUnique" rows="3" placeholder="Материал, цвет, размер, референсы..."></textarea>
         </div>
       </div>
       <div class="mfield">
-        <label>Пожелания</label>
+        <label for="inputNotes">Пожелания</label>
         <textarea id="inputNotes" rows="2" placeholder="Любые детали или уточнения..."></textarea>
       </div>
       <div class="qty-row">
@@ -449,6 +449,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=2" defer></script>
+<script src="/js/consent.js?v=3" defer></script>
 </body>
 </html>

@@ -43,14 +43,42 @@
       box.setAttribute('aria-labelledby', title.id);
     }
     let last = null;
+    let inerted = [];
+    // пока модалка открыта, всё остальное на странице недоступно с клавиатуры и скринридеру
+    // (плашку cookie не трогаем: на телефоне её прячет CSS через html.modal-open)
+    const lock = () => {
+      inerted = [...document.body.children].filter(n =>
+        n !== ov && !n.contains(ov) && !n.classList.contains('cc') && !/^(SCRIPT|STYLE|LINK|NOSCRIPT)$/.test(n.tagName) && !n.inert);
+      inerted.forEach(n => { n.inert = true; });
+      document.documentElement.classList.add('modal-open');
+    };
+    const unlock = () => {
+      inerted.forEach(n => { n.inert = false; });
+      inerted = [];
+      document.documentElement.classList.remove('modal-open');
+    };
+    // Tab по кругу внутри модалки (иначе фокус уходит в интерфейс браузера)
+    ov.addEventListener('keydown', e => {
+      if (e.key !== 'Tab' || !ov.classList.contains('open')) return;
+      const f = [...box.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+        .filter(n => !n.disabled && !n.hidden && n.getClientRects().length);
+      if (!f.length) return;
+      const a = document.activeElement;
+      if (e.shiftKey && (a === f[0] || !box.contains(a))) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (a === f[f.length - 1] || !box.contains(a))) { e.preventDefault(); f[0].focus(); }
+    });
     new MutationObserver(() => {
       if (ov.classList.contains('open')) {
         if (!box.contains(document.activeElement)) last = document.activeElement;
+        if (!inerted.length) lock();
         const first = box.querySelector('.modal-close, button');
         if (first) first.focus({ preventScroll: true });
-      } else if (last) {
-        last.focus({ preventScroll: true });
-        last = null;
+      } else {
+        if (inerted.length) unlock();
+        if (last) {
+          last.focus({ preventScroll: true });
+          last = null;
+        }
       }
     }).observe(ov, { attributes: true, attributeFilter: ['class'] });
   });

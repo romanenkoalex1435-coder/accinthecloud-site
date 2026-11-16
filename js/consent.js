@@ -33,6 +33,7 @@
   background:#fff;color:#0d0d0d;border:1px solid #0d0d0d;
   opacity:0;transform:translateY(12px);transition:opacity .24s cubic-bezier(.23,1,.32,1),transform .24s cubic-bezier(.23,1,.32,1)}
 .cc.is-in{opacity:1;transform:none}
+html.modal-open .cc{display:none}
 .cc.is-out{opacity:0;transform:translateY(8px);transition-duration:.18s}
 .cc-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 12px;border-bottom:1px solid #0d0d0d}
 .cc-title{margin:0;font-family:var(--f-pixel,'PixelImpacted',sans-serif)!important;font-size:32px!important;font-weight:400;line-height:1!important;letter-spacing:0!important;color:#0d0d0d}
