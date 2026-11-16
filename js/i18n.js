@@ -1,7 +1,8 @@
 /* Русский / English. Подключается в <head> обычным скриптом (без defer).
    Русский — исходный текст страниц. В английском режиме тексты подменяются по словарю
    js/i18n-en.json и шаблонам ниже; новые элементы (карточки, окна) переводятся на лету.
-   Выбор хранится в localStorage; ?lang=en|ru в ссылке переключает сразу. */
+   Сайт всегда открывается на русском; английский — только если человек сам выбрал EN
+   (выбор хранится в localStorage) или пришёл по ссылке с ?lang=en. */
 (function () {
   const KEY = 'acc_lang';
   const html = document.documentElement;
@@ -9,7 +10,7 @@
                   set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} } };
   let lang = new URLSearchParams(location.search).get('lang');
   if (lang === 'en' || lang === 'ru') store.set(lang);
-  else lang = store.get() || (/^(ru|uk|be|kk)\b/i.test(navigator.language || 'ru') ? 'ru' : 'en');
+  else lang = store.get() === 'en' ? 'en' : 'ru';
   window.ACC_LANG = lang;
   window.ACC_T = s => s;
 
@@ -115,7 +116,7 @@
   }
 
   // ?v= поднимать вместе с i18n.js?v= в страницах при правке словаря: js/ браузер хранит неделю
-  const dict = fetch('/js/i18n-en.json?v=14').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
+  const dict = fetch('/js/i18n-en.json?v=15').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
   document.addEventListener('DOMContentLoaded', () => dict.then(() => {
     walk(document.documentElement);
     const t = tr(document.title); if (t) document.title = t;

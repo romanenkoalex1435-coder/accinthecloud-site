@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=14"></script>
+  <script src="/js/i18n.js?v=15"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud.com/">
@@ -834,7 +834,8 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 // 3D-знак из пикселей (Three.js, ~170 КБ) грузится после вступления первого экрана, чтобы не тормозить загрузку;
 // до этого виден знак картинкой. Блок дропа догружает сумку, когда подъезжает к экрану.
 if (!document.documentElement.classList.contains('has-drop'))
-  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=7').catch(() => {}), 1400), { once: true });
+  addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=10').catch(() => {}), 1400), { once: true });
 </script>
+<script src="/js/consent.js?v=1" defer></script>
 </body>
 </html>

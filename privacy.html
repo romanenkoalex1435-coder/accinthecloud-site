@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=14"></script>
+  <script src="/js/i18n.js?v=15"></script>
   <title>Политика конфиденциальности — accinthecloud</title>
   <meta name="description" content="Политика конфиденциальности accinthecloud.">
   <link rel="canonical" href="https://accinthecloud.com/privacy.html">
@@ -79,6 +79,8 @@
       footer { flex-direction:column; align-items:center; gap:16px; text-align:center; padding:40px 24px; }
       .footer-links { flex-wrap:wrap; justify-content:center; gap:16px; }
     }
+    .cc-reopen { background:none; border:0; padding:0; font:inherit; color:var(--ink); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+    .cc-reopen:hover { text-decoration-thickness:2px; }
   </style>
   <link rel="stylesheet" href="site.css">
   <script src="site.js" defer></script>
@@ -92,7 +94,7 @@
 
 <main class="wrap">
   <h1>Политика конфиденциальности</h1>
-  <p class="doc-date">Редакция от июня 2026 г.</p>
+  <p class="doc-date">Редакция от ноября 2026 г.</p>
 
   <h2>1. Общие положения</h2>
   <p>Настоящая Политика конфиденциальности описывает, какие персональные данные собирает самозанятый мастер Савельев Алексей Сергеевич, действующий под брендом <strong>accinthecloud</strong> (далее — «Оператор»), как они используются и какие меры принимаются для их защиты.</p>
@@ -117,6 +119,7 @@
   <h2>4. Передача третьим лицам</h2>
   <p>Оператор <strong>не передаёт</strong> персональные данные третьим лицам — рекламным сервисам, базам данных, партнёрам или иным организациям.</p>
   <p>Исключение составляют случаи, прямо предусмотренные законодательством Российской Федерации.</p>
+  <p>Если вы нажали «Принять все» в окне о cookie, сайт подключает сервис веб-аналитики Яндекс Метрика (ООО «ЯНДЕКС»). Он получает обезличенные сведения о посещении: какие страницы открыты и как долго, тип устройства и браузера, примерное местоположение по IP-адресу. Имя, ник Telegram и содержимое заказов в Метрику не передаются.</p>
 
   <h2>5. Хранение данных</h2>
   <p>Данные хранятся в переписке Telegram и в системе административной панели сайта. Доступ к ним имеет только Оператор. Данные хранятся не дольше, чем необходимо для выполнения заказа.</p>
@@ -124,7 +127,9 @@
   <p>По вашему запросу данные могут быть удалены — напишите в Telegram <a href="https://t.me/accinthecloud" target="_blank" style="color:var(--ink);text-decoration:underline;">@accinthecloud</a>.</p>
 
   <h2>6. Cookies</h2>
-  <p>Сайт не использует рекламные cookies и не передаёт данные аналитическим сервисам. Технические cookies (если применяются браузером) носят сессионный характер и не содержат персональных данных.</p>
+  <p>Сайт хранит в браузере технические данные, без которых он не работает: содержимое корзины, выбранный язык и ваш выбор в окне о cookie. Они не передаются третьим лицам.</p>
+  <p>Cookie сервиса Яндекс Метрика устанавливаются, только если вы нажали «Принять все» в окне о cookie. Если выбрать «Только нужные», Метрика не загружается.</p>
+  <p>Изменить решение можно в любой момент: <button type="button" class="cc-reopen" onclick="window.accCookieSettings && accCookieSettings()">настройки cookie</button></p>
 
   <h2>7. Ваши права</h2>
   <ul>
@@ -147,5 +152,6 @@
   </div>
 </footer>
 
+<script src="/js/consent.js?v=1" defer></script>
 </body>
 </html>

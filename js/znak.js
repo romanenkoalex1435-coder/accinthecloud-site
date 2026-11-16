@@ -23,8 +23,15 @@ const COLLAPSE_AT = 7;          // на этом ударе знак рушит�
 const HIT_WINDOW = 3.5;         // удары чаще этого (с) считаются серией
 const PARTIAL_WAIT = 2.5;        // после мелкой выбоины пиксели возвращаются через столько секунд тишины
 const FULL_WAIT = 1.2;          // после полного обрушения — через столько после того, как всё легло
-const GRAVITY = 14;
-const BOUNCE = 0.32, FRICTION = 0.55;
+/* Знак ~2,2 единицы в ширину — как скульптура около метра, поэтому g ≈ 22 ед/с².
+   Пол и горка — сетка высот: кубик отскакивает с трением, скользит, тормозит, переваливается
+   на грань и сам скатывается со ступенек горки; лёгший кубик поднимает свою клетку. */
+const GRAVITY = 22;
+const AIR = 0.12;               // лёгкое сопротивление воздуха, 1/с
+const MU_HIT = 0.7;             // трение в момент удара о пол (доля от импульса удара)
+const MU_SLIDE = 1.1;           // трение скольжения: кубик — не шайба, проезжает чуть-чуть
+const SLOPE_A = GRAVITY * 0.35; // ускорение вниз с крутого края горки
+const SLIDE_MAX = 2.2;          // дальше стольких кубиков от места падения не уезжает
 const BACK_K = 240, BACK_C = 2 * 0.72 * Math.sqrt(240); // пружина возврата: резкая, с небольшим перелётом
 
 function makeRenderer(canvas) {
@@ -132,7 +139,8 @@ async function initMark() {
   const LA = loose.instanceMatrix.array;
 
   // состояние каждого кубика
-  const ATTACHED = 0, FALLING = 1, SETTLING = 2, RESTING = 3, RETURNING = 4;
+  const ATTACHED = 0, FALLING = 1, SETTLING = 2, RESTING = 3, RETURNING = 4, SLIDING = 5;
+  const landX = new Float32Array(N), landZ = new Float32Array(N); // где кубик коснулся кучи
   const mode = new Uint8Array(N);                 // 0 — на месте в знаке
   const pos = new Float32Array(N * 3), vel = new Float32Array(N * 3);
   const rot = new Float32Array(N * 4), spinW = new Float32Array(N * 3);
@@ -187,7 +195,8 @@ async function initMark() {
 
   // текущая скорость оборота знака — выбитый кубик уносит её с собой
   let spinRate = 0;
-  function detach(id, vx, vy, vz) {
+  // spinAmt — насколько сильно кубик закручен: выбитый ударом — сильно, осыпавшийся сам — почти никак
+  function detach(id, vx, vy, vz, spinAmt) {
     mode[id] = FALLING;
     attachedCount--;
     FA.fill(0, id * 16, id * 16 + 16);
@@ -198,7 +207,7 @@ async function initMark() {
     vel[p + 1] = vy;
     vel[p + 2] = vz - spinRate * pos[p];
     rot.set([pivotQ.x, pivotQ.y, pivotQ.z, pivotQ.w], id * 4);
-    const a = 4 + Math.random() * 8;
+    const a = spinAmt * (0.6 + Math.random() * 0.8);
     spinW.set([(Math.random() - 0.5) * a, (Math.random() - 0.5) * a, (Math.random() - 0.5) * a], p);
     bounces[id] = 0;
     addLoose(id);
@@ -221,12 +230,7 @@ async function initMark() {
     }
   }
 
-  /* лёг: скатываемся с горки, пока в пределах трёх клеток есть место ниже больше чем на кубик
-     (иногда и на один — край горки выходит рваным), затем занимаем клетку. Склон ~1:3 — горка
-     низкая и широкая. Клетка — только учёт высоты: сам кубик ложится со сдвигом и креном,
-     как брошенный, а не по линейке. */
   const DX = [1, -1, 0, 0, 1, -1, 1, -1], DZ = [0, 0, 1, -1, 1, 1, -1, -1];
-  const REACH = 4;
   /* где может лежать горка. Глубина считается в resize: чем дальше от камеры, тем выше на экране
      пол, и дальний край не должен заезжать на надпись. Вбок пол шире кадра — что не влезло
      под надпись, раскатывается за края экрана. */
@@ -237,55 +241,111 @@ async function initMark() {
   const czMax = Math.floor((PILE_FRONT - FZ0) / ST);
   // выше этого слоя горка закрыла бы надпись — лишнее раскатывается в стороны (считается в resize)
   let capLv = 99;
-  function settle(id) {
+  const cellX = x => clamp(Math.floor((x - FX0) / ST), cxMin, cxMax);
+  const cellZ = z => clamp(Math.floor((z - FZ0) / ST), czMin, czMax);
+  const surfAt = (x, z) => floorY + height[cellZ(z) * FW + cellX(x)] * ST;
+
+  // поворот, при котором кубик лежит на той грани, что ближе всего к полу (крен вокруг вертикали сохраняется)
+  function faceDown(id, out, o, tiltMax) {
+    const q = id * 4, x = rot[q], y = rot[q + 1], z = rot[q + 2], w = rot[q + 3];
+    // куда в мире смотрят оси кубика (только их вертикальная часть решает, какая грань снизу)
+    const ax = [[1 - 2 * (y * y + z * z), 2 * (x * y + w * z), 2 * (x * z - w * y)],
+                [2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x)],
+                [2 * (x * z + w * y), 2 * (y * z - w * x), 1 - 2 * (x * x + y * y)]];
+    let b = 0;
+    for (let a = 1; a < 3; a++) if (Math.abs(ax[a][1]) > Math.abs(ax[b][1])) b = a;
+    const sg = ax[b][1] < 0 ? -1 : 1, ux = ax[b][0] * sg, uy = ax[b][1] * sg, uz = ax[b][2] * sg;
+    // поворот от этой оси к вертикали: ось u × up, угол acos(u·up)
+    const rx = -uz, rz = ux;
+    const rl = Math.hypot(rx, rz), ang = Math.acos(clamp(uy, -1, 1));
+    let dx = 0, dy = 0, dz = 0, dw = 1;
+    if (rl > 1e-6) { const sn = Math.sin(ang / 2); dx = rx / rl * sn; dz = rz / rl * sn; dw = Math.cos(ang / 2); }
+    // маленький крен: на горке кубик опирается на соседей и лежит не идеально ровно (крен ∘ d)
+    if (tiltMax > 0) {
+      const t = Math.random() * tiltMax / 2, ta = Math.random() * Math.PI * 2;
+      const tx = Math.cos(ta) * Math.sin(t), tz = Math.sin(ta) * Math.sin(t), tw = Math.cos(t);
+      const nx = tw * dx + tx * dw, ny = tz * dx - tx * dz, nz = tw * dz + tz * dw, nw = tw * dw - tx * dx - tz * dz;
+      dx = nx; dy = ny; dz = nz; dw = nw;
+    }
+    // d ∘ q
+    out[o] = dw * x + dx * w + dy * z - dz * y;
+    out[o + 1] = dw * y - dx * z + dy * w + dz * x;
+    out[o + 2] = dw * z + dx * y - dy * x + dz * w;
+    out[o + 3] = dw * w - dx * x - dy * y - dz * z;
+  }
+
+  // кубик коснулся пола или горки снизу
+  function contact(id, surf) {
     const p = id * 3;
-    let cx = clamp(Math.floor((pos[p] - FX0) / ST), cxMin, cxMax), cz = clamp(Math.floor((pos[p + 2] - FZ0) / ST), czMin, czMax);
-    for (let it = 0; it < 60; it++) {
-      const start = (Math.random() * 8) | 0, hc = height[cz * FW + cx];
-      let bestN = -1, bestScore = hc - 0.5;
-      for (let n = 0; n < 8; n++) {
-        const d = (start + n) & 7;
-        for (let k = 1; k <= REACH; k++) {
-          const x = cx + DX[d] * k, z = cz + DZ[d] * k;
-          if (x < cxMin || x > cxMax || z < czMin || z > czMax) break;
-          const hh = height[z * FW + x];
-          if (hh > hc) break;                       // дальше выше — туда не катится
-          const score = hh + k * 0.01;
-          if ((hh < hc - 1 || (hh === hc - 1 && Math.random() < 0.35)) && score < bestScore) { bestScore = score; bestN = d; }
-        }
-      }
-      if (bestN < 0) break;
-      cx += DX[bestN]; cz += DZ[bestN];
+    pos[p + 1] = surf + HALF;
+    const vn = -vel[p + 1];
+    if (vn > 0.75 && bounces[id] < 3) {
+      // отскок теряет большую часть скорости; трение в момент удара гасит скольжение
+      const e = 0.2 + Math.random() * 0.14;
+      vel[p + 1] = vn * e;
+      const vx = vel[p], vz = vel[p + 2], vt = Math.hypot(vx, vz);
+      if (vt > 1e-6) { const dv = Math.min(vt, MU_HIT * (1 + e) * vn); vel[p] -= vx / vt * dv; vel[p + 2] -= vz / vt * dv; }
+      // удар об угол переворачивает кубик: часть вращения — перекат по направлению движения, часть — случайный кувырок
+      const kick = Math.min(vn, 3) * 2.2;
+      spinW[p] = spinW[p] * 0.35 + vel[p + 2] / HALF * 0.08 + (Math.random() - 0.5) * kick;
+      spinW[p + 1] = spinW[p + 1] * 0.35 + (Math.random() - 0.5) * kick * 0.5;
+      spinW[p + 2] = spinW[p + 2] * 0.35 - vel[p] / HALF * 0.08 + (Math.random() - 0.5) * kick;
+      bounces[id]++;
+      return;
     }
-    if (height[cz * FW + cx] >= capLv) {
-      // ближайший по ширине столбец, где во всю глубину полосы есть место
-      const sx = Math.random() < 0.5 ? 1 : -1, nz = czMax - czMin + 1;
-      found: for (let r = 1; r <= cxMax - cxMin; r++) {
-        for (const sg of [sx, -sx]) {
-          const x = cx + sg * r;
-          if (x < cxMin || x > cxMax) continue;
-          const z0 = (Math.random() * nz) | 0;
-          for (let k = 0; k < nz; k++) {
-            const z = czMin + (z0 + k) % nz;
-            if (height[z * FW + x] < capLv) { cx = x; cz = z; break found; }
-          }
-        }
-      }
+    // удар слабый — дальше скользит по поверхности
+    vel[p + 1] = 0;
+    landX[id] = pos[p]; landZ[id] = pos[p + 2];
+    faceDown(id, tgtQ, id * 4, 0);
+    mode[id] = SLIDING;
+  }
+
+  // куда скатываться с этой клетки: только с крутого края (сосед ниже на два кубика и больше) и недалеко от места падения
+  const slope = [0, 0];
+  function downhill(id, cx, cz) {
+    const p = id * 3;
+    if (Math.hypot(pos[p] - landX[id], pos[p + 2] - landZ[id]) > SLIDE_MAX * ST) return false;
+    const hc = height[cz * FW + cx];
+    let best = hc - 1, bd = -1;
+    for (let d = 0; d < 8; d++) {
+      const x = cx + DX[d], z = cz + DZ[d];
+      if (x < cxMin || x > cxMax || z < czMin || z > czMax) continue;
+      const hh = height[z * FW + x];
+      if (hh < best) { best = hh; bd = d; }
     }
-    const c = cz * FW + cx;
+    if (bd < 0) return false;
+    const l = Math.hypot(DX[bd], DZ[bd]);
+    slope[0] = DX[bd] / l; slope[1] = DZ[bd] / l;
+    return true;
+  }
+
+  // остановился: занимает клетку и чуть доворачивается, устраиваясь среди соседей
+  function rest(id, cx, cz) {
+    // один кубик не балансирует на столбике: если рядом клетка ниже на 2+, он скатывается туда
+    for (let k = 0; k < 6; k++) {
+      const hc = height[cz * FW + cx];
+      let best = hc - 1, bx = -1, bz = -1;
+      for (let d = 0; d < 8; d++) {
+        const x = cx + DX[d], z = cz + DZ[d];
+        if (x < cxMin || x > cxMax || z < czMin || z > czMax) continue;
+        const hh = height[z * FW + x];
+        if (hh < best) { best = hh; bx = x; bz = z; }
+      }
+      if (bx < 0) break;
+      cx = bx; cz = bz;
+    }
+    const p = id * 3, c = cz * FW + cx;
     restCell[id] = c;
     restLevel[id] = height[c];
     height[c]++;
     const lv = restLevel[id];
-    tgt[p] = FX0 + ((c % FW) + 0.5 + (Math.random() - 0.5) * 0.7) * ST;
-    tgt[p + 1] = floorY + (lv + 0.5) * ST - (lv ? Math.random() * 0.3 * ST : 0);  // наверху проседает в щели
-    tgt[p + 2] = FZ0 + (Math.floor(c / FW) + 0.5 + (Math.random() - 0.5) * 0.7) * ST;
-    // любой поворот вокруг вертикали и крен: на полу чуть-чуть, на горке — опёрся на соседей
-    const yaw = Math.random() * Math.PI, tilt = (lv ? 0.15 + Math.random() * 0.45 : Math.random() * 0.12) / 2;
-    const ta = Math.random() * Math.PI * 2, ax = Math.cos(ta) * Math.sin(tilt), az = Math.sin(ta) * Math.sin(tilt);
-    const w1 = Math.cos(tilt), y2 = Math.sin(yaw / 2), w2 = Math.cos(yaw / 2);
-    tgtQ.set([ax * w2 - az * y2, w1 * y2, ax * y2 + az * w2, w1 * w2], id * 4);
+    // кубик съезжает в «гнездо» своей клетки — недалеко, не больше полкубика
+    tgt[p] = clamp(pos[p], FX0 + (cx + 0.3) * ST, FX0 + (cx + 0.7) * ST);
+    tgt[p + 1] = floorY + (lv + 0.5) * ST - (lv ? Math.random() * 0.2 * ST : 0);
+    tgt[p + 2] = clamp(pos[p + 2], FZ0 + (cz + 0.3) * ST, FZ0 + (cz + 0.7) * ST);
+    faceDown(id, tgtQ, id * 4, lv ? 0.08 + Math.random() * 0.22 : Math.random() * 0.05);
     vel.fill(0, p, p + 3);
+    spinW.fill(0, p, p + 3);
     mode[id] = SETTLING;
   }
 
@@ -305,7 +365,7 @@ async function initMark() {
     const ci = ijk[hitId * 3], cj = ijk[hitId * 3 + 1], ck = ijk[hitId * 3 + 2];
     const hw = [0, 0, 0], vw = [0, 0, 0];
     homeWorld(hitId, hw, 0);
-    const power = 0.6 + hits * 0.12;
+    const power = (0.6 + hits * 0.12) * 1.25;   // g выше прежнего — толчок сильнее, чтобы дуга не стала короче
     for (let di = -r; di <= r; di++) for (let dj = -r; dj <= r; dj++) for (let dk = -r; dk <= r; dk++) {
       // неровный край выбоины
       if (di * di + dj * dj + dk * dk > R * R * (0.75 + 0.5 * Math.random())) continue;
@@ -318,7 +378,7 @@ async function initMark() {
       const al = Math.hypot(ax, ay, az);
       if (al > 1e-6) { ax /= al; ay /= al; az /= al; }
       const s = power * (0.6 + Math.random() * 0.9), back = 0.5 + Math.random() * 0.7;
-      detach(id, ax * s - rd.x * back, ay * s - rd.y * back + Math.random() * 0.6, az * s - rd.z * back);
+      detach(id, ax * s - rd.x * back, ay * s - rd.y * back + Math.random() * 0.6, az * s - rd.z * back, 3 + s * 3);
     }
     // удар качает знак: толчок вокруг центра от точки попадания (r × направление удара)
     const rx = hw[0] - PE[12], ry = hw[1] - PE[13], rz = hw[2] - PE[14], push = 4 + hits * 0.8;
@@ -380,11 +440,12 @@ async function initMark() {
       const d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > R2) continue;
       liftOff(id);
-      const d = Math.sqrt(d2) || 1, f = 0.8 + Math.random();
-      vel[p] = dx / d * f - rd.x * 0.5;
-      vel[p + 1] = 1.4 + Math.random() * 1.6;
-      vel[p + 2] = dz / d * f - rd.z * 0.5;
-      const a = 4 + Math.random() * 8;
+      // подбрасывает на месте: вверх, чуть в стороны от пальца
+      const d = Math.sqrt(d2) || 1, near = 1 - Math.sqrt(d2) / R, f = 0.15 + Math.random() * 0.35;
+      vel[p] = dx / d * f;
+      vel[p + 1] = (0.9 + Math.random() * 0.9) * (0.6 + near * 0.6);
+      vel[p + 2] = dz / d * f;
+      const a = 2 + Math.random() * 4;
       spinW.set([(Math.random() - 0.5) * a, (Math.random() - 0.5) * a, (Math.random() - 0.5) * a], p);
       bounces[id] = 0;
       mode[id] = FALLING;
@@ -511,7 +572,7 @@ async function initMark() {
     floorY = y;
     for (let s = 0; s < looseCount; s++) {
       const id = slotId[s];
-      if (mode[id] !== SETTLING && mode[id] !== RESTING) continue;
+      if (mode[id] !== SETTLING && mode[id] !== RESTING && mode[id] !== SLIDING) continue;
       pos[id * 3 + 1] += dy; tgt[id * 3 + 1] += dy;
       writeLoose(id); looseDirty = true;
     }
@@ -650,7 +711,7 @@ async function initMark() {
     // цели возврата — текущее место в знаке (знак может крутиться)
     for (let s = 0; s < looseCount; s++) { const id = slotId[s]; if (mode[id] === RETURNING) homeWorld(id, tgt, id * 3); }
     const n = Math.max(1, Math.ceil(dt / (1 / 120))), h = dt / n;
-    const settleK = 1 - Math.exp(-22 * h), turnK = 1 - Math.exp(-20 * h);
+    const settleK = 1 - Math.exp(-14 * h), turnK = 1 - Math.exp(-20 * h), tipK = 1 - Math.exp(-16 * h);
     active = 0; returning = 0;
     // с конца: вернувшийся кубик уходит из списка, на его место встаёт уже посчитанный последний
     for (let s = looseCount - 1; s >= 0; s--) {
@@ -670,27 +731,47 @@ async function initMark() {
       for (let k = 0; k < n; k++) {
         if (mode[id] === FALLING) {
           vel[p + 1] -= GRAVITY * h;
+          const drag = 1 - AIR * h;
+          vel[p] *= drag; vel[p + 1] *= drag; vel[p + 2] *= drag;
+          // сбоку в горку: не запрыгиваем на неё, а отлетаем от стенки
+          const nx = pos[p] + vel[p] * h, nz = pos[p + 2] + vel[p + 2] * h;
+          if (surfAt(nx, nz) > pos[p + 1] - HALF + ST * 0.5) {
+            if (cellX(nx) !== cellX(pos[p])) vel[p] *= -0.25;
+            if (cellZ(nz) !== cellZ(pos[p + 2])) vel[p + 2] *= -0.25;
+          }
           pos[p] += vel[p] * h; pos[p + 1] += vel[p + 1] * h; pos[p + 2] += vel[p + 2] * h;
           // стенки за краем пола, чтобы горка не уезжала из кадра
           if (Math.abs(pos[p]) > PILE_X) { pos[p] = clamp(pos[p], -PILE_X, PILE_X); vel[p] *= -0.3; }
           if (pos[p + 2] < PILE_BACK || pos[p + 2] > PILE_FRONT) { pos[p + 2] = clamp(pos[p + 2], PILE_BACK, PILE_FRONT); vel[p + 2] *= -0.3; }
-          const cx = clamp(Math.floor((pos[p] - FX0) / ST), 0, FW - 1), cz = clamp(Math.floor((pos[p + 2] - FZ0) / ST), 0, FD - 1);
+          const surf = surfAt(pos[p], pos[p + 2]);
+          if (pos[p + 1] - HALF <= surf && vel[p + 1] < 0) contact(id, surf);
+          tumble(q, p, h);
+        } else if (mode[id] === SLIDING) {
+          const cx = cellX(pos[p]), cz = cellZ(pos[p + 2]);
           const surf = floorY + height[cz * FW + cx] * ST;
-          if (pos[p + 1] - HALF <= surf && vel[p + 1] < 0) {
-            if (bounces[id] < 2 && -vel[p + 1] > 0.9) {
-              pos[p + 1] = surf + HALF;
-              vel[p + 1] *= -BOUNCE; vel[p] *= FRICTION; vel[p + 2] *= FRICTION;
-              spinW[p] *= 0.6; spinW[p + 1] *= 0.6; spinW[p + 2] *= 0.6;
-              bounces[id]++;
-            } else settle(id);
-          }
-          // кувырок: q += ½·ω·q·dt
-          const wx = spinW[p], wy = spinW[p + 1], wz = spinW[p + 2];
-          const x = rot[q], y = rot[q + 1], z = rot[q + 2], w = rot[q + 3], hh = 0.5 * h;
-          rot[q] = x + hh * (wx * w + wy * z - wz * y);
-          rot[q + 1] = y + hh * (wy * w + wz * x - wx * z);
-          rot[q + 2] = z + hh * (wz * w + wx * y - wy * x);
-          rot[q + 3] = w - hh * (wx * x + wy * y + wz * z);
+          // съехал с края ступеньки — падает на уровень ниже
+          if (pos[p + 1] - HALF > surf + ST * 0.05) { mode[id] = FALLING; vel[p + 1] = 0; continue; }
+          pos[p + 1] = surf + HALF;
+          let vx = vel[p], vz = vel[p + 2];
+          const down = downhill(id, cx, cz);
+          if (down) { vx += slope[0] * SLOPE_A * h; vz += slope[1] * SLOPE_A * h; }
+          // трение скольжения: на ступеньке слабее, иначе кубик не сдвинется
+          const vt = Math.hypot(vx, vz), dec = MU_SLIDE * GRAVITY * (down ? 0.2 : 1) * h;
+          if (vt <= dec) { vx = 0; vz = 0; } else { vx -= vx / vt * dec; vz -= vz / vt * dec; }
+          // впереди клетка выше — упирается
+          const ncx = cellX(pos[p] + vx * h), ncz = cellZ(pos[p + 2] + vz * h);
+          if (ncx !== cx && height[cz * FW + ncx] > height[cz * FW + cx]) vx *= -0.2;
+          if (ncz !== cz && height[ncz * FW + cx] > height[cz * FW + cx]) vz *= -0.2;
+          vel[p] = vx; vel[p + 2] = vz;
+          pos[p] += vx * h; pos[p + 2] += vz * h;
+          if (Math.abs(pos[p]) > PILE_X) { pos[p] = clamp(pos[p], -PILE_X, PILE_X); vel[p] = 0; }
+          if (pos[p + 2] < PILE_BACK || pos[p + 2] > PILE_FRONT) { pos[p + 2] = clamp(pos[p + 2], PILE_BACK, PILE_FRONT); vel[p + 2] = 0; }
+          // переваливается на ближайшую грань, вращение гаснет о пол
+          const sd = Math.exp(-9 * h);
+          spinW[p] *= sd; spinW[p + 1] *= sd; spinW[p + 2] *= sd;
+          tumble(q, p, h);
+          nlerp(q, tgtQ, q, tipK);
+          if (vx === 0 && vz === 0) { rest(id, cx, cz); break; }
         } else if (mode[id] === SETTLING) {
           pos[p] += (tgt[p] - pos[p]) * settleK;
           pos[p + 1] += (tgt[p + 1] - pos[p + 1]) * settleK;
@@ -724,6 +805,15 @@ async function initMark() {
     }
   }
   const PQ = new Float32Array(4);
+  // кувырок: q += ½·ω·q·dt
+  function tumble(q, p, h) {
+    const wx = spinW[p], wy = spinW[p + 1], wz = spinW[p + 2];
+    const x = rot[q], y = rot[q + 1], z = rot[q + 2], w = rot[q + 3], hh = 0.5 * h;
+    rot[q] = x + hh * (wx * w + wy * z - wz * y);
+    rot[q + 1] = y + hh * (wy * w + wz * x - wx * z);
+    rot[q + 2] = z + hh * (wz * w + wx * y - wy * x);
+    rot[q + 3] = w - hh * (wx * x + wy * y + wz * z);
+  }
   // плавный поворот к цели: нормализованная линейная смесь, коротким путём
   function nlerp(q, src, so, k) {
     let x = src[so], y = src[so + 1], z = src[so + 2], w = src[so + 3];
@@ -770,7 +860,8 @@ async function initMark() {
       // очередь обрушения
       while (pendAt < pending.length && pending[pendAt][0] <= clock) {
         const id = pending[pendAt++][1];
-        if (mode[id] === ATTACHED) detach(id, (Math.random() - 0.5) * 0.4, Math.random() * 0.3, (Math.random() - 0.5) * 0.4);
+        // осыпается сам: почти без толчка и почти не крутясь — кувыркаться начнёт, ударившись о пол
+        if (mode[id] === ATTACHED) detach(id, (Math.random() - 0.5) * 0.3, Math.random() * 0.2, (Math.random() - 0.5) * 0.3, 1.2);
       }
       if (pendAt >= pending.length && pending.length) { pending = []; pendAt = 0; }
       const t0 = performance.now();
@@ -801,11 +892,12 @@ async function initMark() {
     get tilt() { return free.quaternion.toArray(); },
     get info() { return { voxelMode, attached: attachedCount, loose: looseCount, active, returning, hits, collapsed, total: N, clock, lastBusy, lastAction, physMs, pending: pending.length }; },
     debug() {
-      const byMode = [0, 0, 0, 0, 0]; let maxH = 0, maxY = -9;
+      const byMode = [0, 0, 0, 0, 0, 0]; let maxH = 0, maxY = -9;
       for (let s = 0; s < looseCount; s++) { const id = slotId[s]; byMode[mode[id]]++; if (mode[id] === RESTING) maxY = Math.max(maxY, pos[id * 3 + 1]); }
       for (let c = 0; c < height.length; c++) maxH = Math.max(maxH, height[c]);
       return { byMode, maxH, maxY, floorY, capLv, back: PILE_BACK, step: ST };
     },
+    snap() { const o = []; for (let s = 0; s < looseCount; s++) { const id = slotId[s]; o.push([id, pos[id * 3] / ST, pos[id * 3 + 2] / ST]); } return o; },
     get frames() { return frames; },
   };
 }
