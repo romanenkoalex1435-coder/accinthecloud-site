@@ -1,7 +1,0 @@
-{
-  "name": "accinthecloud-site",
-  "private": true,
-  "dependencies": {
-    "@vercel/blob": "^1.1.1"
-  }
-}

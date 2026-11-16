@@ -1,5 +1,5 @@
 #!/bin/bash
-# Выкладка сайта на хостинг Timeweb (вместо vercel --prod).
+# Выкладка сайта на хостинг Timeweb.
 # Берёт только файлы из git (черновики, аудиты, .env и node_modules туда не попадают) + серверную часть из php/.
 # Загруженное из админки (media/, refs/) и данные (_data/) не трогает.
 # Запуск из папки сайта:  bash tools/deploy-host.sh
@@ -10,7 +10,7 @@ HOST=ct084307@vh480.timeweb.ru
 SSH="ssh -o ControlMaster=auto -o ControlPath=/tmp/acc-%C -o ControlPersist=5m -o ConnectTimeout=60"
 DEST=public_html
 LIST=$(mktemp)
-git ls-files -z | grep -z -v -E '^(api/|php/|tools/|middleware\.js$|vercel\.json$|package(-lock)?\.json$|\.gitignore$|\.vercelignore$|LogoPolyacc\.MOV$)|(^|/)\.DS_Store$' > "$LIST"
+git ls-files -z | grep -z -v -E '^(php/|tools/|\.gitignore$|LogoPolyacc\.MOV$)|(^|/)\.DS_Store$' > "$LIST"
 rsync -az -e "$SSH" --from0 --files-from="$LIST" ./ "$HOST:$DEST/"
 rm -f "$LIST"
 rsync -az -e "$SSH" php/ "$HOST:$DEST/"

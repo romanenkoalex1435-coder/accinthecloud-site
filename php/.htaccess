@@ -1,4 +1,4 @@
-# accinthecloud на хостинге Timeweb (Apache). Замена vercel.json и middleware.js.
+# accinthecloud на хостинге Timeweb (Apache).
 AddDefaultCharset utf-8
 Options -Indexes
 DirectoryIndex index.html
@@ -37,7 +37,7 @@ RewriteRule ^(collection-a[123]|lookbook)\.html$ api/og.php?p=$1 [L,QSA]
   Header always set Content-Security-Policy "frame-ancestors 'self'"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
   Header always set Strict-Transport-Security "max-age=31536000"
-  # картинки, видео, шрифты и папка js/ (её файлы подключаются с ?v=) — неделю, как было на Vercel
+  # картинки, видео, шрифты и папка js/ (её файлы подключаются с ?v=) — неделю
   <FilesMatch "\.(jpe?g|png|webp|avif|gif|svg|ico|woff2?|ttf|otf|mp4|webm|mov|glb)$">
     Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
   </FilesMatch>

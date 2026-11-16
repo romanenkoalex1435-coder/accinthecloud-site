@@ -1,5 +1,5 @@
 """Собирает js/og-items.json — названия, цены и первое фото вещей для превью ссылок
-(middleware.js подставляет их, когда ссылку ?item= открывает Telegram, Instagram и т. п.).
+(php/api/og.php подставляет их, когда ссылку ?item= открывает Telegram, Instagram и т. п.).
 Запуск при поднятом локальном сервере на 5181:  ~/Documents/proverka/.venv/bin/python tools/og-items.py"""
 import json
 from playwright.sync_api import sync_playwright
