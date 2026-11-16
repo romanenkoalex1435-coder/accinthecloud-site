@@ -4,6 +4,8 @@
    accCookieSettings() — кнопка есть на странице политики конфиденциальности.
    Подключение: <script src="/js/consent.js?v=1" defer></script> на всех страницах, кроме админки. */
 (function () {
+  // предпросмотр в админке (?preview=1, во фрейме): ни плашки, ни Метрики — это не посетитель
+  if (/[?&]preview=1\b/.test(location.search) || window.top !== window) return;
   // ← номер счётчика Яндекс Метрики (metrika.yandex.ru → Настройки → номер). Пусто — Метрика не грузится
   const METRIKA_ID = '';
 

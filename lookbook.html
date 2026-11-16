@@ -350,27 +350,67 @@ const ITEMS = ACC_SITE.lookbook() || [
     it.pre = it.images.map((src, k) => { const im = new Image(); im.onload = () => learn(it, k, im); im.src = ACC_SITE.sm(src); return im; });
   }
 
+  // до стольких вещей стол выглядит как раньше; дальше стопки плавно мельчают до предела и начинают наезжать друг на друга
+  const CALM = 18;
+  // во сколько раз ослабить расталкивание соседей: 1 — как раньше, меньше — стопки на столе лежат внахлёст
+  let squeeze = 1;
   function sizeStacks() {
     const area = W() * H(), n = stacks.length;
     // ширина отпечатка — чтобы все стопки свободно поместились на столе
-    const base = Math.max(74, Math.min(190, Math.sqrt(area / n) * (mob() ? 0.52 : 0.46)));
+    const fit = Math.min(190, Math.sqrt(area / n) * (mob() ? 0.52 : 0.46));
+    // нижний предел ширины: после CALM вещей плавно (на 20 вещей) уходит от прежних 74 к 64 px на телефоне и 90 px на компьютере
+    const minW = mob() ? 64 : 90;
+    const floor = n <= CALM ? 74 : 74 + (minW - 74) * Math.min(1, (n - CALM) / 20);
+    const base = Math.max(floor, fit);
+    let hs = 0;
     stacks.forEach(s => {
       const ar = s.it.ars[0];
       s.w = base; s.h = Math.min(base / ar, base * 1.35) + (mob() ? 18 : 28);
       s.r = Math.hypot(s.w, s.h) * 0.36;
+      hs += s.h;
       s.el.style.width = s.w + 'px'; s.el.style.height = s.h + 'px';
       s.el.querySelectorAll('.print').forEach(p => { p.style.width = s.w + 'px'; p.style.height = s.h + 'px'; });
     });
+    // сколько места на стопку при ровной сетке по свободной части стола; если стопка крупнее — разрешаем наезжать
+    const free = Math.max(1, (W() - 2 * (mob() ? 8 : 16)) * (H() - (mob() ? 152 : 170)));
+    squeeze = n <= CALM ? 1 : Math.min(1, Math.sqrt(free / n) * 0.7 / (Math.hypot(base, hs / n) * 0.59));
   }
   // разложить по столу сеткой с разбросом
   function scatter(throwIt) {
     const n = stacks.length, top = mob() ? 72 : 80, bottom = mob() ? 80 : 90;
-    const cols = Math.max(3, Math.round(Math.sqrt(n * W() / Math.max(1, H() - top - bottom))));
-    const rows = Math.ceil(n / cols), cw = W() / cols, ch = (H() - top - bottom) / rows;
     const order = [...stacks].sort(() => Math.random() - 0.5);
+    let spot;
+    if (n <= CALM) {
+      const cols = Math.max(3, Math.round(Math.sqrt(n * W() / Math.max(1, H() - top - bottom))));
+      const rows = Math.ceil(n / cols), cw = W() / cols, ch = (H() - top - bottom) / rows;
+      spot = i => ({ x: cw * (i % cols + 0.5) + rnd(-cw, cw) * 0.18, y: top + ch * (Math.floor(i / cols) + 0.5) + rnd(-ch, ch) * 0.16 });
+    } else {
+      // много вещей: центры стопок раскладываем так, чтобы они целиком оставались между фильтрами и нижней кнопкой,
+      // а лишнее — наезжало друг на друга (шаг сетки меньше стопки), с большим разбросом, чтобы не выглядело сеткой
+      const mx = mob() ? 12 : 26, fw = stacks[0].w, fh = stacks.reduce((a, s) => a + s.h, 0) / n;
+      const x0 = mx + fw / 2, x1 = W() - mx - fw / 2, y0 = top + fh / 2, y1 = H() - bottom - fh / 2;
+      const iw = Math.max(0, x1 - x0), ih = Math.max(0, y1 - y0);
+      // число колонок, при котором стопки наезжают друг на друга меньше всего (и по ширине, и по высоте поровну)
+      let cols = 2, bestOv = Infinity;
+      for (let c = 2; c <= n; c++) {
+        const r = Math.ceil(n / c), ov = Math.max(fw / (iw / (c - 1) || 1), fh / ((r > 1 ? ih / (r - 1) : ih) || 1)) + (c * r - n) * 0.004;
+        if (ov < bestOv) { bestOv = ov; cols = c; }
+      }
+      const rows = Math.ceil(n / cols), py = rows > 1 ? ih / (rows - 1) : 0;
+      spot = i => {
+        const row = Math.floor(i / cols), inRow = row < rows - 1 ? cols : n - cols * (rows - 1);
+        // неполный последний ряд растягиваем на всю ширину
+        const px = inRow > 1 ? iw / (inRow - 1) : 0, col = i - row * cols;
+        const jx = Math.max(px, fw * 0.5) * 0.3, jy = Math.max(py, fh * 0.5) * 0.3;
+        return {
+          x: Math.min(x1, Math.max(x0, (inRow > 1 ? x0 + px * col : (x0 + x1) / 2) + rnd(-jx, jx))),
+          y: Math.min(y1, Math.max(y0, (rows > 1 ? y0 + py * row : (y0 + y1) / 2) + rnd(-jy, jy))),
+        };
+      };
+    }
     order.forEach((s, i) => {
-      const tx = cw * (i % cols + 0.5) + rnd(-cw, cw) * 0.18, ty = top + ch * (Math.floor(i / cols) + 0.5) + rnd(-ch, ch) * 0.16;
-      if (throwIt && !REDUCE) { s.vx = (tx - s.x) * 0.09; s.vy = (ty - s.y) * 0.09; s.va = rnd(-6, 6); }
+      const { x: tx, y: ty } = spot(i);
+      if (throwIt && !REDUCE) { const g = n > CALM ? 0.1 : 0.09; /* 0.1 — долетает ровно до места */ s.vx = (tx - s.x) * g; s.vy = (ty - s.y) * g; s.va = rnd(-6, 6); }
       else { s.x = tx; s.y = ty; }
     });
   }
@@ -384,7 +424,7 @@ const ITEMS = ACC_SITE.lookbook() || [
   /* ── физика: скольжение с трением, края стола, стопки толкают друг друга ── */
   let held = null, open = null;
   function step(dt) {
-    const k = dt * 60, w = W(), h = H();
+    const k = dt * 60, w = W(), h = H(), crowded = stacks.length > CALM;
     for (const s of stacks) {
       if (s === held || s.parked) continue;
       s.x += s.vx * k; s.y += s.vy * k; s.a += s.va * k;
@@ -394,14 +434,16 @@ const ITEMS = ACC_SITE.lookbook() || [
       const mx = s.w * 0.5, my = s.h * 0.5;
       if (s.x < mx) { s.x = mx; s.vx = Math.abs(s.vx) * 0.45; }
       if (s.x > w - mx) { s.x = w - mx; s.vx = -Math.abs(s.vx) * 0.45; }
-      if (s.y < my + 50) { s.y = my + 50; s.vy = Math.abs(s.vy) * 0.45; }
-      if (s.y > h - my) { s.y = h - my; s.vy = -Math.abs(s.vy) * 0.45; }
+      // на тесном столе стопки не заезжают под фильтры сверху и под кнопку снизу
+      const yMin = my + (crowded ? (mob() ? 66 : 68) : 50), yMax = h - my - (crowded ? (mob() ? 68 : 74) : 0);
+      if (s.y < yMin) { s.y = yMin; s.vy = Math.abs(s.vy) * 0.45; }
+      if (s.y > yMax) { s.y = yMax; s.vy = -Math.abs(s.vy) * 0.45; }
     }
     // соседи расталкиваются, если наехали друг на друга
     for (let i = 0; i < stacks.length; i++) for (let j = i + 1; j < stacks.length; j++) {
       const a = stacks[i], b = stacks[j];
       if (a.parked || b.parked || a.el.classList.contains('gone') || b.el.classList.contains('gone')) continue;
-      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = (a.r + b.r) * 0.82;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, min = (a.r + b.r) * 0.82 * squeeze;
       if (d >= min) continue;
       const push = (min - d) / d * 0.5, px = dx * push, py = dy * push;
       const ah = a === held, bh = b === held;
@@ -595,6 +637,8 @@ const ITEMS = ACC_SITE.lookbook() || [
     filter = b.dataset.cat;
     fBox.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     applyFilter();
+    // на тесном столе подходящие стопки выходят наверх, чтобы их не закрывали соседние
+    stacks.forEach(s => { if (!s.el.classList.contains('off')) s.el.style.zIndex = ++zTop; });
     // подходящие стопки чуть подпрыгивают, чтобы их было видно
     if (!REDUCE) stacks.forEach(s => { if (!s.el.classList.contains('off')) { s.va += rnd(-3, 3); s.vy -= 1.5; } });
   });
@@ -640,6 +684,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=1" defer></script>
+<script src="/js/consent.js?v=2" defer></script>
 </body>
 </html>

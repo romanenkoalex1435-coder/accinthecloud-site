@@ -250,7 +250,13 @@
     .capsule-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.23, 1, .32, 1); }
     .capsule-tile.photo .capsule-tag { z-index: 1; background: var(--bg); padding: 4px 6px 3px; top: 10px; left: 10px; }
     @media (hover: hover) { .capsule-card:hover .capsule-photo { transform: scale(1.03); } }
-    .capsules-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    /* новая капсула без обложки: номер крупным пиксельным шрифтом на плитке того же семейства, что a1–a3 */
+    .capsule-tile.ph { background: #f2f1ee; }
+    .capsule-tile.ph .capsule-tag { display: none; } /* маленький номер в углу дублировал бы большой */
+    .capsule-ph { font-family: var(--pixel); font-size: 36cqw; line-height: 1; color: #bcb9b2; letter-spacing: -.02em; user-select: none; }
+    @media (hover: hover) { .capsule-card:hover .capsule-ph { transform: translateY(-3cqw); } } /* прыжок в духе a1–a3: рывком, без плавности */
+    /* на десктопе — ряды по три, 4-я, 5-я… переносятся вниз; высота плиток равна (aspect-ratio), ряды выравниваются по верху */
+    .capsules-grid { align-items: start; row-gap: 40px; }
     @media (max-width: 900px) {
       .capsules-grid {
         display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
@@ -264,6 +270,11 @@
       .capsule-bars { display: flex; gap: 4px; flex: 1; }
       .capsule-bars i { flex: 1; height: 4px; background: var(--border); transition: background-color .2s ease; }
       .capsule-bars i.on { background: var(--ink); }
+      /* 6+ капсул: полоски превращаются в щепки — вместо них одна тонкая шкала, закрашенная часть = текущая/всего */
+      .capsule-track { display: none; flex: 1; height: 4px; background: var(--border); position: relative; overflow: hidden; }
+      .capsule-track i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); transition: width .25s ease; }
+      .capsule-count.many .capsule-bars { display: none; }
+      .capsule-count.many .capsule-track { display: block; }
     }
 
 
@@ -601,7 +612,7 @@ accBanners('top', document.getElementById('bannersTop'));
       </div>
     </a>
   </div>
-  <div class="capsule-count" aria-hidden="true"><b id="capsuleNum">01/03</b><span class="capsule-bars"><i class="on"></i><i></i><i></i></span></div>
+  <div class="capsule-count" aria-hidden="true"><b id="capsuleNum">01/03</b><span class="capsule-bars"><i class="on"></i><i></i><i></i></span><span class="capsule-track"><i></i></span></div>
 </section>
 <script>
 // ── Капсулы из админки: скрытые убираем, у a1–a3 — свои название и подпись, новые добавляем карточками ──
@@ -621,9 +632,9 @@ accBanners('top', document.getElementById('bannersTop'));
     if (c.builtin || c.hidden) return;
     grid.insertAdjacentHTML('beforeend', `
     <a class="capsule-card reveal" href="${esc(c.href)}">
-      <div class="capsule-tile${c.cover ? ' photo' : ''}">
+      <div class="capsule-tile${c.cover ? ' photo' : ' ph'}">
         <span class="capsule-tag">${esc(c.key)}</span>
-        ${c.cover ? `<img class="capsule-photo" src="${esc(ACC_SITE.sm(c.cover))}" alt="" loading="lazy" decoding="async">` : ''}
+        ${c.cover ? `<img class="capsule-photo" src="${esc(ACC_SITE.sm(c.cover))}" alt="" loading="lazy" decoding="async">` : `<span class="capsule-ph" aria-hidden="true">${esc(c.key)}</span>`}
       </div>
       <div class="capsule-meta">
         <div><p class="capsule-name">${esc(c.name || c.key)}</p>${c.sub ? `<p class="capsule-sub">${esc(c.sub)}</p>` : ''}</div>
@@ -632,9 +643,11 @@ accBanners('top', document.getElementById('bannersTop'));
     </a>`);
   });
   const n = grid.children.length;
-  grid.classList.toggle('four', n % 4 === 0);
+  // полоски счётчика — по числу капсул (до 5); дальше одна шкала вместо щепок (см. CSS .many)
   const bars = document.querySelector('.capsule-bars');
   if (bars) bars.innerHTML = Array.from({ length: n }, (_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('');
+  const cnt = document.querySelector('.capsule-count');
+  if (cnt) cnt.classList.toggle('many', n > 5);
 })();
 </script>
 
@@ -817,17 +830,24 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 (function(){
   const grid = document.getElementById('capsulesGrid'), num = document.getElementById('capsuleNum');
   if (!grid || !num) return;
-  const cards = [...grid.children], bars = document.querySelectorAll('.capsule-bars i');
-  let cur = -1;
+  const fill = document.querySelector('.capsule-track i');
+  let cur = -1, cnt = -1;
   const upd = () => {
+    // карточки и полоски читаем заново: капсулы добавляет скрипт из админки, их может быть сколько угодно
+    const cards = [...grid.children], bars = document.querySelectorAll('.capsule-bars i');
+    if (!cards.length) return;
     const x = grid.scrollLeft, w = cards[0].offsetWidth + 12;
-    const i = Math.min(cards.length - 1, Math.round(x / w));
-    if (i === cur) return;
-    cur = i;
+    let i = Math.min(cards.length - 1, Math.round(x / w));
+    // последняя карточка не доезжает до левого края — у самого конца ленты считаем её текущей
+    if (x + grid.clientWidth >= grid.scrollWidth - 2 && x > 0) i = cards.length - 1;
+    if (i === cur && cards.length === cnt) return;
+    cur = i; cnt = cards.length;
     num.textContent = String(i + 1).padStart(2, '0') + '/' + String(cards.length).padStart(2, '0');
     bars.forEach((b, k) => b.classList.toggle('on', k === i));
+    if (fill) fill.style.width = ((i + 1) / cards.length * 100) + '%';
   };
   grid.addEventListener('scroll', upd, { passive: true });
+  addEventListener('resize', upd);
   upd();
 })();
 </script>
@@ -837,6 +857,6 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 if (!document.documentElement.classList.contains('has-drop'))
   addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=13').catch(() => {}), 1400), { once: true });
 </script>
-<script src="/js/consent.js?v=1" defer></script>
+<script src="/js/consent.js?v=2" defer></script>
 </body>
 </html>

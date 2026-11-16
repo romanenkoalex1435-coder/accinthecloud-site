@@ -26,9 +26,11 @@ RewriteRule ^admin/?$ admin.html [L]
 # API: /api/site → api/site.php и т. д.
 RewriteRule ^api/(site|lead|ref|admin|order)/?$ api/$1.php [L,QSA]
 
-# превью ссылок ?item= для мессенджеров
+# превью ссылок ?item= и новых капсул ?c= для мессенджеров (данные из админки)
 RewriteCond %{QUERY_STRING} (^|&)item=
 RewriteRule ^(collection-a[123]|lookbook)\.html$ api/og.php?p=$1 [L,QSA]
+RewriteCond %{QUERY_STRING} (^|&)c=a[0-9]
+RewriteRule ^capsule\.html$ api/og.php?p=capsule [L,QSA]
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
