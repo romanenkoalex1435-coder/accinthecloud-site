@@ -16,7 +16,10 @@
   // адрес с кавычкой, скобкой или пробелом (кроме своих путей к файлам) — отбрасываем
   const src = u => { u = String(u || ''); return /^https?:/.test(u) ? (/["'<>\s`]/.test(u) ? '' : u) : encodeURI(u).replace(/'/g, '%27'); };
   // ссылка баннера: только https, свои страницы и якоря
-  const link = u => { u = String(u || ''); return /["'<>\s`]/.test(u) || !/^(https:\/\/|[a-z0-9-]+\.html|\?|#)/i.test(u) ? '' : u; };
+  const link = u => {
+    u = String(u || '').replace(/^\/?index\.html(?=[?#]|$)/i, '/').replace(/^\/?([a-z0-9-]+)\.html(?=[?#]|$)/i, '/$1');
+    return /["'<>\s`]/.test(u) || !/^(https:\/\/|\/[a-z0-9-]*(?:[?#]|$)|\?|#)/i.test(u) ? '' : u;
+  };
   // уменьшенная копия фото: у своих файлов — папка sm/ рядом, у загруженных из админки — media/sm/
   const sm = u => /^https?:|^media\//.test(u)
     ? u.replace(/(^|\/)media\/(?!sm\/)([^/]+\.(jpg|jpeg|png|webp|avif))$/i, '$1media/sm/$2')
@@ -72,7 +75,7 @@
 
   // Капсулы по порядку: a1–a3 со своими страницами, новые из админки — на общей capsule.html?c=…
   const BUILTIN = ['a1', 'a2', 'a3'];
-  const capHref = c => BUILTIN.includes(c) ? `collection-${c}.html` : `capsule.html?c=${c}`;
+  const capHref = c => BUILTIN.includes(c) ? `/collection-${c}` : `/capsule?c=${c}`;
   function capsule(c) {
     const cap = raw && raw.capsules && raw.capsules[c];
     if (!cap) return null;

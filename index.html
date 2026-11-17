@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=16"></script>
+  <script src="/js/i18n.js?v=17"></script>
   <title>accinthecloud</title>
   <meta name="description" content="accinthecloud — одежда и аксессуары ручной работы из Москвы. Капсульные коллекции, lookbook и индивидуальный пошив под заказ.">
   <link rel="canonical" href="https://accinthecloud.com/">
@@ -404,7 +404,7 @@
     }
   </style>
   <link rel="stylesheet" href="site.css?v=3">
-  <script src="site.js?v=3" defer></script>
+  <script src="site.js?v=4" defer></script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"accinthecloud","url":"https://accinthecloud.com/","logo":"https://accinthecloud.com/images/icon-512.png","description":"Одежда и сумки ручной работы, пошив под заказ. Москва.","sameAs":["https://t.me/accinthecloud1"]}
   </script>
@@ -417,12 +417,12 @@
 
 <!-- ─── MOBILE MENU ───────────────────────────────────────── -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html" aria-current="page" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/" aria-current="page" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
   <a href="#capsules" onclick="closeMobileMenu()">Капсулы</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
-  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/cart" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 
@@ -430,13 +430,13 @@
 <nav>
   <a href="#" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <ul class="nav-links">
-    <li><a href="lookbook.html">Lookbook</a></li>
-    <li><a href="order.html">Пошив</a></li>
-    <li><a href="faq.html">FAQ</a></li>
+    <li><a href="/lookbook">Lookbook</a></li>
+    <li><a href="/order">Пошив</a></li>
+    <li><a href="/faq">FAQ</a></li>
     <li><a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:20px;">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -454,7 +454,7 @@
 <main>
 <!-- ─── HERO ─────────────────────────────────────────────── -->
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=7"></script>
+<script src="/js/site-data.js?v=8"></script>
 <section id="hero">
   <div class="hero-3d" id="hero3d" aria-hidden="true">
     <img class="hero-still" src="images/mark-still.webp?v=3" alt="" width="1219" height="584" fetchpriority="high">
@@ -496,8 +496,8 @@ document.fonts && document.fonts.ready.then(accHeroLayout);
     media.className = 'drop-lineup';
     media.setAttribute('aria-label', d.title);
     media.innerHTML = models.map((m, i) =>
-      `<li><a href="drop.html"><img src="${esc(m.image)}" alt="${esc(m.name)}" width="800" height="800"${i < 4 ? ' fetchpriority="high"' : ' loading="lazy"'}><span class="drop-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span></a></li>`).join('') +
-      (models.length % 4 ? `<li><a class="drop-all" href="drop.html">Все модели →</a></li>` : '');
+      `<li><a href="/drop"><img src="${esc(m.image)}" alt="${esc(m.name)}" width="800" height="800"${i < 4 ? ' fetchpriority="high"' : ' loading="lazy"'}><span class="drop-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span></a></li>`).join('') +
+      (models.length % 4 ? `<li><a class="drop-all" href="/drop">Все модели →</a></li>` : '');
   } else {
   media.className = 'drop-media' + (d.media ? ' has-media' : '');
   if (d.media) media.innerHTML = d.mediaType === 'video'
@@ -581,7 +581,7 @@ accBanners('top', document.getElementById('bannersTop'));
   </div>
 
   <div class="capsules-grid" id="capsulesGrid">
-    <a class="capsule-card reveal" href="collection-a1.html">
+    <a class="capsule-card reveal" href="/collection-a1">
       <div class="capsule-tile">
         <span class="capsule-tag">a1</span>
         <img class="capsule-art" src="images/capsules/a1.png?v=2" alt="" style="--rows:70;--cols:58" width="464" height="560" loading="lazy" decoding="async">
@@ -591,7 +591,7 @@ accBanners('top', document.getElementById('bannersTop'));
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
-    <a class="capsule-card reveal" href="collection-a2.html">
+    <a class="capsule-card reveal" href="/collection-a2">
       <div class="capsule-tile">
         <span class="capsule-tag">a2</span>
         <img class="capsule-art" src="images/capsules/a2.png?v=2" alt="" style="--rows:97;--cols:102" width="816" height="776" loading="lazy" decoding="async">
@@ -601,7 +601,7 @@ accBanners('top', document.getElementById('bannersTop'));
         <span class="capsule-view">Смотреть</span>
       </div>
     </a>
-    <a class="capsule-card reveal" href="collection-a3.html">
+    <a class="capsule-card reveal" href="/collection-a3">
       <div class="capsule-tile">
         <span class="capsule-tag">a3</span>
         <img class="capsule-art" src="images/capsules/a3.png?v=2" alt="" style="--rows:123;--cols:68" width="544" height="984" loading="lazy" decoding="async">
@@ -660,7 +660,7 @@ accBanners('top', document.getElementById('bannersTop'));
     <h2>Индивидуальный пошив</h2>
     <p>Опиши идею — свяжусь в телеграме и обсудим детали</p>
   </div>
-  <a href="order.html" class="order-cta-btn">Заказать →</a>
+  <a href="/order" class="order-cta-btn">Заказать →</a>
 </div>
 </main>
 
@@ -669,8 +669,8 @@ accBanners('top', document.getElementById('bannersTop'));
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
 </footer>
 
@@ -857,6 +857,6 @@ document.querySelectorAll('.faq-q').forEach(btn => {
 if (!document.documentElement.classList.contains('has-drop'))
   addEventListener('load', () => setTimeout(() => import('./js/znak.js?v=13').catch(() => {}), 1400), { once: true });
 </script>
-<script src="/js/consent.js?v=4" defer></script>
+<script src="/js/consent.js?v=5" defer></script>
 </body>
 </html>

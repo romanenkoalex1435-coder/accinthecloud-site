@@ -37,7 +37,10 @@ function num($v) { return max(0, min(10000000, (int)round(is_numeric($v) ? (floa
 function url($v) {
   $v = mb_substr(is_scalar($v) ? (string)$v : '', 0, 600);
   if (preg_match('/["\'<>\s`\\\\]/', $v)) return '';
-  return $v === '' || preg_match('#^(https://|images/|media/|[a-z0-9-]+\.html|\?)#i', $v) ? $v : '';
+  // старые ссылки вида lookbook.html?… приводим к адресу без .html
+  $v = preg_replace('~^/?index\.html(?=[?#]|$)~i', '/', $v);
+  $v = preg_replace('~^/?([a-z0-9-]+)\.html(?=[?#]|$)~i', '/$1', $v);
+  return $v === '' || preg_match('~^(https://|images/|media/|/[a-z0-9-]*(?:[?#]|$)|\?)~i', $v) ? $v : '';
 }
 function en($o, $keys) { $o = is_array($o) ? $o : []; $r = []; foreach ($keys as [$k, $n]) $r[$k] = str($o[$k] ?? '', $n); return $r; }
 function arr($v) { return is_array($v) ? array_values($v) : []; }

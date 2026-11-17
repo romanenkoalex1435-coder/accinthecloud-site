@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=16"></script>
+  <script src="/js/i18n.js?v=17"></script>
   <title>Корзина — accinthecloud</title>
   <meta name="description" content="Корзина accinthecloud.">
   <meta name="robots" content="noindex">
@@ -261,23 +261,23 @@
     }
   </style>
   <link rel="stylesheet" href="site.css?v=3">
-  <script src="site.js?v=3" defer></script>
+  <script src="site.js?v=4" defer></script>
 </head>
 <body>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
-  <a href="cart.html" onclick="closeMobileMenu()" aria-current="page">Корзина</a>
+  <a href="/" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/#capsules" onclick="closeMobileMenu()">Капсулы</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/cart" onclick="closeMobileMenu()" aria-current="page">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div style="display:flex;align-items:center;gap:20px;">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина" aria-current="page">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина" aria-current="page">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -291,7 +291,7 @@
 
 <main>
 <div class="page-header">
-  <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Корзина</p>
+  <p class="breadcrumb"><a href="/">accinthecloud</a> / Корзина</p>
   <h1>Корзина</h1>
 </div>
 
@@ -304,7 +304,7 @@
     <div class="empty-cart" id="emptyCart">
       <div class="empty-icon">○</div>
       <p>Корзина пустая</p>
-      <a href="index.html#capsules" class="btn-browse">Смотреть капсулы</a>
+      <a href="/#capsules" class="btn-browse">Смотреть капсулы</a>
     </div>
   </div>
 
@@ -325,7 +325,7 @@
       <span class="label" id="summaryTotalLabel">Итого</span>
       <span id="summaryTotal">0 ₽</span>
     </div>
-    <p class="summary-note">Пошив — 3–28 рабочих дней. Обычно предоплата 50 %, для капсул бывает 100 %. Доставка по России бесплатная. Детали подтвержу в Telegram, условия — в <a href="offer.html">оферте</a>.</p>
+    <p class="summary-note">Пошив — 3–28 рабочих дней. Обычно предоплата 50 %, для капсул бывает 100 %. Доставка по России бесплатная. Детали подтвержу в Telegram, условия — в <a href="/offer">оферте</a>.</p>
 
     <div class="checkout-divider"></div>
 
@@ -347,11 +347,11 @@
     <div class="consent">
       <label class="consent-label" for="checkConsent">
         <input type="checkbox" id="checkConsent" required aria-describedby="errConsent" />
-        <span>Даю согласие на обработку персональных данных в соответствии с <a href="privacy.html" target="_blank">политикой конфиденциальности</a></span>
+        <span>Даю согласие на обработку персональных данных в соответствии с <a href="/privacy" target="_blank">политикой конфиденциальности</a></span>
       </label>
       <p class="field-error" id="errConsent" hidden>Без согласия на обработку данных заказ не отправить</p>
     </div>
-    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="offer.html" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
+    <p class="offer-note">Нажимая кнопку, вы принимаете условия <a href="/offer" target="_blank">публичной оферты</a>. Персональные данные не передаются третьим лицам и используются исключительно для связи по заказу.</p>
     <button class="btn-order" id="btnOrder">Оформить заказ</button>
     <p class="checkout-note">Заказ сохранится, дальше — написать мастеру в Telegram.</p>
    </div>
@@ -390,8 +390,8 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
 </footer>
 
@@ -708,6 +708,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=4" defer></script>
+<script src="/js/consent.js?v=5" defer></script>
 </body>
 </html>

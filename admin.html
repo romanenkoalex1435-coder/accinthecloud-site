@@ -321,7 +321,7 @@
               </label>
               <div class="row2">
                 <label class="field"><span>Текст</span><input id="dCtaLabel" maxlength="40"></label>
-                <label class="field"><span>Ссылка</span><input id="dCtaHref" placeholder="collection-a2.html?item=texas"></label>
+                <label class="field"><span>Ссылка</span><input id="dCtaHref" placeholder="/collection-a2?item=texas"></label>
               </div>
             </div>
 
@@ -331,7 +331,7 @@
               <div class="models" id="dModels"></div>
               <label class="btn btn-ghost" id="dModelAdd">+ Добавить модели<input type="file" id="dModelFile" accept="image/*" multiple class="sr"></label>
               <label class="field"><span>Ссылка на голосование в канале</span><input id="dVoteHref" placeholder="https://t.me/accinthecloud1/1214"><span class="hint">Пусто — ссылки на странице не будет.</span></label>
-              <a class="btn btn-ghost" href="drop.html?preview=1" target="_blank" rel="noopener">Открыть страницу дропа ↗</a>
+              <a class="btn btn-ghost" href="/drop?preview=1" target="_blank" rel="noopener">Открыть страницу дропа ↗</a>
             </div>
 
             <details class="en-box" id="dEn">
@@ -454,7 +454,7 @@ const BUILTIN = {
 };
 const LOOKBOOK = { name: 'Лукбук', lookbook: true };
 const capCfg = c => c === 'lb' ? LOOKBOOK : BUILTIN[c] || { name: c + ' · ' + (S.data.capsules[c].name || 'без названия'), fields: ['specs', 'desc'], kinds: ['item', 'unique'], sold: true, defType: '', custom: true };
-const capHref = c => BUILTIN[c] ? `collection-${c}.html` : `capsule.html?c=${c}`;
+const capHref = c => BUILTIN[c] ? `/collection-${c}` : `/capsule?c=${c}`;
 const capItemHref = (c, id) => capHref(c) + (BUILTIN[c] ? '?' : '&') + 'item=' + encodeURIComponent(id.startsWith(c + '-') ? id.slice(c.length + 1) : id);
 const CAT = { tops: 'Верх', bottoms: 'Низ', bags: 'Сумки', accessories: 'Аксессуары' };
 const FIELD = { specs: 'Характеристики', temp: 'Температура', desc: 'Описание' };
@@ -668,7 +668,7 @@ function renderHero() {
   $('#dCountdown').checked = !!d.countdown;
   const links = itemLinks();
   for (const [id, k] of Object.entries(HERO_EN)) { $('#' + id).value = d.en[k] || ''; $('#' + id).placeholder = d[k] || ''; }
-  $('#dCtaPick').innerHTML = `<option value="">Своя ссылка</option><option value="drop.html">Страница дропа</option>` +
+  $('#dCtaPick').innerHTML = `<option value="">Своя ссылка</option><option value="/drop">Страница дропа</option>` +
     Object.keys(S.data.capsules).filter(c => !S.data.capsules[c].hidden).map(c => `<option value="${capHref(c)}">Капсула ${c} целиком</option>`).join('') +
     links.map(l => `<option value="${esc(l.href)}">${esc(l.label)}</option>`).join('');
   $('#dCtaPick').value = [...$('#dCtaPick').options].some(o => o.value === d.ctaHref) ? d.ctaHref : '';
@@ -777,7 +777,7 @@ const B = () => S.data.banners;
 const bOpen = new Set();
 const B_PLACE = { top: 'Под первым экраном', mid: 'Под капсулами' };
 function bLinks() {
-  return [['', 'Никуда — просто картинка'], ['lookbook.html', 'Лукбук'], ['order.html', 'Индивидуальный пошив'], ['drop.html', 'Страница дропа'],
+  return [['', 'Никуда — просто картинка'], ['/lookbook', 'Лукбук'], ['/order', 'Индивидуальный пошив'], ['/drop', 'Страница дропа'],
     ['https://t.me/accinthecloud1', 'Telegram-канал'],
     ...Object.keys(S.data.capsules).filter(c => !S.data.capsules[c].hidden).map(c => [capHref(c), `Капсула ${c} целиком`]),
     ...itemLinks().map(l => [l.href, l.label])];
@@ -1073,7 +1073,7 @@ function renderEditor() {
       <label class="btn btn-ghost" ${i.images.length >= 12 ? 'hidden' : ''}>+ Добавить фото<input type="file" id="ePhotoFile" accept="image/*" multiple class="sr"></label>
     </div>
     <div class="editor-foot">
-      <a class="btn btn-ghost" href="${lb ? `lookbook.html?preview=1&item=${esc(i.id)}` : esc(capItemHref(S.cap, i.id) + '&preview=1')}" target="_blank" rel="noopener">Посмотреть на странице ↗</a>
+      <a class="btn btn-ghost" href="${lb ? `/lookbook?preview=1&item=${esc(i.id)}` : esc(capItemHref(S.cap, i.id) + '&preview=1')}" target="_blank" rel="noopener">Посмотреть на странице ↗</a>
       <button class="btn btn-danger" type="button" id="eDelete">Удалить вещь</button>
     </div>`;
 

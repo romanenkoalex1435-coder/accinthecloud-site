@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=16"></script>
+  <script src="/js/i18n.js?v=17"></script>
   <title>a1 ACCESS — accinthecloud</title>
   <meta name="description" content="Капсула a1 ACCESS от accinthecloud: сумки ручной работы, пошив под заказ.">
-  <link rel="canonical" href="https://accinthecloud.com/collection-a1.html">
+  <link rel="canonical" href="https://accinthecloud.com/collection-a1">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="accinthecloud">
   <meta property="og:title" content="a1 ACCESS — accinthecloud">
   <meta property="og:description" content="Капсула a1 ACCESS от accinthecloud: сумки ручной работы, пошив под заказ.">
-  <meta property="og:url" content="https://accinthecloud.com/collection-a1.html">
+  <meta property="og:url" content="https://accinthecloud.com/collection-a1">
   <meta property="og:image" content="https://accinthecloud.com/images/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -209,24 +209,24 @@
     }
   </style>
   <link rel="stylesheet" href="site.css?v=3">
-  <script src="site.js?v=3" defer></script>
+  <script src="site.js?v=4" defer></script>
 </head>
 <body>
-<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="cart.html">Открыть →</a></div>
+<div id="cartFeedback"><span>Добавлено в корзину ✓</span> <a href="/cart">Открыть →</a></div>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
-  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="/" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/#capsules" onclick="closeMobileMenu()">Капсулы</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/cart" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
 </div>
 <nav>
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud"></a>
   <div class="nav-right">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -241,7 +241,7 @@
 <main>
 <div class="hero reveal">
   <div>
-    <p class="breadcrumb"><a href="index.html">accinthecloud</a> / Капсула a1</p>
+    <p class="breadcrumb"><a href="/">accinthecloud</a> / Капсула a1</p>
     <h1 class="hero-title">ACCESS</h1>
     <p class="hero-sub">Сумки через плечо &mdash; ручной пошив</p>
   </div>
@@ -296,13 +296,13 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram-канал</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
 </footer>
 
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=7"></script>
+<script src="/js/site-data.js?v=8"></script>
 <script>// капсула скрыта в админке — страница не открывается (кроме предпросмотра)
 (function(){var c=window.ACC_SITE&&ACC_SITE.capsule('a1');if(c&&c.hidden&&!/[?&]preview=1\b/.test(location.search))location.replace('/#capsules');})();</script>
 <script>
@@ -394,7 +394,7 @@ function closeModal() {
 
 document.getElementById('mShare').addEventListener('click', () => ACC_LINK.share(cur && cur.name));
 /* ссылка вида ?item=camo сразу открывает вещь */
-document.addEventListener('DOMContentLoaded', () => ACC_LD(PRODUCTS, 'collection-a1.html', 'Капсула a1'));
+document.addEventListener('DOMContentLoaded', () => ACC_LD(PRODUCTS, '/collection-a1', 'Капсула a1'));
 document.addEventListener('DOMContentLoaded', () => ACC_LINK.open(PRODUCTS, p => p.id.replace(/^a\d-/, ''), openModal));
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('overlay').addEventListener('click', e => {
@@ -450,6 +450,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=4" defer></script>
+<script src="/js/consent.js?v=5" defer></script>
 </body>
 </html>

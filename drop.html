@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=16"></script>
+  <script src="/js/i18n.js?v=17"></script>
   <title>Winter Jackets — accinthecloud</title>
   <meta name="robots" content="noindex">
   <meta name="description" content="Семь зимних курток accinthecloud: выбери модель и забронируй пошив по своим меркам.">
-  <link rel="canonical" href="https://accinthecloud.com/drop.html">
+  <link rel="canonical" href="https://accinthecloud.com/drop">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="accinthecloud">
   <meta property="og:title" content="Winter Jackets — accinthecloud">
   <meta property="og:description" content="Семь зимних курток accinthecloud: выбери модель и забронируй пошив по своим меркам.">
-  <meta property="og:url" content="https://accinthecloud.com/drop.html">
+  <meta property="og:url" content="https://accinthecloud.com/drop">
   <meta property="og:image" content="https://accinthecloud.com/images/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -177,25 +177,25 @@
     .drop { min-height: calc(100svh - 69px); }
   </style>
   <link rel="stylesheet" href="site.css?v=3">
-  <script src="site.js?v=3" defer></script>
+  <script src="site.js?v=4" defer></script>
 </head>
 <body>
 
 <div class="mobile-menu" id="mobileMenu">
   <button class="mobile-menu-close" id="menuClose" aria-label="Закрыть меню">✕</button>
-  <a href="index.html" onclick="closeMobileMenu()">Главная</a>
-  <a href="lookbook.html" onclick="closeMobileMenu()">Lookbook</a>
-  <a href="index.html#capsules" onclick="closeMobileMenu()">Капсулы</a>
-  <a href="order.html" onclick="closeMobileMenu()">Индивидуальный пошив</a>
-  <a href="faq.html" onclick="closeMobileMenu()">FAQ</a>
-  <a href="cart.html" onclick="closeMobileMenu()">Корзина</a>
+  <a href="/" onclick="closeMobileMenu()">Главная</a>
+  <a href="/lookbook" onclick="closeMobileMenu()">Lookbook</a>
+  <a href="/#capsules" onclick="closeMobileMenu()">Капсулы</a>
+  <a href="/order" onclick="closeMobileMenu()">Индивидуальный пошив</a>
+  <a href="/faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="/cart" onclick="closeMobileMenu()">Корзина</a>
   <a href="https://t.me/accinthecloud1" target="_blank" rel="noopener">Telegram-канал</a>
 </div>
 
 <nav class="site-nav">
-  <a href="index.html" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud — на главную"></a>
+  <a href="/" class="nav-logo"><img src="images/logo.png" width="240" height="110" alt="accinthecloud — на главную"></a>
   <div class="nav-right">
-    <a href="cart.html" class="cart-icon-btn" aria-label="Корзина">
+    <a href="/cart" class="cart-icon-btn" aria-label="Корзина">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
       </svg>
@@ -230,13 +230,13 @@
   <span class="footer-logo">accinthecloud</span>
   <div class="footer-links">
     <a href="https://t.me/accinthecloud1" target="_blank">Telegram</a>
-    <a href="offer.html">Публичная оферта</a>
-    <a href="privacy.html">Политика конфиденциальности</a>
+    <a href="/offer">Публичная оферта</a>
+    <a href="/privacy">Политика конфиденциальности</a>
   </div>
 </footer>
 
 <script src="/api/site"></script>
-<script src="/js/site-data.js?v=7"></script>
+<script src="/js/site-data.js?v=8"></script>
 <script>
 // ── Дроп: модели из админки (или встроенные семь курток), выбор модели, свайп по фото, бронь в Telegram ──
 (function(){
@@ -349,6 +349,6 @@ burgerBtn.addEventListener('click',()=>{
 });
 document.getElementById('menuClose').addEventListener('click',closeMobileMenu);
 </script>
-<script src="/js/consent.js?v=4" defer></script>
+<script src="/js/consent.js?v=5" defer></script>
 </body>
 </html>

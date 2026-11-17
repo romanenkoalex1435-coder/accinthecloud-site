@@ -77,7 +77,7 @@ html.modal-open .cc{display:none}
       '<div class="cc-head"><p class="cc-title">cookie</p></div>' +
       '<div class="cc-body">' +
         '<p class="cc-text">Мы используем cookie и Яндекс Метрику, чтобы понимать, какие вещи смотрят чаще, и делать сайт удобнее. ' +
-        'Метрика включится, только если вы согласитесь. Подробнее — в <a href="/privacy.html">политике конфиденциальности</a></p>' +
+        'Метрика включится, только если вы согласитесь. Подробнее — в <a href="/privacy">политике конфиденциальности</a></p>' +
         '<div class="cc-btns">' +
           '<button type="button" class="cc-btn cc-btn--ghost" data-c="necessary">Только нужные</button>' +
           '<button type="button" class="cc-btn cc-btn--solid" data-c="all">Принять все</button>' +

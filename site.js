@@ -622,7 +622,7 @@ function accVelocity(hist) {
 
 
 /* Разметка Product для поисковиков: один список (ItemList) из тех же вещей, что нарисованы на странице.
-   Страница вызывает ACC_LD(PRODUCTS, 'collection-a2.html', 'Капсула a2 · Accept') после загрузки. */
+   Страница вызывает ACC_LD(PRODUCTS, '/collection-a2', 'Капсула a2 · Accept') после загрузки. */
 window.ACC_LD = function (products, page, name) {
   try {
     const ORIGIN = 'https://accinthecloud.com/';
@@ -633,7 +633,7 @@ window.ACC_LD = function (products, page, name) {
     const data = {
       '@context': 'https://schema.org', '@type': 'ItemList', name: name || document.title,
       itemListElement: list.map((p, i) => {
-        const url = ORIGIN + page + '?item=' + encodeURIComponent(slug(p));
+        const url = ORIGIN + String(page).replace(/^\//, '') + '?item=' + encodeURIComponent(slug(p));
         const prod = { '@type': 'Product', name: String(p.name).replace(/<[^>]*>/g, ''), url };
         if (p.img || (p.images && p.images[0])) prod.image = abs(p.img || p.images[0]);
         if (p.desc) prod.description = String(p.desc);

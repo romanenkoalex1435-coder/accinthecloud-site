@@ -23,14 +23,27 @@ RewriteCond %{THE_REQUEST} \s/admin\.html[\s?]
 RewriteRule ^admin\.html$ https://accinthecloud.com/admin [R=301,L]
 RewriteRule ^admin/?$ admin.html [L]
 
+# адреса без .html: старые /lookbook.html?… перекидываем на /lookbook?… (строка запроса сохраняется), /index.html — на главную
+RewriteCond %{THE_REQUEST} \s/index\.html[\s?#]
+RewriteRule ^index\.html$ https://accinthecloud.com/ [R=301,L]
+RewriteCond %{THE_REQUEST} \s/[a-z0-9-]+\.html[\s?#]
+RewriteCond $1 !^404$
+RewriteRule ^([a-z0-9-]+)\.html$ https://accinthecloud.com/$1 [R=301,L]
+
 # API: /api/site → api/site.php и т. д.
 RewriteRule ^api/(site|lead|ref|admin|order)/?$ api/$1.php [L,QSA]
 
 # превью ссылок ?item= и новых капсул ?c= для мессенджеров (данные из админки)
 RewriteCond %{QUERY_STRING} (^|&)item=
-RewriteRule ^(collection-a[123]|lookbook)\.html$ api/og.php?p=$1 [L,QSA]
+RewriteRule ^(collection-a[123]|lookbook)(\.html)?$ api/og.php?p=$1 [L,QSA]
 RewriteCond %{QUERY_STRING} (^|&)c=a[0-9]
-RewriteRule ^capsule\.html$ api/og.php?p=capsule [L,QSA]
+RewriteRule ^capsule(\.html)?$ api/og.php?p=capsule [L,QSA]
+
+# /lookbook → lookbook.html (если такая страница есть)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([a-z0-9-]+)$ $1.html [L]
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"

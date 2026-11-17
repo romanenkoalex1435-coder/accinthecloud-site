@@ -1,6 +1,6 @@
 User-agent: *
 Disallow: /admin
-Disallow: /cart.html
+Disallow: /cart
 Disallow: /api/
 
 Sitemap: https://accinthecloud.com/sitemap.xml
