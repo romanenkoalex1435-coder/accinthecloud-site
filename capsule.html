@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="/js/i18n.js?v=17"></script>
+  <script src="/js/i18n.js?v=18"></script>
   <title>Капсула — accinthecloud</title>
   <meta name="description" content="Капсула accinthecloud: вещи ручной работы, пошив под заказ.">
   <meta property="og:type" content="website">
@@ -387,7 +387,6 @@ PRODUCTS.forEach((p, n) => {
       <p class="card-name">${esc(p.name)}</p>
       <p class="card-price">${esc(p.priceUsd ? `${p.price} / ${p.priceUsd}` : p.price)}</p>
       <p class="card-specs">${esc([p.specs, p.temp].filter(Boolean).join(' · '))}</p>
-      <p class="card-made">Индивидуальный пошив</p>
       <span class="card-cta">Подробнее &#8594;</span>
     </div>`;
 
@@ -528,6 +527,6 @@ burgerBtn.addEventListener('click', () => {
   }
 });
 </script>
-<script src="/js/consent.js?v=5" defer></script>
+<script src="/js/consent.js?v=6" defer></script>
 </body>
 </html>

@@ -50,7 +50,15 @@ html.modal-open .cc{display:none}
 .cc-btn--solid{background:#0d0d0d;color:#fff}
 @media (hover:hover){.cc-btn--ghost:hover{background:#0d0d0d;color:#fff}.cc-btn--solid:hover{background:#3a3a3a;border-color:#3a3a3a}}
 .cc-btn:focus-visible{outline:2px solid #0d0d0d;outline-offset:2px}
-@media (max-width:600px){.cc{left:16px;right:16px;bottom:16px;width:auto}}
+.cc-short{display:none}
+@media (max-width:600px){
+  .cc{left:8px;right:8px;bottom:8px;width:auto}
+  .cc-head{display:none}
+  .cc-body{padding:12px}
+  .cc-text{margin-bottom:10px;font-size:12px;line-height:1.45}
+  .cc-long{display:none}.cc-short{display:inline}
+  .cc-btn{font-size:11px;padding:0 8px}
+}
 @media (prefers-reduced-motion:reduce){.cc,.cc.is-in,.cc.is-out{transform:none}}
 `;
 
@@ -76,8 +84,9 @@ html.modal-open .cc{display:none}
     box.innerHTML =
       '<div class="cc-head"><p class="cc-title">cookie</p></div>' +
       '<div class="cc-body">' +
-        '<p class="cc-text">Мы используем cookie и Яндекс Метрику, чтобы понимать, какие вещи смотрят чаще, и делать сайт удобнее. ' +
-        'Метрика включится, только если вы согласитесь. Подробнее — в <a href="/privacy">политике конфиденциальности</a></p>' +
+        '<p class="cc-text"><span class="cc-long">Мы используем cookie и Яндекс Метрику, чтобы понимать, какие вещи смотрят чаще, и делать сайт удобнее. ' +
+        'Метрика включится, только если вы согласитесь. Подробнее — в <a href="/privacy">политике конфиденциальности</a></span>' +
+        '<span class="cc-short">Cookie и Яндекс Метрика — только с вашего согласия. <a href="/privacy">Подробнее</a></span></p>' +
         '<div class="cc-btns">' +
           '<button type="button" class="cc-btn cc-btn--ghost" data-c="necessary">Только нужные</button>' +
           '<button type="button" class="cc-btn cc-btn--solid" data-c="all">Принять все</button>' +

@@ -125,7 +125,7 @@
   }
 
   // ?v= поднимать вместе с i18n.js?v= в страницах при правке словаря: js/ браузер хранит неделю
-  const dict = fetch('/js/i18n-en.json?v=17').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
+  const dict = fetch('/js/i18n-en.json?v=18').then(r => r.json()).then(d => { DICT = d; }).catch(() => {});
   document.addEventListener('DOMContentLoaded', () => dict.then(() => {
     walk(document.documentElement);
     const t = tr(document.title); if (t) document.title = t;
