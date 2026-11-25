@@ -2,7 +2,7 @@
 # Ставит пароль админки на хостинге Timeweb. Пароль хранится только на хостинге (public_html/_data/config.php, закрыт для браузера).
 # Запуск из папки сайта:  bash tools/set-admin-host.sh
 set -e
-HOST=ct084307@vh480.timeweb.ru
+HOST=cq766202@vh480.timeweb.ru
 # одно соединение на все команды: хостинг притормаживает частые входы по SSH
 SSH="ssh -o ControlMaster=auto -o ControlPath=/tmp/acc-%C -o ControlPersist=5m -o ConnectTimeout=60"
 read -r -s -p "Придумай пароль для админки (от 10 символов) и нажми Enter: " P1; echo

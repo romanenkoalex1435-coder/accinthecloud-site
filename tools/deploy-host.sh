@@ -5,7 +5,7 @@
 # Запуск из папки сайта:  bash tools/deploy-host.sh
 set -e
 cd "$(dirname "$0")/.."
-HOST=ct084307@vh480.timeweb.ru
+HOST=cq766202@vh480.timeweb.ru
 # одно соединение на все команды: хостинг притормаживает частые входы по SSH
 SSH="ssh -o ControlMaster=auto -o ControlPath=/tmp/acc-%C -o ControlPersist=5m -o ConnectTimeout=60"
 DEST=public_html
